@@ -2,13 +2,14 @@ const db = require('../config/db');
 
 // CREATE
 async function createSubject(data) {
-  const { name, description, created_at } = data;
+  const { name, description } = data;
   const result = await db.query(
-    'INSERT INTO subject (name, description, created_at) VALUES ($1, $2, $3) RETURNING *',
-    [name, description, created_at]
+    'INSERT INTO subject (name, description, created_at) VALUES ($1, $2, NOW()) RETURNING *',
+    [name, description]
   );
   return result.rows[0];
 }
+
 
 // READ ALL
 async function getAllSubjects() {

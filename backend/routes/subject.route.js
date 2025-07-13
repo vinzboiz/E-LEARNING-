@@ -1,11 +1,16 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const controller = require('../controllers/subject.controller');
+const controller = require("../controllers/subject.controller");
+const authMiddleware = require("../middlewares/auth.middleware");
+const checkRole = require("../middlewares/checkRole");
 
-router.post('/', controller.create);
-router.get('/', controller.findAll);
-router.get('/:id', controller.findById);
-router.put('/:id', controller.update);
-router.delete('/:id', controller.delete);
+// ✅ Admin: tạo, sửa, xóa, xem tất cả
+router.post("/", authMiddleware, checkRole(1), controller.create);
+router.get("/", authMiddleware, checkRole(1), controller.findAll);
+router.put("/:id", authMiddleware, checkRole(1), controller.update);
+router.delete("/:id", authMiddleware, checkRole(1), controller.delete);
+
+// ✅ Admin + SV + GV: xem chi tiết môn học
+router.get("/:id", authMiddleware, controller.findById);
 
 module.exports = router;

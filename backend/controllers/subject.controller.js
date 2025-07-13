@@ -35,11 +35,16 @@ exports.findById = async (req, res) => {
 exports.update = async (req, res) => {
   try {
     const updated = await Subject.updateSubject(req.params.id, req.body);
-    res.json(updated);
+    if (updated) {
+      res.json({ message: "Cập nhật thành công", subject: updated });
+    } else {
+      res.status(404).json({ message: "Không tìm thấy môn học" });
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 // DELETE
 exports.delete = async (req, res) => {
