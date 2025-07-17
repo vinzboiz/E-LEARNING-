@@ -10,7 +10,6 @@ async function createSubject(data) {
   return result.rows[0];
 }
 
-
 // READ ALL
 async function getAllSubjects() {
   const result = await db.query('SELECT * FROM subject ORDER BY subject_id ASC');
