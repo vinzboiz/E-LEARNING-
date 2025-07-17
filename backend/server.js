@@ -14,6 +14,7 @@ const courseRoute = require("./routes/course.route");
 const classmemberRoute = require("./routes/classmember.route");
 const registerCourseRoute = require('./routes/registercourse.route');
 const coursescheduleRoutes = require("./routes/courseschedule.route");
+const lessonRoutes = require("./routes/lesson.route");
 
 // Setup routes
 app.use("/api/auth", authRoutes);
@@ -24,6 +25,7 @@ app.use("/api/course", courseRoute);
 app.use('/api/registercourse', registerCourseRoute);
 app.use("/api/classmember", classmemberRoute);
 app.use("/api/courseschedules", coursescheduleRoutes);
+app.use("/api/lesson", lessonRoutes);
 
 // Root route (test server)
 app.get("/", (req, res) => {

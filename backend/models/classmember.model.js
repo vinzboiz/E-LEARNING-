@@ -114,12 +114,19 @@ async function addClassMember(userId, courseId) {
   const course = await db.query(`SELECT price FROM course WHERE course_id = $1`, [courseId]);
   const price = course.rows[0]?.price;
 
-  await db.query(
-    `INSERT INTO classmember (user_id, course_id, joined_at, price)
-     VALUES ($1, $2, NOW(), $3)`,
-    [userId, courseId, price]
-  );
+  const getRegisterId = await db.query(
+  `SELECT register_id FROM registercourse 
+   WHERE user_id = $1 
+   ORDER BY create_at DESC LIMIT 1`,
+  [userId]
+    );
+    const register_id = getRegisterId.rows[0].register_id;
 
+    await db.query(
+      `INSERT INTO classmember (user_id, register_id, course_id, joined_at, price)
+      VALUES ($1, $2, $3, NOW(), $4)`,
+      [userId, register_id, courseId, price]
+    );
   return { message: "✅ Đã thêm môn học vào giỏ", data: { course_id: courseId } };
 }
 
