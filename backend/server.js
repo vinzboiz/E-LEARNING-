@@ -5,6 +5,10 @@ const app = express();
 // Middlewares
 app.use(express.json());
 
+const assignmentModel = require("./models/assignment.model");
+// Gọi 1 lần khi server khởi động
+assignmentModel.cronUpdateAssignments();
+
 // Import routes
 const authRoutes = require("./routes/auth.route");
 const userRoutes = require("./routes/user.route");
@@ -15,6 +19,8 @@ const classmemberRoute = require("./routes/classmember.route");
 const registerCourseRoute = require('./routes/registercourse.route');
 const coursescheduleRoutes = require("./routes/courseschedule.route");
 const lessonRoutes = require("./routes/lesson.route");
+const assignmentRoutes = require("./routes/assignment.route");
+const submissionRoutes = require("./routes/submission.route");
 
 // Setup routes
 app.use("/api/auth", authRoutes);
@@ -26,6 +32,8 @@ app.use('/api/registercourse', registerCourseRoute);
 app.use("/api/classmember", classmemberRoute);
 app.use("/api/courseschedules", coursescheduleRoutes);
 app.use("/api/lesson", lessonRoutes);
+app.use("/api/assignment", assignmentRoutes);
+app.use("/api/submission", submissionRoutes);
 
 // Root route (test server)
 app.get("/", (req, res) => {

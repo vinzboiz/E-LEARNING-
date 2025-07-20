@@ -1,16 +1,29 @@
 const Course = require("../models/course.model");
 
-// ✅ Tạo khóa học mới (admin)
+// ==========================
+// TẠO KHÓA HỌC MỚI (ADMIN)
+// ==========================
 exports.create = async (req, res) => {
   try {
+    // Kiểm tra dữ liệu schedule
+    if (!req.body.schedule) {
+      return res.status(400).json({ error: "Thiếu dữ liệu schedule (date, start_time, end_time, room, note)" });
+    }
+
+    // Tạo khóa học + lịch học
     const course = await Course.createCourse(req.body);
-    res.json(course);
+    res.status(201).json({
+      message: "Tạo khóa học và lịch học thành công",
+      course
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// ✅ Lấy tất cả khóa học (admin & sinh viên)
+// ==========================
+// LẤY TẤT CẢ KHÓA HỌC (ADMIN & SINH VIÊN)
+// ==========================
 exports.findAll = async (req, res) => {
   try {
     const courses = await Course.getAllCourses();
@@ -20,15 +33,17 @@ exports.findAll = async (req, res) => {
   }
 };
 
-// ✅ Lấy khóa học theo ID (giảng viên chỉ được xem nếu mình phụ trách)
+// ==========================
+// LẤY KHÓA HỌC THEO ID
+// (GIẢNG VIÊN CHỈ XEM NẾU MÌNH PHỤ TRÁCH)
+// ==========================
 exports.findById = async (req, res) => {
-  const userId = Number(req.user?.id);       // ✅ dùng id thay vì user_id
-  const role = Number(req.user?.role);       // ✅ dùng role đúng như middleware
+  const userId = Number(req.user?.id);
+  const role = Number(req.user?.role);
   const courseId = Number(req.params.id);
 
   if (!userId || isNaN(userId)) {
-    console.log("[FIND BY ID ERROR] userId is invalid");
-    return res.status(500).json({ error: "userId is invalid" });
+    return res.status(400).json({ error: "userId is invalid" });
   }
 
   try {
@@ -41,21 +56,25 @@ exports.findById = async (req, res) => {
   }
 };
 
-// ✅ Cập nhật khóa học
+// ==========================
+// CẬP NHẬT KHÓA HỌC
+// ==========================
 exports.update = async (req, res) => {
   try {
     const updated = await Course.updateCourse(req.params.id, req.body);
     if (updated) {
       res.json({ message: "Cập nhật thành công", course: updated });
     } else {
-      res.status(404).json({ message: "Không tìm thấy môn học" });
+      res.status(404).json({ message: "Không tìm thấy khóa học" });
     }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// ✅ Xóa khóa học
+// ==========================
+// XÓA KHÓA HỌC
+// ==========================
 exports.delete = async (req, res) => {
   try {
     const result = await Course.deleteCourse(req.params.id);
@@ -65,7 +84,9 @@ exports.delete = async (req, res) => {
   }
 };
 
-// ✅ Giảng viên: xem danh sách khóa học của chính mình
+// ==========================
+// GIẢNG VIÊN: LẤY KHÓA HỌC CỦA MÌNH
+// ==========================
 exports.getMyAssignedCourses = async (req, res) => {
   try {
     const courses = await Course.getCoursesByLecturer(req.user.id);
@@ -74,4 +95,3 @@ exports.getMyAssignedCourses = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-

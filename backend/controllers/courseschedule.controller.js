@@ -1,23 +1,17 @@
 const CourseSchedule = require("../models/courseschedule.model");
 
-// ✅ Admin – Thêm lịch học
-exports.create = async (req, res) => {
-  try {
-    const result = await CourseSchedule.create(req.body);
-    res.json(result);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-
 // ✅ Admin – Sửa lịch học
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await CourseSchedule.update(id, req.body);
-    res.json(result);
+    res.json({
+      success: true,
+      message: "Cập nhật lịch học thành công.",
+      data: result
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ success: false, error: error.message });
   }
 };
 
@@ -26,9 +20,13 @@ exports.remove = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await CourseSchedule.remove(id);
-    res.json(result);
+    res.json({
+      success: true,
+      message: "Xoá lịch học thành công.",
+      data: result
+    });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(400).json({ success: false, error: error.message });
   }
 };
 
@@ -36,9 +34,13 @@ exports.remove = async (req, res) => {
 exports.getAll = async (req, res) => {
   try {
     const data = await CourseSchedule.getAll();
-    res.json(data);
+    res.json({
+      success: true,
+      message: "Lấy danh sách tất cả lịch học thành công.",
+      data: data
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -47,9 +49,15 @@ exports.getById = async (req, res) => {
   try {
     const { id } = req.params;
     const data = await CourseSchedule.getById(id);
-    res.json(data);
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy lịch học."
+      });
+    }
+    res.json({ success: true, data });
   } catch (error) {
-    res.status(404).json({ error: error.message });
+    res.status(404).json({ success: false, error: error.message });
   }
 };
 
@@ -70,9 +78,8 @@ exports.getByTeacher = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Lấy danh sách lịch dạy thành công.",
-      data: data
+      data
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -82,18 +89,26 @@ exports.getByTeacher = async (req, res) => {
   }
 };
 
-
-// ✅ Sinh viên – Xem lịch học theo nghiệp vụ 3 điều kiện
+// ✅ Sinh viên – Xem lịch học theo nghiệp vụ
 exports.getByStudent = async (req, res) => {
   try {
-    console.log("✅ Đã vào controller getByStudent");
     const userId = req.user.id;
     const courseId = req.query.course_id || null;
     const data = await CourseSchedule.getByStudent(userId, courseId);
     res.json(data);
   } catch (error) {
     console.error("❌ Lỗi controller getByStudent:", error);
-    res.status(403).json({ error: error.message });
+    res.status(403).json({ success: false, error: error.message });
   }
 };
 
+// **Lấy lịch học 1 môn cụ thể của sinh viên**
+exports.getByStudentOneCourse = async (req, res) => {
+  try {
+    const { studentId, courseId } = req.params;
+    const result = await CourseSchedule.getByStudentOneCourse(studentId, courseId);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
