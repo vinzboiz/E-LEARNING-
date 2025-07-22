@@ -70,6 +70,17 @@ async function deleteUser(id) {
   return res.rows[0];
 }
 
+// Lấy danh sách giảng viên (role_id = 3)
+async function getAllTeachers() {
+  const result = await db.query(
+    `SELECT user_id, name, email
+     FROM users
+     WHERE role_id = 3
+     ORDER BY name`
+  );
+  return result.rows;
+}
+
 // Export tất cả các hàm
 module.exports = {
   getAllUsers,
@@ -77,4 +88,5 @@ module.exports = {
   createUser,
   updateUser,
   deleteUser,
+  getAllTeachers,
 };

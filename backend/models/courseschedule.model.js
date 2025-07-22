@@ -1,8 +1,6 @@
 const db = require("../config/db");
 
-// ==========================
 // HÀM KIỂM TRA TRÙNG LỊCH (CHO UPDATE)
-// ==========================
 async function checkLecturerScheduleConflictByCourse(course_id, date, start_time, end_time, exclude_schedule_id = null) {
   const userQuery = await db.query(
     `SELECT user_id FROM course WHERE course_id = $1`,
@@ -30,9 +28,7 @@ async function checkLecturerScheduleConflictByCourse(course_id, date, start_time
   return result.rows.length > 0;
 }
 
-// ==========================
 // UPDATE
-// ==========================
 async function update(schedule_id, data) {
   const { room, date, start_time, end_time, note, course_id } = data;
 
@@ -54,17 +50,13 @@ async function update(schedule_id, data) {
   return result.rows[0];
 }
 
-// ==========================
 // DELETE
-// ==========================
 async function remove(schedule_id) {
   await db.query("DELETE FROM courseschedule WHERE schedule_id = $1", [schedule_id]);
   return { message: "Xoá lịch học thành công" };
 }
 
-// ==========================
 // GET ALL
-// ==========================
 async function getAll() {
   const result = await db.query(
     `SELECT cs.*, s.name AS subject_name 
@@ -76,9 +68,7 @@ async function getAll() {
   return result.rows;
 }
 
-// ==========================
 // GET BY ID
-// ==========================
 async function getById(schedule_id) {
   const result = await db.query(
     `SELECT cs.*, s.name AS subject_name 
@@ -91,9 +81,7 @@ async function getById(schedule_id) {
   return result.rows[0];
 }
 
-// ==========================
 // GET BY TEACHER
-// ==========================
 async function getByTeacher(userId) {
   const result = await db.query(
     `SELECT cs.*, s.name AS subject_name
@@ -106,9 +94,7 @@ async function getByTeacher(userId) {
   return result.rows;
 }
 
-// ==========================
 // GET BY STUDENT
-// ==========================
 async function getByStudent(userId, course_id = null) {
   const regRes = await db.query(
     `SELECT * FROM registercourse WHERE user_id = $1 ORDER BY create_at DESC LIMIT 1`,
@@ -188,9 +174,7 @@ async function getByStudent(userId, course_id = null) {
   return { success: false, message: "Bạn không có quyền xem lịch học vào thời điểm này.", data: [] };
 }
 
-// ==========================
 // GET BY STUDENT ONE COURSE
-// ==========================
 async function getByStudentOneCourse(userId, course_id) {
   return await getByStudent(userId, course_id);
 }

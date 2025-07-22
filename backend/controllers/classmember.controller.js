@@ -1,6 +1,6 @@
 const ClassMember = require("../models/classmember.model");
 
-// ✅ Lấy danh sách tất cả môn học trong giỏ tạm
+// Lấy danh sách tất cả môn học trong giỏ tạm
 exports.getMyClassMembers = async (req, res) => {
   try {
     const result = await ClassMember.getClassMembersByUser(req.user.id);
@@ -10,7 +10,7 @@ exports.getMyClassMembers = async (req, res) => {
   }
 };
 
-// ✅ Thêm môn học vào giỏ
+// Thêm môn học vào giỏ
 exports.addCourseToClassMember = async (req, res) => {
   try {
     const { course_id } = req.body;
@@ -25,7 +25,7 @@ exports.addCourseToClassMember = async (req, res) => {
   }
 };
 
-// ✅ Xoá môn học khỏi giỏ
+// Xoá môn học khỏi giỏ
 exports.removeCourseFromClassMember = async (req, res) => {
   try {
     const { course_id } = req.body;
@@ -40,8 +40,7 @@ exports.removeCourseFromClassMember = async (req, res) => {
   }
 };
 
-
-// ✅ Lọc danh sách môn học theo trạng thái
+// Lọc danh sách môn học theo trạng thái
 exports.getClassMembersByStatus = async (req, res) => {
   try {
     const { status } = req.query;
@@ -57,7 +56,7 @@ exports.getClassMembersByStatus = async (req, res) => {
 };
 
 
-// ✅ API để sinh viên nhấn "Lưu" giỏ tạm và cập nhật tổng học phí
+// API để sinh viên nhấn "Lưu" giỏ tạm và cập nhật tổng học phí
 exports.saveRegisterCourses = async (req, res) => {
   try {
     const result = await ClassMember.saveRegisterCourse(req.user.id);
@@ -68,7 +67,7 @@ exports.saveRegisterCourses = async (req, res) => {
 };
 
 
-// ✅ API để sinh viên đóng học phí
+// API để sinh viên đóng học phí
 exports.payTuition = async (req, res) => {
   try {
     const result = await ClassMember.payTuition(req.user.id);
@@ -78,8 +77,7 @@ exports.payTuition = async (req, res) => {
   }
 };
 
-
-// ✅ Admin: Lấy toàn bộ giỏ môn học của mọi sinh viên
+// Admin: Lấy toàn bộ giỏ môn học của mọi sinh viên
 exports.getAllClassMembers = async (req, res) => {
   try {
     const result = await ClassMember.getAllClassMembers();

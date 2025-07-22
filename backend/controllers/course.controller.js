@@ -1,16 +1,13 @@
 const Course = require("../models/course.model");
 
-// ==========================
+
 // TẠO KHÓA HỌC MỚI (ADMIN)
-// ==========================
 exports.create = async (req, res) => {
   try {
-    // Kiểm tra dữ liệu schedule
-    if (!req.body.schedule) {
-      return res.status(400).json({ error: "Thiếu dữ liệu schedule (date, start_time, end_time, room, note)" });
+    if (!req.body.schedules || !Array.isArray(req.body.schedules)) {
+      return res.status(400).json({ error: "Thiếu hoặc sai định dạng 'schedules' (array)" });
     }
 
-    // Tạo khóa học + lịch học
     const course = await Course.createCourse(req.body);
     res.status(201).json({
       message: "Tạo khóa học và lịch học thành công",
@@ -21,9 +18,7 @@ exports.create = async (req, res) => {
   }
 };
 
-// ==========================
 // LẤY TẤT CẢ KHÓA HỌC (ADMIN & SINH VIÊN)
-// ==========================
 exports.findAll = async (req, res) => {
   try {
     const courses = await Course.getAllCourses();
@@ -33,10 +28,8 @@ exports.findAll = async (req, res) => {
   }
 };
 
-// ==========================
 // LẤY KHÓA HỌC THEO ID
 // (GIẢNG VIÊN CHỈ XEM NẾU MÌNH PHỤ TRÁCH)
-// ==========================
 exports.findById = async (req, res) => {
   const userId = Number(req.user?.id);
   const role = Number(req.user?.role);
@@ -56,9 +49,7 @@ exports.findById = async (req, res) => {
   }
 };
 
-// ==========================
 // CẬP NHẬT KHÓA HỌC
-// ==========================
 exports.update = async (req, res) => {
   try {
     const updated = await Course.updateCourse(req.params.id, req.body);
@@ -72,9 +63,7 @@ exports.update = async (req, res) => {
   }
 };
 
-// ==========================
 // XÓA KHÓA HỌC
-// ==========================
 exports.delete = async (req, res) => {
   try {
     const result = await Course.deleteCourse(req.params.id);
@@ -84,9 +73,7 @@ exports.delete = async (req, res) => {
   }
 };
 
-// ==========================
 // GIẢNG VIÊN: LẤY KHÓA HỌC CỦA MÌNH
-// ==========================
 exports.getMyAssignedCourses = async (req, res) => {
   try {
     const courses = await Course.getCoursesByLecturer(req.user.id);

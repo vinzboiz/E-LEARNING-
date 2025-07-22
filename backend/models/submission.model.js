@@ -1,7 +1,7 @@
 const db = require("../config/db");
 const assignmentModel = require("./assignment.model");
 
-// ✅ Thêm Submission (bao gồm drive_link)
+// Thêm Submission (bao gồm drive_link)
 async function createSubmission(userId, data) {
   const { assignment_id, content, drive_link } = data;
 
@@ -28,7 +28,7 @@ async function createSubmission(userId, data) {
   return result.rows[0];
 }
 
-// ✅ Cập nhật Submission (bao gồm drive_link)
+// Cập nhật Submission (bao gồm drive_link)
 async function updateSubmission(userId, id, data) {
   const { content, drive_link } = data;
 
@@ -55,7 +55,7 @@ async function updateSubmission(userId, id, data) {
   return result.rows[0];
 }
 
-// ✅ Xóa Submission
+// Xóa Submission
 async function deleteSubmission(userId, id) {
   const submissionCheck = await db.query(
     `SELECT s.assignment_id, s.user_id, a.due_date_end
@@ -74,7 +74,7 @@ async function deleteSubmission(userId, id) {
   return { message: "Xóa submission thành công" };
 }
 
-// ✅ Lấy tất cả Submission của 1 Assignment (Admin/Giảng viên)
+// Lấy tất cả Submission của 1 Assignment (Admin/Giảng viên)
 async function getSubmissionsByAssignment(assignmentId) {
   const result = await db.query(
     `SELECT * FROM submission WHERE assignment_id = $1 ORDER BY submitted_at DESC`,
@@ -83,7 +83,7 @@ async function getSubmissionsByAssignment(assignmentId) {
   return result.rows;
 }
 
-// ✅ Lấy Submission theo ID (ẩn thông tin nếu là sinh viên)
+// Lấy Submission theo ID (ẩn thông tin nếu là sinh viên)
 async function getSubmissionById(userId, role, id) {
   const result = await db.query(`SELECT * FROM submission WHERE submission_id = $1`, [id]);
   if (result.rowCount === 0) return null;
@@ -102,7 +102,7 @@ async function getSubmissionById(userId, role, id) {
   return submission;
 }
 
-// ✅ Giảng viên/Admin chấm điểm và nhận xét
+// Giảng viên/Admin chấm điểm và nhận xét
 async function gradeSubmission(userId, role, submissionId, data) {
   const { score, feedback } = data;
 

@@ -1,6 +1,6 @@
 const lessonModel = require("../models/lesson.model");
 
-// ✅ Lấy tất cả bài học (Admin & Giảng viên được phân công)
+// Lấy tất cả bài học (Admin & Giảng viên được phân công)
 exports.getAllLessons = async (req, res) => {
   try {
     const { role, id: userId } = req.user;
@@ -29,7 +29,7 @@ exports.getAllLessons = async (req, res) => {
   }
 };
 
-// ✅ Lấy bài học theo ID
+// Lấy bài học theo ID
 exports.getLessonById = async (req, res) => {
   try {
     const { role, id: userId } = req.user;
@@ -62,7 +62,7 @@ exports.getLessonById = async (req, res) => {
   }
 };
 
-// ✅ Sinh viên: Lấy tất cả bài học đã đăng ký & thanh toán
+// Sinh viên: Lấy tất cả bài học đã đăng ký & thanh toán
 exports.getLessonsByStudent = async (req, res) => {
   try {
     if (req.user.role !== 2) {
@@ -76,7 +76,7 @@ exports.getLessonsByStudent = async (req, res) => {
   }
 };
 
-// ✅ Thêm bài học (Admin hoặc Giảng viên nếu là chủ khóa học)
+// Thêm bài học (Admin hoặc Giảng viên nếu là chủ khóa học)
 exports.createLesson = async (req, res) => {
   try {
     const { title, content, course_id } = req.body;
@@ -101,7 +101,7 @@ exports.createLesson = async (req, res) => {
   }
 };
 
-// ✅ Cập nhật bài học (Admin hoặc Giảng viên nếu là chủ bài học)
+// Cập nhật bài học (Admin hoặc Giảng viên nếu là chủ bài học)
 exports.updateLesson = async (req, res) => {
   try {
     const lessonId = req.params.id;
@@ -126,7 +126,7 @@ exports.updateLesson = async (req, res) => {
   }
 };
 
-// ✅ Xóa bài học (Admin hoặc Giảng viên nếu là chủ)
+// Xóa bài học (Admin hoặc Giảng viên nếu là chủ)
 exports.deleteLesson = async (req, res) => {
   try {
     const lessonId = req.params.id;

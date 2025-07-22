@@ -2,35 +2,40 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model");
 const authModel = require("../models/auth.model");
+const otpModel = require("../models/otp.model");
+const { sendOTP } = require("../utils/sendEmail");
 
-// Đăng ký tài khoản mới
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000); // Tạo mã OTP 6 số
+}
+
+// 1. Gửi OTP khi đăng ký
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Kiểm tra các trường bắt buộc
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Vui lòng nhập tên, email và mật khẩu" });
     }
 
-    // Kiểm tra email đã tồn tại
     const existing = await authModel.findUserByEmail(email);
     if (existing) {
       return res.status(400).json({ message: "Email đã tồn tại" });
     }
 
-    // Băm mật khẩu
-    const hashed = await bcrypt.hash(password, 10);
+    const otp = generateOTP();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 phút
 
-    // Tạo người dùng mới với role mặc định là sinh viên (role_id = 2)
-    const newUser = await userModel.createUser({
-      name,
+    await otpModel.createOTP(email, otp, expiresAt);
+    await sendOTP(email, otp);
+
+    // Chưa tạo user ngay, đợi xác thực OTP
+    res.json({
+      message: "OTP đã được gửi đến email. Vui lòng xác nhận OTP để hoàn tất đăng ký.",
       email,
-      password: hashed,
-      role_id: 2,
+      name,
+      password // Có thể bỏ password ở response để bảo mật
     });
-
-    res.status(201).json({ message: "Đăng ký thành công", user: newUser });
   } catch (error) {
     console.error("Register error:", error);
     res.status(500).json({ message: "Lỗi máy chủ khi đăng ký" });
@@ -95,5 +100,59 @@ exports.logout = async (req, res) => {
     res.json({ message: "Đăng xuất thành công. Hãy xóa token ở phía client." });
   } catch (err) {
     res.status(500).json({ message: "Lỗi khi đăng xuất" });
+  }
+};
+
+//Đăng ký qua OTP
+
+// Gửi OTP qua email
+exports.sendOTP = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Vui lòng nhập tên, email và mật khẩu" });
+    }
+
+    const existing = await authModel.findUserByEmail(email);
+    if (existing) return res.status(400).json({ message: "Email đã tồn tại" });
+
+    const otp = generateOTP();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+    await otpModel.createOTP(email, otp, expiresAt);
+    await sendOTP(email, otp);
+
+    res.json({ message: "OTP đã được gửi đến email của bạn", email, name, password });
+  } catch (error) {
+    console.error("Send OTP error:", error);
+    res.status(500).json({ message: "Lỗi máy chủ khi gửi OTP" });
+  }
+};
+
+// 2. Xác thực OTP và tạo tài khoản
+exports.verifyOTP = async (req, res) => {
+  try {
+    const { name, email, password, otp } = req.body;
+
+    const record = await otpModel.findOTP(email, otp);
+    if (!record || new Date() > record.expires_at) {
+      return res.status(400).json({ message: "OTP không hợp lệ hoặc đã hết hạn" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    const newUser = await userModel.createUser({
+      name,
+      email,
+      password: hashed,
+      role_id: 2, // Mặc định là sinh viên
+    });
+
+    await otpModel.deleteOTP(email);
+
+    res.status(201).json({ message: "Đăng ký thành công", user: newUser });
+  } catch (error) {
+    console.error("Verify OTP error:", error);
+    res.status(500).json({ message: "Lỗi máy chủ khi xác thực OTP" });
   }
 };

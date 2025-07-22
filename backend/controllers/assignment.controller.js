@@ -1,6 +1,6 @@
 const assignmentModel = require("../models/assignment.model");
 
-// ✅ Lấy tất cả assignment của 1 lesson
+// Lấy tất cả assignment của 1 lesson
 exports.getAssignmentsByLesson = async (req, res) => {
   try {
     const lessonId = req.params.lessonId;
@@ -11,7 +11,7 @@ exports.getAssignmentsByLesson = async (req, res) => {
   }
 };
 
-// ✅ Lấy assignment theo ID
+// Lấy assignment theo ID
 exports.getAssignmentById = async (req, res) => {
   try {
     const assignment = await assignmentModel.getAssignmentById(req.user.id, req.params.id);
@@ -22,7 +22,7 @@ exports.getAssignmentById = async (req, res) => {
   }
 };
 
-// ✅ Thêm assignment
+// Thêm assignment
 exports.createAssignment = async (req, res) => {
   try {
     if (req.user.role !== 1 && req.user.role !== 3) {
@@ -35,7 +35,7 @@ exports.createAssignment = async (req, res) => {
   }
 };
 
-// ✅ Cập nhật assignment
+// Cập nhật assignment
 exports.updateAssignment = async (req, res) => {
   try {
     if (req.user.role !== 1 && req.user.role !== 3) {
@@ -48,7 +48,7 @@ exports.updateAssignment = async (req, res) => {
   }
 };
 
-// ✅ Xóa assignment
+// Xóa assignment
 exports.deleteAssignment = async (req, res) => {
   try {
     if (req.user.role !== 1 && req.user.role !== 3) {

@@ -1,6 +1,6 @@
 const CourseSchedule = require("../models/courseschedule.model");
 
-// ✅ Admin – Sửa lịch học
+// Admin – Sửa lịch học
 exports.update = async (req, res) => {
   try {
     const { id } = req.params;
@@ -15,7 +15,7 @@ exports.update = async (req, res) => {
   }
 };
 
-// ✅ Admin – Xoá lịch học
+// Admin – Xoá lịch học
 exports.remove = async (req, res) => {
   try {
     const { id } = req.params;
@@ -30,7 +30,7 @@ exports.remove = async (req, res) => {
   }
 };
 
-// ✅ Admin – Xem tất cả lịch học
+// Admin – Xem tất cả lịch học
 exports.getAll = async (req, res) => {
   try {
     const data = await CourseSchedule.getAll();
@@ -44,7 +44,7 @@ exports.getAll = async (req, res) => {
   }
 };
 
-// ✅ Admin – Xem chi tiết lịch học
+// Admin – Xem chi tiết lịch học
 exports.getById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -61,7 +61,7 @@ exports.getById = async (req, res) => {
   }
 };
 
-// ✅ Giảng viên – Lịch dạy của mình
+// Giảng viên – Lịch dạy của mình
 exports.getByTeacher = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -89,7 +89,7 @@ exports.getByTeacher = async (req, res) => {
   }
 };
 
-// ✅ Sinh viên – Xem lịch học theo nghiệp vụ
+// Sinh viên – Xem lịch học theo nghiệp vụ
 exports.getByStudent = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -102,7 +102,7 @@ exports.getByStudent = async (req, res) => {
   }
 };
 
-// **Lấy lịch học 1 môn cụ thể của sinh viên**
+// Lấy lịch học 1 môn cụ thể của sinh viên
 exports.getByStudentOneCourse = async (req, res) => {
   try {
     const { studentId, courseId } = req.params;

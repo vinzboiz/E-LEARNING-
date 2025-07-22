@@ -1,6 +1,6 @@
 const submissionModel = require("../models/submission.model");
 
-// ✅ Thêm Submission
+// Thêm Submission
 exports.createSubmission = async (req, res) => {
   try {
     if (req.user.role !== 2 && req.user.role !== 1)
@@ -18,7 +18,7 @@ exports.createSubmission = async (req, res) => {
   }
 };
 
-// ✅ Cập nhật Submission
+// Cập nhật Submission
 exports.updateSubmission = async (req, res) => {
   try {
     if (req.user.role !== 2 && req.user.role !== 1)
@@ -36,7 +36,7 @@ exports.updateSubmission = async (req, res) => {
 };
 
 
-// ✅ Cập nhật Submission
+// Cập nhật Submission
 exports.updateSubmission = async (req, res) => {
   try {
     if (req.user.role !== 2 && req.user.role !== 1)
@@ -49,7 +49,7 @@ exports.updateSubmission = async (req, res) => {
   }
 };
 
-// ✅ Xóa Submission
+// Xóa Submission
 exports.deleteSubmission = async (req, res) => {
   try {
     if (req.user.role !== 2 && req.user.role !== 1)
@@ -62,7 +62,7 @@ exports.deleteSubmission = async (req, res) => {
   }
 };
 
-// ✅ Lấy tất cả Submission của 1 Assignment
+// Lấy tất cả Submission của 1 Assignment
 exports.getSubmissionsByAssignment = async (req, res) => {
   try {
     if (req.user.role === 2) {
@@ -77,7 +77,7 @@ exports.getSubmissionsByAssignment = async (req, res) => {
   }
 };
 
-// ✅ Lấy Submission theo ID
+// Lấy Submission theo ID
 exports.getSubmissionById = async (req, res) => {
   try {
     const submission = await submissionModel.getSubmissionById(
@@ -92,7 +92,7 @@ exports.getSubmissionById = async (req, res) => {
   }
 };
 
-// ✅ Giảng viên/Admin chấm điểm & nhận xét
+// Giảng viên/Admin chấm điểm & nhận xét
 exports.gradeSubmission = async (req, res) => {
   try {
     const { score, feedback } = req.body;

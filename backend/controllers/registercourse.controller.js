@@ -1,6 +1,6 @@
 const RegisterCourse = require('../models/registercourse.model');
 
-// ✅ Admin: Tạo đăng ký học phần cho toàn bộ user
+// Admin: Tạo đăng ký học phần cho toàn bộ user
 exports.createRegisterCoursesForAll = async (req, res) => {
   try {
     const { begin_register, end_register, year, semester } = req.body;
@@ -16,7 +16,7 @@ exports.createRegisterCoursesForAll = async (req, res) => {
   }
 };
 
-// ✅ Sinh viên: Xem thông tin đăng ký học phần của chính mình
+// Sinh viên: Xem thông tin đăng ký học phần của chính mình
 exports.getMyRegisterCourses = async (req, res) => {
   try {
     const data = await RegisterCourse.getRegisterCourseByUser(req.user.id);
@@ -26,7 +26,7 @@ exports.getMyRegisterCourses = async (req, res) => {
   }
 };
 
-// ✅ Admin: Xem toàn bộ danh sách đăng ký học phần
+// Admin: Xem toàn bộ danh sách đăng ký học phần
 exports.getAllRegisterCourses = async (req, res) => {
   try {
     const data = await RegisterCourse.getAllRegisterCourses();
@@ -36,7 +36,7 @@ exports.getAllRegisterCourses = async (req, res) => {
   }
 };
 
-// ✅ Admin: Cập nhật thời gian đăng ký toàn hệ thống
+// Admin: Cập nhật thời gian đăng ký toàn hệ thống
 exports.updateRegisterTime = async (req, res) => {
   try {
     const { begin, end, newBegin, newEnd } = req.body;

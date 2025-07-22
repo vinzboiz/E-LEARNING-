@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-// ✅ Kiểm tra và cập nhật trạng thái nếu đã quá hạn đóng học phí
+// Kiểm tra và cập nhật trạng thái nếu đã quá hạn đóng học phí
 async function checkAndUpdateStatus(userId) {
   const result = await db.query(
     `SELECT register_id, status, due_date_end 
@@ -25,7 +25,7 @@ async function checkAndUpdateStatus(userId) {
   }
 }
 
-// ✅ Kiểm tra có nằm trong khoảng thời gian đăng ký không
+// Kiểm tra có nằm trong khoảng thời gian đăng ký không
 async function isWithinRegisterTime(userId) {
   const result = await db.query(
     `SELECT begin_register, end_register 
@@ -69,13 +69,13 @@ async function addClassMember(userId, courseId) {
     return { message: "Môn học đã có trong giỏ", data: null };
   }
 
-  // ✅ Lấy lịch học của khóa học sắp thêm
+  // Lấy lịch học của khóa học sắp thêm
   const newSchedule = await db.query(
     `SELECT date, start_time, end_time FROM courseschedule WHERE course_id = $1`,
     [courseId]
   );
 
-  // ✅ Lấy lịch học của các môn đã có trong giỏ
+  // Lấy lịch học của các môn đã có trong giỏ
   const existingSchedules = await db.query(
     `SELECT cs.date, cs.start_time, cs.end_time
      FROM classmember cm
@@ -84,7 +84,7 @@ async function addClassMember(userId, courseId) {
     [userId]
   );
 
-  // ✅ So sánh trùng lịch
+  // So sánh trùng lịch
   for (let newSlot of newSchedule.rows) {
     const newDate = newSlot.date.toISOString().split("T")[0]; // so sánh theo ngày yyyy-mm-dd
     const newStart = newSlot.start_time;
@@ -95,7 +95,7 @@ async function addClassMember(userId, courseId) {
       const existStart = exist.start_time;
       const existEnd = exist.end_time;
 
-      // ✅ Nếu cùng ngày và giờ giao nhau → trùng lịch
+      // Nếu cùng ngày và giờ giao nhau → trùng lịch
       if (newDate === existDate && (
           (newStart >= existStart && newStart < existEnd) ||
           (newEnd > existStart && newEnd <= existEnd) ||
@@ -103,14 +103,14 @@ async function addClassMember(userId, courseId) {
         )
       ) {
         return {
-          message: "❌ Khóa học bị trùng lịch với môn học đã chọn trước đó.",
+          message: "Khóa học bị trùng lịch với môn học đã chọn trước đó.",
           data: null
         };
       }
     }
   }
 
-  // ✅ Nếu không trùng, thêm vào giỏ
+  // Nếu không trùng, thêm vào giỏ
   const course = await db.query(`SELECT price FROM course WHERE course_id = $1`, [courseId]);
   const price = course.rows[0]?.price;
 
@@ -127,7 +127,7 @@ async function addClassMember(userId, courseId) {
       VALUES ($1, $2, $3, NOW(), $4)`,
       [userId, register_id, courseId, price]
     );
-  return { message: "✅ Đã thêm môn học vào giỏ", data: { course_id: courseId } };
+  return { message: "Đã thêm môn học vào giỏ", data: { course_id: courseId } };
 }
 
 
@@ -159,7 +159,7 @@ async function removeClassMember(userId, courseId) {
 }
 
 
-// ✅ Lấy danh sách môn học trong giỏ
+// Lấy danh sách môn học trong giỏ
 async function getClassMembersByUser(userId) {
   await checkAndUpdateStatus(userId);
 
@@ -207,7 +207,7 @@ async function getClassMembersByUser(userId) {
 }
 
 
-// ✅ Save giỏ tạm → đóng học phí
+// Save giỏ tạm → đóng học phí
 async function saveRegisterCourse(userId) {
   await checkAndUpdateStatus(userId);
 
@@ -262,7 +262,7 @@ async function saveRegisterCourse(userId) {
 }
 
 
-// ✅ Đóng học phí – chỉ thực hiện được 1 lần nếu trong khoảng thời gian đóng học phí
+// Đóng học phí – chỉ thực hiện được 1 lần nếu trong khoảng thời gian đóng học phí
 async function payTuition(userId) {
   await checkAndUpdateStatus(userId);
 
@@ -367,7 +367,7 @@ async function getClassMembersByStatus(userId, filterStatus) {
 }
 
 
-// ✅ Admin: lấy toàn bộ giỏ tạm
+// Admin: lấy toàn bộ giỏ tạm
 async function getAllClassMembers() {
   const result = await db.query(
     `SELECT 

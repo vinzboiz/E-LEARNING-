@@ -4,7 +4,7 @@ const controller = require("../controllers/classmember.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const checkRole = require("../middlewares/checkRole");
 
-// ✅ Sinh viên (role = 2) – thao tác với giỏ môn học của mình
+// Sinh viên (role = 2) – thao tác với giỏ môn học của mình
 router.get("/", authMiddleware, checkRole(2), controller.getMyClassMembers);
 router.get("/filter", authMiddleware, checkRole(2), controller.getClassMembersByStatus);
 router.post("/", authMiddleware, checkRole(2), controller.addCourseToClassMember);
@@ -12,7 +12,7 @@ router.delete("/", authMiddleware, checkRole(2), controller.removeCourseFromClas
 router.post("/save", authMiddleware, checkRole(2), controller.saveRegisterCourses);
 router.post("/pay", authMiddleware, checkRole(2), controller.payTuition); // ✅ Đóng học phí
 
-// ✅ Admin (role = 1) – xem toàn bộ giỏ môn học của tất cả sinh viên
+// Admin (role = 1) – xem toàn bộ giỏ môn học của tất cả sinh viên
 router.get("/admin/all", authMiddleware, checkRole(1), controller.getAllClassMembers);
 
 module.exports = router;

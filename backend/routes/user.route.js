@@ -4,8 +4,10 @@ const userController = require("../controllers/user.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const checkRole = require("../middlewares/checkRole");
 
-// ✅ Admin (role_id = 1): toàn quyền với users
+// Admin (role_id = 1): toàn quyền với users
 router.get("/", authMiddleware, checkRole(1), userController.getUsers);
+// Lấy danh sách giảng viên (chỉ admin)
+router.get("/teachers", authMiddleware, userController.getTeachers);
 router.get("/:id", authMiddleware, checkRole(1), userController.getUser);
 router.post("/", authMiddleware, checkRole(1), userController.createUser);
 router.put("/:id", authMiddleware, async (req, res, next) => {

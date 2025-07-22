@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-// ✅ ADMIN: Tạo mới toàn bộ đăng ký học phần cho tất cả user
+// ADMIN: Tạo mới toàn bộ đăng ký học phần cho tất cả user
 async function createAll(begin_register, end_register, year, semester) {
   const due_start = new Date(end_register);
   due_start.setDate(due_start.getDate() + 1);
@@ -23,7 +23,7 @@ async function createAll(begin_register, end_register, year, semester) {
   return { message: "Đã tạo thành công đăng ký học phần cho toàn bộ user." };
 }
 
-// ✅ Sinh viên: Xem thông tin đăng ký học phần của chính mình
+// Sinh viên: Xem thông tin đăng ký học phần của chính mình
 async function getRegisterCourseByUser(userId) {
   const res = await db.query(
     `SELECT * FROM registercourse WHERE user_id = $1 ORDER BY create_at DESC LIMIT 1`,
@@ -32,13 +32,13 @@ async function getRegisterCourseByUser(userId) {
   return res.rows;
 }
 
-// ✅ ADMIN: Xem tất cả các bản ghi đăng ký học phần
+// ADMIN: Xem tất cả các bản ghi đăng ký học phần
 async function getAllRegisterCourses() {
   const res = await db.query(`SELECT * FROM registercourse ORDER BY create_at DESC`);
   return res.rows;
 }
 
-// ✅ ADMIN: Cập nhật thời gian đăng ký cho toàn hệ thống
+// ADMIN: Cập nhật thời gian đăng ký cho toàn hệ thống
 async function updateRegisterTimeForAll(begin, end, newBegin, newEnd) {
   const due_start = new Date(newEnd);
   due_start.setDate(due_start.getDate() + 1);

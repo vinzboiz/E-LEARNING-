@@ -1,8 +1,8 @@
 const db = require("../config/db");
 
-// ==================== LESSON FUNCTIONS ====================
+// LESSON FUNCTIONS
 
-// ✅ Thêm bài học (chỉ giảng viên được phân công cho course)
+// Thêm bài học (chỉ giảng viên được phân công cho course)
 async function createLesson(userId, data) {
   const { title, content, file, course_id } = data;
 
@@ -20,7 +20,7 @@ async function createLesson(userId, data) {
   return result.rows[0];
 }
 
-// ✅ Cập nhật bài học (chỉ giảng viên được phân công cho course)
+// Cập nhật bài học (chỉ giảng viên được phân công cho course)
 async function updateLesson(userId, id, data) {
   // Kiểm tra quyền
   const isOwner = await isCourseOwner(userId, id);
@@ -45,7 +45,7 @@ async function updateLesson(userId, id, data) {
   return result.rows[0];
 }
 
-// ✅ Xóa bài học (chỉ giảng viên được phân công cho course)
+// Xóa bài học (chỉ giảng viên được phân công cho course)
 async function deleteLesson(userId, id) {
   const isOwner = await isCourseOwner(userId, id);
   if (!isOwner) {
@@ -56,7 +56,7 @@ async function deleteLesson(userId, id) {
   return { message: "Xoá bài học thành công" };
 }
 
-// ✅ Lấy tất cả bài học của giảng viên cho course do họ dạy
+// Lấy tất cả bài học của giảng viên cho course do họ dạy
 async function getAllLessons(userId, courseId) {
   // Kiểm tra quyền giảng viên
   const isOwner = await isCourseOwnerByCourse(userId, courseId);
@@ -71,7 +71,7 @@ async function getAllLessons(userId, courseId) {
   return result.rows;
 }
 
-// ✅ Lấy bài học theo ID (chỉ giảng viên được phân công)
+// Lấy bài học theo ID (chỉ giảng viên được phân công)
 async function getLessonById(userId, id) {
   const isOwner = await isCourseOwner(userId, id);
   if (!isOwner) {
@@ -85,9 +85,9 @@ async function getLessonById(userId, id) {
   return result.rows[0];
 }
 
-// ==================== STUDENT LESSONS ====================
+// STUDENT LESSONS
 
-// ✅ Lấy tất cả bài học của sinh viên đã đăng ký & thanh toán
+// Lấy tất cả bài học của sinh viên đã đăng ký & thanh toán
 async function getLessonsByStudent(user_id) {
   const result = await db.query(
     `SELECT l.* FROM lesson l
@@ -100,7 +100,7 @@ async function getLessonsByStudent(user_id) {
   return result.rows;
 }
 
-// ✅ Lấy bài học theo ID cho sinh viên đã thanh toán
+// Lấy bài học theo ID cho sinh viên đã thanh toán
 async function getLessonByIdForStudent(userId, lessonId) {
   const result = await db.query(
     `SELECT l.*
@@ -114,9 +114,9 @@ async function getLessonByIdForStudent(userId, lessonId) {
   return result.rows[0];
 }
 
-// ==================== CHECK PERMISSIONS ====================
+// CHECK PERMISSIONS
 
-// ✅ Kiểm tra giảng viên có quyền sửa/xoá bài học
+// Kiểm tra giảng viên có quyền sửa/xoá bài học
 async function isCourseOwner(userId, lessonId) {
   const result = await db.query(
     `SELECT 1 FROM lesson l
@@ -127,7 +127,7 @@ async function isCourseOwner(userId, lessonId) {
   return result.rowCount > 0;
 }
 
-// ✅ Kiểm tra giảng viên có sở hữu khoá học khi tạo bài học
+// Kiểm tra giảng viên có sở hữu khoá học khi tạo bài học
 async function isCourseOwnerByCourse(userId, courseId) {
   const result = await db.query(
     `SELECT 1 FROM course WHERE course_id = $1 AND user_id = $2`,
@@ -136,7 +136,7 @@ async function isCourseOwnerByCourse(userId, courseId) {
   return result.rowCount > 0;
 }
 
-// ✅ Kiểm tra giảng viên có quyền với lesson qua course
+// Kiểm tra giảng viên có quyền với lesson qua course
 async function isCourseOwnerByLesson(userId, lessonId) {
   const result = await db.query(
     `SELECT 1 FROM lesson l
@@ -147,7 +147,7 @@ async function isCourseOwnerByLesson(userId, lessonId) {
   return result.rowCount > 0;
 }
 
-// ✅ Kiểm tra user có quyền xem lesson (giảng viên chủ hoặc sinh viên đã thanh toán)
+// Kiểm tra user có quyền xem lesson (giảng viên chủ hoặc sinh viên đã thanh toán)
 async function canUserViewLesson(userId, lessonId) {
   // Giảng viên chủ course
   const ownerCheck = await db.query(

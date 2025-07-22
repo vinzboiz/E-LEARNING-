@@ -1,7 +1,7 @@
 const db = require("../config/db");
 const lessonModel = require("./lesson.model");
 
-// ✅ Cập nhật tất cả assignment đã hết hạn
+// Cập nhật tất cả assignment đã hết hạn
 async function cronUpdateAssignments() {
   const now = new Date();
   const result = await db.query(
@@ -12,27 +12,26 @@ async function cronUpdateAssignments() {
   );
 }
 
-// ✅ Thêm Assignment
+// Thêm Assignment
 async function createAssignment(userId, data) {
-  const { lesson_id, title, description, due_date_start, due_date_end } = data;
+  const { lesson_id, title, description, due_date_start, due_date_end, link_drive } = data;
 
-  // Kiểm tra quyền giảng viên trên lesson
   const isOwner = await lessonModel.isCourseOwnerByLesson(userId, lesson_id);
   if (!isOwner) throw new Error("Bạn không có quyền tạo bài tập cho lesson này.");
 
   const result = await db.query(
-    `INSERT INTO assignment (lesson_id, title, description, due_date_start, due_date_end, status)
-     VALUES ($1, $2, $3, $4, $5, 'đã giao') RETURNING *`,
-    [lesson_id, title, description, due_date_start, due_date_end]
+    `INSERT INTO assignment (lesson_id, title, description, due_date_start, due_date_end, link_drive, status)
+     VALUES ($1, $2, $3, $4, $5, $6, 'đã giao') RETURNING *`,
+    [lesson_id, title, description, due_date_start, due_date_end, link_drive || null]
   );
   return result.rows[0];
 }
 
-// ✅ Cập nhật Assignment
-async function updateAssignment(userId, id, data) {
-  const { title, description, due_date_start, due_date_end, status } = data;
 
-  // Kiểm tra quyền giảng viên
+// Cập nhật Assignment
+async function updateAssignment(userId, id, data) {
+  const { title, description, due_date_start, due_date_end, link_drive, status } = data;
+
   const lessonCheck = await db.query(
     `SELECT lesson_id FROM assignment WHERE assignment_id = $1`,
     [id]
@@ -45,14 +44,15 @@ async function updateAssignment(userId, id, data) {
 
   const result = await db.query(
     `UPDATE assignment 
-     SET title = $1, description = $2, due_date_start = $3, due_date_end = $4, status = $5
-     WHERE assignment_id = $6 RETURNING *`,
-    [title, description, due_date_start, due_date_end, status || 'đã giao', id]
+     SET title = $1, description = $2, due_date_start = $3, due_date_end = $4, link_drive = $5, status = $6
+     WHERE assignment_id = $7 RETURNING *`,
+    [title, description, due_date_start, due_date_end, link_drive || null, status || 'đã giao', id]
   );
   return result.rows[0];
 }
 
-// ✅ Xóa Assignment
+
+// Xóa Assignment
 async function deleteAssignment(userId, id) {
   const lessonCheck = await db.query(
     `SELECT lesson_id FROM assignment WHERE assignment_id = $1`,
@@ -68,7 +68,7 @@ async function deleteAssignment(userId, id) {
   return { message: "Xoá assignment thành công" };
 }
 
-// ✅ Lấy tất cả Assignment của 1 lesson
+// Lấy tất cả Assignment của 1 lesson
 async function getAssignmentsByLesson(userId, lessonId) {
   const canView = await lessonModel.canUserViewLesson(userId, lessonId);
   if (!canView) throw new Error("Bạn không có quyền xem assignment trong lesson này.");
@@ -82,7 +82,7 @@ async function getAssignmentsByLesson(userId, lessonId) {
   return await updateStatusIfExpired(result.rows);
 }
 
-// ✅ Lấy Assignment theo ID
+// Lấy Assignment theo ID
 async function getAssignmentById(userId, id) {
   const assignment = await db.query(
     `SELECT * FROM assignment WHERE assignment_id = $1`,
@@ -99,7 +99,7 @@ async function getAssignmentById(userId, id) {
   return assignments[0];
 }
 
-// ✅ Kiểm tra user có quyền xem assignment (dùng cho submission)
+// Kiểm tra user có quyền xem assignment (dùng cho submission)
 async function canUserViewAssignment(userId, assignmentId) {
   const result = await db.query(
     `SELECT a.lesson_id

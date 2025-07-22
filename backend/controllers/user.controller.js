@@ -77,7 +77,7 @@ exports.updateUser = async (req, res) => {
       updateData.password = await bcrypt.hash(password, 10);
     }
 
-    // ✅ Chỉ admin mới được thay đổi role_id
+    // Chỉ admin mới được thay đổi role_id
     if (req.user.role === 1 && role_id !== undefined) {
       updateData.role_id = role_id;
     }
@@ -104,5 +104,20 @@ exports.deleteUser = async (req, res) => {
     res.json({ message: "User deleted successfully", user: deleted });
   } catch (error) {
     res.status(500).json({ error: "Failed to delete user" });
+  }
+};
+
+// Lấy danh sách giảng viên (chỉ admin mới xem)
+exports.getTeachers = async (req, res) => {
+  try {
+    const teachers = await userModel.getAllTeachers();
+    res.status(200).json({
+      success: true,
+      message: "Danh sách giảng viên",
+      data: teachers,
+    });
+  } catch (error) {
+    console.error("Error in getTeachers:", error);
+    res.status(500).json({ error: error.message });
   }
 };

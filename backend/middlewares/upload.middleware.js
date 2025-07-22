@@ -4,7 +4,7 @@ const path = require("path");
 
 const uploadDir = path.join(__dirname, "../uploads/lessons");
 
-// ✅ Tạo thư mục nếu chưa tồn tại
+// Tạo thư mục nếu chưa tồn tại
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }

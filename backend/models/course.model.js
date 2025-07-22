@@ -1,8 +1,6 @@
 const db = require("../config/db");
 
-// ==========================
 // HÀM KIỂM TRA TRÙNG LỊCH GIẢNG VIÊN
-// ==========================
 async function checkLecturerScheduleConflict(user_id, date, start_time, end_time) {
   const query = `
     SELECT cs.schedule_id
@@ -16,29 +14,22 @@ async function checkLecturerScheduleConflict(user_id, date, start_time, end_time
   return result.rows.length > 0;
 }
 
-// ==========================
 // TẠO KHÓA HỌC + LỊCH HỌC
-// ==========================
 async function createCourse(course) {
-  const {
-    subject_id,
-    user_id,
-    semester,
-    year,
-    price,
-    numofperiods,
-    schedule // { date, start_time, end_time, room, note }
-  } = course;
+  const { subject_id, user_id, semester, year, price, numofperiods, schedules } = course;
 
-  // 1. Check trùng lịch
-  const isConflict = await checkLecturerScheduleConflict(
-    user_id,
-    schedule.date,
-    schedule.start_time,
-    schedule.end_time
-  );
-  if (isConflict) {
-    throw new Error("Giảng viên đã có lịch trùng vào thời gian này");
+  if (!schedules || !Array.isArray(schedules) || schedules.length === 0) {
+    throw new Error("Cần ít nhất một lịch học cho khóa học");
+  }
+
+  // 1. Kiểm tra trùng lịch cho từng buổi
+  for (const sch of schedules) {
+    const isConflict = await checkLecturerScheduleConflict(
+      user_id, sch.date, sch.start_time, sch.end_time
+    );
+    if (isConflict) {
+      throw new Error(`Giảng viên đã có lịch trùng vào ${sch.date} (${sch.start_time} - ${sch.end_time})`);
+    }
   }
 
   // 2. Tạo khóa học
@@ -50,26 +41,20 @@ async function createCourse(course) {
   );
   const newCourse = courseResult.rows[0];
 
-  // 3. Tạo lịch học cho khóa học
-  await db.query(
-    `INSERT INTO courseschedule (course_id, date, start_time, end_time, room, note)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [
-      newCourse.course_id,
-      schedule.date,
-      schedule.start_time,
-      schedule.end_time,
-      schedule.room,
-      schedule.note
-    ]
-  );
+  // 3. Tạo nhiều lịch học
+  for (const sch of schedules) {
+    await db.query(
+      `INSERT INTO courseschedule (course_id, date, start_time, end_time, room, note)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [newCourse.course_id, sch.date, sch.start_time, sch.end_time, sch.room, sch.note]
+    );
+  }
 
   return newCourse;
 }
 
-// ==========================
+
 // LẤY TẤT CẢ KHÓA HỌC
-// ==========================
 async function getAllCourses() {
   const result = await db.query(
     `SELECT c.*, s.name AS subject_name
@@ -80,9 +65,7 @@ async function getAllCourses() {
   return result.rows;
 }
 
-// ==========================
 // LẤY KHÓA HỌC THEO ID
-// ==========================
 async function getCourseById(courseId, userId = null, role = null) {
   let query = `
     SELECT c.*, s.name AS subject_name
@@ -93,15 +76,21 @@ async function getCourseById(courseId, userId = null, role = null) {
   const params = [Number(courseId)];
 
   if (Number(role) === 3) {
-    if (!userId || isNaN(Number(userId))) {
-      throw new Error("userId is invalid");
-    }
     query += ` AND c.user_id = $2`;
     params.push(Number(userId));
   }
 
-  const result = await db.query(query, params);
-  return result.rows[0];
+  const courseResult = await db.query(query, params);
+  const course = courseResult.rows[0];
+  if (!course) return null;
+
+  const schedulesResult = await db.query(
+    `SELECT * FROM courseschedule WHERE course_id = $1 ORDER BY date, start_time`,
+    [courseId]
+  );
+  course.schedules = schedulesResult.rows;
+
+  return course;
 }
 
 // ==========================

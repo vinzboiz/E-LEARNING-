@@ -25,7 +25,7 @@ module.exports = async function (req, res, next) {
       role: userRes.rows[0].role_id,
     };
 
-    next(); // ✅ Không kiểm tra quyền ở đây
+    next(); // Không kiểm tra quyền ở đây
   } catch (error) {
     return res.status(403).json({ message: "Token không hợp lệ", error });
   }
