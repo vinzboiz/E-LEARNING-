@@ -95,14 +95,6 @@ export default function AddCourseScreen() {
       return;
     }
 
-      // Hàm chuyển đổi DD/MM/YYYY -> YYYY-MM-DD
-    const convertDateToSQL = (dateStr: string) => {
-      const [day, month, year] = dateStr.split("/").map(Number);
-      // Sử dụng Date để tránh lỗi ngày
-      const dateObj = new Date(year, month - 1, day);
-      return dateObj.toISOString().split("T")[0]; // => YYYY-MM-DD
-    };
-
     try {
       const courseData = {
         subject_id: Number(subjectId),
@@ -111,10 +103,7 @@ export default function AddCourseScreen() {
         year: Number(year),
         price: Number(price),
         numofperiods: totalPeriods,
-        schedules: schedules.map((sch) => ({
-          ...sch,
-          date: convertDateToSQL(sch.date),
-        })),
+        schedules,
       };
 
       await CourseService.create(courseData);

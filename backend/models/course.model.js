@@ -127,9 +127,15 @@ async function updateCourse(courseId, data) {
 // XÓA KHÓA HỌC
 // ==========================
 async function deleteCourse(courseId) {
+  // Xóa tất cả lịch học liên quan
+  await db.query(`DELETE FROM courseschedule WHERE course_id = $1`, [courseId]);
+
+  // Sau đó xóa khóa học
   await db.query(`DELETE FROM course WHERE course_id = $1`, [courseId]);
+
   return { message: "Xóa thành công" };
 }
+
 
 // ==========================
 // LẤY KHÓA HỌC THEO GIẢNG VIÊN
