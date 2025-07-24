@@ -4,7 +4,11 @@ const assignmentModel = require("../models/assignment.model");
 exports.getAssignmentsByLesson = async (req, res) => {
   try {
     const lessonId = req.params.lessonId;
-    const assignments = await assignmentModel.getAssignmentsByLesson(req.user.id, lessonId);
+    const assignments = await assignmentModel.getAssignmentsByLesson(
+      req.user.id,
+      lessonId,
+      req.user.role
+    );
     res.json(assignments);
   } catch (err) {
     res.status(403).json({ error: err.message });
@@ -14,8 +18,13 @@ exports.getAssignmentsByLesson = async (req, res) => {
 // Lấy assignment theo ID
 exports.getAssignmentById = async (req, res) => {
   try {
-    const assignment = await assignmentModel.getAssignmentById(req.user.id, req.params.id);
-    if (!assignment) return res.status(404).json({ error: "Không tìm thấy assignment." });
+    const assignment = await assignmentModel.getAssignmentById(
+      req.user.id,
+      req.params.id,
+      req.user.role
+    );
+    if (!assignment)
+      return res.status(404).json({ error: "Không tìm thấy assignment." });
     res.json(assignment);
   } catch (err) {
     res.status(403).json({ error: err.message });
@@ -26,9 +35,15 @@ exports.getAssignmentById = async (req, res) => {
 exports.createAssignment = async (req, res) => {
   try {
     if (req.user.role !== 1 && req.user.role !== 3) {
-      return res.status(403).json({ error: "Bạn không có quyền thêm assignment." });
+      return res
+        .status(403)
+        .json({ error: "Bạn không có quyền thêm assignment." });
     }
-    const newAssignment = await assignmentModel.createAssignment(req.user.id, req.body);
+    const newAssignment = await assignmentModel.createAssignment(
+      req.user.id,
+      req.body,
+      req.user.role
+    );
     res.status(201).json(newAssignment);
   } catch (err) {
     res.status(403).json({ error: err.message });
@@ -39,9 +54,16 @@ exports.createAssignment = async (req, res) => {
 exports.updateAssignment = async (req, res) => {
   try {
     if (req.user.role !== 1 && req.user.role !== 3) {
-      return res.status(403).json({ error: "Bạn không có quyền cập nhật assignment." });
+      return res
+        .status(403)
+        .json({ error: "Bạn không có quyền cập nhật assignment." });
     }
-    const updated = await assignmentModel.updateAssignment(req.user.id, req.params.id, req.body);
+    const updated = await assignmentModel.updateAssignment(
+      req.user.id,
+      req.params.id,
+      req.body,
+      req.user.role
+    );
     res.json(updated);
   } catch (err) {
     res.status(403).json({ error: err.message });
@@ -52,9 +74,15 @@ exports.updateAssignment = async (req, res) => {
 exports.deleteAssignment = async (req, res) => {
   try {
     if (req.user.role !== 1 && req.user.role !== 3) {
-      return res.status(403).json({ error: "Bạn không có quyền xóa assignment." });
+      return res
+        .status(403)
+        .json({ error: "Bạn không có quyền xóa assignment." });
     }
-    const result = await assignmentModel.deleteAssignment(req.user.id, req.params.id);
+    const result = await assignmentModel.deleteAssignment(
+      req.user.id,
+      req.params.id,
+      req.user.role
+    );
     res.json(result);
   } catch (err) {
     res.status(403).json({ error: err.message });

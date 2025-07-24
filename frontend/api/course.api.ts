@@ -40,6 +40,11 @@ export const getCourseByIdStudentApi = (id: number) => {
   return api.get(`${API_URL}/student/${id}`);
 };
 
+// Lấy khóa học cho Student theo 3 điều kiện (mới)
+export const getCoursesForStudentApi = () => {
+  return api.get(`${API_URL}/student/courses`);
+};
+
 // ==================== TEACHER ====================
 // Lấy các khóa học được phân công (Teacher)
 export const getMyAssignedCoursesApi = () => {

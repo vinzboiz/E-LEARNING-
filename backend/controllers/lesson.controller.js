@@ -10,19 +10,13 @@ exports.getAllLessons = async (req, res) => {
       return res.status(400).json({ error: "Vui lòng cung cấp course_id." });
     }
 
-    // Admin có thể xem tất cả
-    if (role === 1) {
-      const lessons = await lessonModel.getAllLessons(userId, courseId);
-      return res.json(lessons);
+    const lessons = await lessonModel.getAllLessons(userId, courseId, role);
+    if (lessons?.message) {
+      // Không có quyền xem
+      return res.status(403).json({ message: lessons.message });
     }
 
-    // Giảng viên chỉ xem nếu là chủ của course
-    if (role === 3) {
-      const lessons = await lessonModel.getAllLessons(userId, courseId);
-      return res.json(lessons);
-    }
-
-    return res.status(403).json({ error: "Bạn không có quyền truy cập." });
+    return res.json(lessons);
   } catch (err) {
     console.error("❌ Lỗi getAllLessons:", err);
     res.status(500).json({ error: "Lỗi khi lấy danh sách bài học." });
@@ -35,27 +29,23 @@ exports.getLessonById = async (req, res) => {
     const { role, id: userId } = req.user;
     const lessonId = req.params.id;
 
-    // Admin hoặc giảng viên (nếu là chủ)
-    if (role === 1) {
-      const lesson = await lessonModel.getLessonById(userId, lessonId);
-      if (!lesson) return res.status(404).json({ error: "Không tìm thấy bài học." });
-      return res.json(lesson);
+    let lesson;
+    if (role === 1 || role === 3) {
+      lesson = await lessonModel.getLessonById(userId, lessonId, role);
+    } else if (role === 2) {
+      lesson = await lessonModel.getLessonByIdForStudent(userId, lessonId);
+    } else {
+      return res.status(403).json({ error: "Vai trò không hợp lệ." });
     }
 
-    if (role === 3) {
-      const lesson = await lessonModel.getLessonById(userId, lessonId);
-      if (!lesson) return res.status(403).json({ error: "Bạn không có quyền xem bài học này." });
-      return res.json(lesson);
+    if (!lesson) {
+      return res.status(404).json({ error: "Không tìm thấy bài học." });
+    }
+    if (lesson?.message) {
+      return res.status(403).json({ message: lesson.message });
     }
 
-    // Sinh viên
-    if (role === 2) {
-      const lesson = await lessonModel.getLessonByIdForStudent(userId, lessonId);
-      if (!lesson) return res.status(403).json({ error: "Bạn không có quyền xem bài học này." });
-      return res.json(lesson);
-    }
-
-    res.status(403).json({ error: "Vai trò không hợp lệ." });
+    return res.json(lesson);
   } catch (err) {
     console.error("❌ Lỗi getLessonById:", err);
     res.status(500).json({ error: "Lỗi khi lấy bài học." });
@@ -76,7 +66,7 @@ exports.getLessonsByStudent = async (req, res) => {
   }
 };
 
-// Thêm bài học (Admin hoặc Giảng viên nếu là chủ khóa học)
+// Thêm bài học (Admin hoặc Giảng viên)
 exports.createLesson = async (req, res) => {
   try {
     const { title, content, course_id } = req.body;
@@ -87,12 +77,10 @@ exports.createLesson = async (req, res) => {
       return res.status(403).json({ error: "Bạn không có quyền tạo bài học." });
     }
 
-    const newLesson = await lessonModel.createLesson(userId, {
-      title,
-      content,
-      file,
-      course_id,
-    });
+    const newLesson = await lessonModel.createLesson(userId, { title, content, file, course_id }, role);
+    if (newLesson?.message) {
+      return res.status(403).json({ message: newLesson.message });
+    }
 
     res.status(201).json(newLesson);
   } catch (error) {
@@ -101,7 +89,7 @@ exports.createLesson = async (req, res) => {
   }
 };
 
-// Cập nhật bài học (Admin hoặc Giảng viên nếu là chủ bài học)
+// Cập nhật bài học (Admin hoặc Giảng viên)
 exports.updateLesson = async (req, res) => {
   try {
     const lessonId = req.params.id;
@@ -109,40 +97,30 @@ exports.updateLesson = async (req, res) => {
     const { role, id: userId } = req.user;
     const file = req.file ? req.file.filename : null;
 
-    if (role === 1) {
-      const updated = await lessonModel.updateLesson(userId, lessonId, { title, content, file });
-      return res.json(updated);
+    const updated = await lessonModel.updateLesson(userId, lessonId, { title, content, file }, role);
+    if (updated?.message) {
+      return res.status(403).json({ message: updated.message });
     }
 
-    if (role === 3) {
-      const updated = await lessonModel.updateLesson(userId, lessonId, { title, content, file });
-      return res.json(updated);
-    }
-
-    res.status(403).json({ error: "Bạn không có quyền cập nhật bài học." });
+    return res.json(updated);
   } catch (err) {
     console.error("❌ Lỗi khi cập nhật bài học:", err);
     res.status(500).json({ error: err.message || "Lỗi khi cập nhật bài học." });
   }
 };
 
-// Xóa bài học (Admin hoặc Giảng viên nếu là chủ)
+// Xóa bài học (Admin hoặc Giảng viên)
 exports.deleteLesson = async (req, res) => {
   try {
     const lessonId = req.params.id;
     const { role, id: userId } = req.user;
 
-    if (role === 1) {
-      const result = await lessonModel.deleteLesson(userId, lessonId);
-      return res.json(result);
+    const result = await lessonModel.deleteLesson(userId, lessonId, role);
+    if (result?.message === "Bạn không có quyền xoá bài học này.") {
+      return res.status(403).json({ message: result.message });
     }
 
-    if (role === 3) {
-      const result = await lessonModel.deleteLesson(userId, lessonId);
-      return res.json(result);
-    }
-
-    res.status(403).json({ error: "Bạn không có quyền xoá bài học." });
+    return res.json(result);
   } catch (err) {
     console.error("❌ Lỗi khi xoá bài học:", err);
     res.status(500).json({ error: err.message || "Lỗi khi xoá bài học." });

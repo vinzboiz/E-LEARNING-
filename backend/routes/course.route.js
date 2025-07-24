@@ -16,10 +16,12 @@ router.get("/admin/:id", checkRole(1), controller.findById);            // Xem c
 
 // ==================== SINH VIÊN (role = 2) ====================
 router.get("/student/all", checkRole(2), controller.findAll);           // Xem tất cả
+router.get("/student/courses", checkRole(2), controller.getCoursesForStudent);
 router.get("/student/:id", checkRole(2), controller.findById);          // Xem chi tiết
 
 // ==================== GIẢNG VIÊN (role = 3) ====================
 router.get("/teacher/my-courses", checkRole(3), controller.getMyAssignedCourses); // Xem các môn được phân công
 router.get("/teacher/course/:id", checkRole(3), controller.findById);            // Xem chi tiết môn mình dạy
+
 
 module.exports = router;

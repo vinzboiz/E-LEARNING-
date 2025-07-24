@@ -77,28 +77,31 @@ async function deleteSubmission(userId, id) {
 // Lấy tất cả Submission của 1 Assignment (Admin/Giảng viên)
 async function getSubmissionsByAssignment(assignmentId) {
   const result = await db.query(
-    `SELECT * FROM submission WHERE assignment_id = $1 ORDER BY submitted_at DESC`,
+    `SELECT s.*, u.name AS student_name
+     FROM submission s
+     JOIN "users" u ON s.user_id = u.user_id
+     WHERE s.assignment_id = $1
+     ORDER BY s.submitted_at DESC`,
     [assignmentId]
   );
   return result.rows;
 }
 
+
 // Lấy Submission theo ID (ẩn thông tin nếu là sinh viên)
 async function getSubmissionById(userId, role, id) {
-  const result = await db.query(`SELECT * FROM submission WHERE submission_id = $1`, [id]);
+  const result = await db.query(
+    `SELECT s.*, u.name AS student_name
+     FROM submission s
+     JOIN "users" u ON s.user_id = u.user_id
+     WHERE s.submission_id = $1`,
+    [id]
+  );
   if (result.rowCount === 0) return null;
-
   const submission = result.rows[0];
   if (role === 2 && submission.user_id !== userId) {
     throw new Error("Bạn không có quyền xem bài nộp này.");
   }
-
-  // Nếu là sinh viên và chưa chấm thì hiển thị "Chưa chấm", "Chưa nhận xét"
-  if (role === 2) {
-    if (submission.score === null) submission.score = "Chưa chấm";
-    if (!submission.feedback) submission.feedback = "Chưa nhận xét";
-  }
-
   return submission;
 }
 

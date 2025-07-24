@@ -46,10 +46,17 @@ export default function CourseListScreen() {
     if (!roleId) return;
     setLoading(true);
     try {
-      let data = [];
-      if (roleId === 1) data = await CourseService.getAllAdmin();
-      else if (roleId === 2) data = await CourseService.getAllStudent();
-      else if (roleId === 3) data = await CourseService.getMyCoursesTeacher();
+      let data: any[] = [];
+      if (roleId === 1) {
+        // ADMIN
+        data = await CourseService.getAllAdmin();
+      } else if (roleId === 2) {
+        // STUDENT - sử dụng hàm mới theo 3 điều kiện
+        data = await CourseService.getCoursesForStudent();
+      } else if (roleId === 3) {
+        // TEACHER
+        data = await CourseService.getMyCoursesTeacher();
+      }
       setCourses(data);
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Lấy danh sách khóa học thất bại.");

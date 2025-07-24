@@ -6,6 +6,7 @@ import {
   deleteCourseApi,
   getAllCoursesStudentApi,
   getCourseByIdStudentApi,
+  getCoursesForStudentApi,
   getMyAssignedCoursesApi,
   getCourseByIdTeacherApi,
 } from "../api/course.api";
@@ -82,6 +83,25 @@ export const CourseService = {
       throw new Error(error.response?.data?.error || "Lấy chi tiết khóa học (Student) thất bại");
     }
   },
+
+   // **Hàm mới**
+ getCoursesForStudent: async () => {
+  try {
+    console.log("DEBUG: Gọi API getCoursesForStudent"); // log gọi API
+    const response = await getCoursesForStudentApi();
+    console.log("DEBUG: Response từ API:", response.data);
+    return response.data;
+  } catch (error: any) {
+    console.log(
+      "Error getCoursesForStudent:",
+      error.response?.data || error.message
+    );
+    throw new Error(
+      error.response?.data?.error || "Lấy danh sách khóa học (Student) thất bại"
+    );
+  }
+},
+
 
   // ==================== TEACHER ====================
   getMyCoursesTeacher: async () => {

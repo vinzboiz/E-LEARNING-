@@ -82,3 +82,23 @@ exports.getMyAssignedCourses = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// Lấy danh sách khóa học cho sinh viên
+exports.getCoursesForStudent = async (req, res) => {
+  try {
+    console.log("DEBUG Controller: req.user =", req.user);
+
+    const userId = req.user?.id;
+    console.log("DEBUG Controller: userId =", userId);
+
+    if (!userId) {
+      return res.status(400).json({ message: "Không tìm thấy userId từ token" });
+    }
+
+    const courses = await Course.getCoursesForStudent(userId);
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error("Error getCoursesForStudent:", error);
+    res.status(500).json({ error: error.message });
+  }
+};

@@ -152,11 +152,81 @@ async function getCoursesByLecturer(userId) {
   return result.rows;
 }
 
+async function getCoursesForStudent(userId) {
+  console.log("DEBUG Model: userId =", userId, "typeof =", typeof userId);
+  if (!userId) {
+    throw new Error("userId không hợp lệ");
+  }
+
+  const now = new Date();
+  console.log("DEBUG Model: now =", now);
+
+  // 1. Kiểm tra nếu đang trong thời gian đăng ký
+  const checkReg = await db.query(
+    `SELECT COUNT(*) AS total
+     FROM RegisterCourse
+     WHERE $1 BETWEEN begin_register AND end_register`,
+    [now]
+  );
+  console.log("DEBUG Model: checkReg =", checkReg.rows[0]);
+
+  if (Number(checkReg.rows[0].total) > 0) {
+    console.log("DEBUG Model: Đang trong thời gian đăng ký");
+    const allCourses = await db.query(
+      `SELECT c.course_id, c.semester, c.year, c.price, s.name AS subject_name
+       FROM Course c
+       JOIN Subject s ON c.subject_id = s.subject_id
+       ORDER BY c.course_id DESC`
+    );
+    return allCourses.rows;
+  }
+
+  // 2. Nếu đang trong hạn đóng học phí
+  const checkPaymentPeriod = await db.query(
+    `SELECT COUNT(*) AS total
+     FROM RegisterCourse
+     WHERE user_id = $1 AND $2 BETWEEN due_date_start AND due_date_end`,
+    [userId, now]
+  );
+  console.log("DEBUG Model: checkPaymentPeriod =", checkPaymentPeriod.rows[0]);
+
+  if (Number(checkPaymentPeriod.rows[0].total) > 0) {
+    console.log("DEBUG Model: Trong hạn đóng học phí");
+    const regCourses = await db.query(
+      `SELECT c.course_id, c.semester, c.year, c.price, rc.status, s.name AS subject_name
+       FROM RegisterCourse rc
+       JOIN ClassMember cm ON rc.register_id = cm.register_id
+       JOIN Course c ON cm.course_id = c.course_id
+       JOIN Subject s ON c.subject_id = s.subject_id
+       WHERE rc.user_id = $1
+       ORDER BY c.course_id DESC`,
+      [userId]
+    );
+    return regCourses.rows;
+  }
+
+  // 3. Nếu hết hạn đóng học phí
+  console.log("DEBUG Model: Hết hạn đóng học phí -> chỉ xem đã thanh toán");
+  const paidCourses = await db.query(
+    `SELECT c.course_id, c.semester, c.year, c.price, rc.status, s.name AS subject_name
+     FROM RegisterCourse rc
+     JOIN ClassMember cm ON rc.register_id = cm.register_id
+     JOIN Course c ON cm.course_id = c.course_id
+     JOIN Subject s ON c.subject_id = s.subject_id
+     WHERE rc.user_id = $1 AND rc.status = 'đã thanh toán'
+     ORDER BY c.course_id DESC`,
+    [userId]
+  );
+
+  return paidCourses.rows;
+}
+
 module.exports = {
   createCourse,
   getAllCourses,
   getCourseById,
   updateCourse,
   deleteCourse,
-  getCoursesByLecturer
+  getCoursesByLecturer,
+  getCoursesForStudent
 };
