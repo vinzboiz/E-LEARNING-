@@ -42,32 +42,39 @@ export default function AssignmentDetailScreen() {
   const [assignmentDetail, setAssignmentDetail] = useState<any>(assignment);
 
   const fetchData = async () => {
-    if (!assignment || !assignment.assignment_id) {
-      Alert.alert("Lỗi", "Không có thông tin bài tập.");
-      return;
-    }
+  if (!assignment || !assignment.assignment_id) {
+    Alert.alert("Lỗi", "Không có thông tin bài tập.");
+    return;
+  }
 
-    setLoading(true);
-    try {
-      const user = await AuthService.getMe();
-      setRoleId(user.role_id);
+  setLoading(true);
+  try {
+    const user = await AuthService.getMe();
+    setRoleId(user.role_id);
 
-      const detail = await AssignmentService.getAssignmentById(
-        assignment.assignment_id
-      );
-      setAssignmentDetail(detail);
+    const detail = await AssignmentService.getAssignmentById(
+      assignment.assignment_id
+    );
+    setAssignmentDetail(detail);
 
+    // Chỉ admin/giảng viên mới gọi API danh sách bài nộp
+    if (user.role_id !== 2) {
       const res = await SubmissionService.getSubmissionsByAssignment(
         assignment.assignment_id
       );
       console.log("[DEBUG] Submissions:", res);
       setSubmissions(res);
-    } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Không thể tải chi tiết bài tập.");
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error: any) {
+    // Không báo lỗi nếu là lỗi 403 cho sinh viên
+    if (error.message && !error.message.includes("quyền")) {
+      Alert.alert("Lỗi", error.message || "Không thể tải chi tiết bài tập.");
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchData();
@@ -133,16 +140,17 @@ export default function AssignmentDetailScreen() {
           </Text>
 
           {/* Nút nộp bài (student) */}
-          {roleId === 2 && (
-            <View style={{ marginTop: 15 }}>
-              <Button
-                title="Nộp bài tập"
-                onPress={() =>
-                  navigation.navigate("SubmitAssignmentScreen", { assignment })
-                }
-              />
-            </View>
-          )}
+          {roleId === 2 && assignmentDetail?.status !== "đã hết hạn" && (
+  <View style={{ marginTop: 15 }}>
+    <Button
+      title="Nộp bài tập"
+      onPress={() =>
+        navigation.navigate("SubmitAssignmentScreen", { assignment })
+      }
+    />
+  </View>
+)}
+
 
           {/* Tiêu đề danh sách nộp bài */}
           {roleId !== 2 && (

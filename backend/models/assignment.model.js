@@ -130,6 +130,17 @@ async function canUserViewAssignment(userId, assignmentId) {
   return result.rowCount > 0;
 }
 
+async function getSubmissionByUser(assignmentId, userId) {
+  const result = await db.query(
+    `SELECT s.*, u.name AS student_name
+     FROM submission s
+     JOIN users u ON s.user_id = u.user_id
+     WHERE s.assignment_id = $1 AND s.user_id = $2`,
+    [assignmentId, userId]
+  );
+  return result.rows[0];
+}
+
 module.exports = {
   createAssignment,
   updateAssignment,
@@ -137,5 +148,6 @@ module.exports = {
   getAssignmentsByLesson,
   getAssignmentById,
   canUserViewAssignment,
-  cronUpdateAssignments
+  cronUpdateAssignments,
+  getSubmissionByUser
 };

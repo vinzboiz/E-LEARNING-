@@ -86,67 +86,79 @@ export default function AssignmentListScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Danh sách bài tập - Lesson ID: {lessonId}</Text>
+  <View style={styles.container}>
+    <Text style={styles.title}>Danh sách bài tập - Lesson ID: {lessonId}</Text>
 
-      {/* Chỉ admin (role 1) hoặc giảng viên (role 3) mới thấy nút Thêm */}
-      {(roleId === 1 || roleId === 3) && (
+    {/* Nút "Xem bài đã nộp" cho sinh viên */}
+    {roleId === 2 && (
+      <View style={{ marginBottom: 10 }}>
         <Button
-          title="Thêm bài tập"
-          onPress={() => navigation.navigate("AddAssignmentScreen", { lessonId })}
+          title="Xem bài đã nộp"
+          color="#5B3FFF"
+          onPress={() => navigation.navigate("SubmittedAssignments")}
         />
-      )}
+      </View>
+    )}
 
-      {assignments.length === 0 ? (
-        <Text style={{ marginTop: 20, textAlign: "center", color: "#555" }}>
-          Không có bài tập nào cho bài học này.
-        </Text>
-      ) : (
-        <FlatList
-          data={assignments}
-          keyExtractor={(item) => item.assignment_id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.assignmentItem}>
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("AssignmentDetail", { assignment: item })
-                }
-              >
-                <Text style={styles.assignmentTitle}>{item.title}</Text>
-                <Text style={styles.assignmentDetail}>
-                  Hạn nộp: {item.due_date_end || "Không có thông tin"}
-                </Text>
-                <Text style={styles.assignmentDetail}>
-                  Trạng thái: {item.status || "Không xác định"}
-                </Text>
-              </TouchableOpacity>
+    {/* Chỉ admin (role 1) hoặc giảng viên (role 3) mới thấy nút Thêm */}
+    {(roleId === 1 || roleId === 3) && (
+      <Button
+        title="Thêm bài tập"
+        onPress={() => navigation.navigate("AddAssignmentScreen", { lessonId })}
+      />
+    )}
 
-              {/* Chỉ admin hoặc giảng viên mới thấy nút Sửa và Xóa */}
-              {(roleId === 1 || roleId === 3) && (
-                <View style={styles.actionRow}>
-                  <Button
-                    title="Sửa"
-                    color="orange"
-                    onPress={() =>
-                      navigation.navigate("EditAssignmentScreen", {
-                        assignmentId: item.assignment_id, // chỉ gửi ID
-                      })
-                    }
-                  />
+    {assignments.length === 0 ? (
+      <Text style={{ marginTop: 20, textAlign: "center", color: "#555" }}>
+        Không có bài tập nào cho bài học này.
+      </Text>
+    ) : (
+      <FlatList
+        data={assignments}
+        keyExtractor={(item) => item.assignment_id.toString()}
+        renderItem={({ item }) => (
+          <View style={styles.assignmentItem}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("AssignmentDetail", { assignment: item })
+              }
+            >
+              <Text style={styles.assignmentTitle}>{item.title}</Text>
+              <Text style={styles.assignmentDetail}>
+                Hạn nộp: {item.due_date_end || "Không có thông tin"}
+              </Text>
+              <Text style={styles.assignmentDetail}>
+                Trạng thái: {item.status || "Không xác định"}
+              </Text>
+            </TouchableOpacity>
 
-                  <Button
-                    title="Xóa"
-                    color="red"
-                    onPress={() => handleDelete(item.assignment_id)}
-                  />
-                </View>
-              )}
-            </View>
-          )}
-        />
-      )}
-    </View>
-  );
+            {/* Chỉ admin hoặc giảng viên mới thấy nút Sửa và Xóa */}
+            {(roleId === 1 || roleId === 3) && (
+              <View style={styles.actionRow}>
+                <Button
+                  title="Sửa"
+                  color="orange"
+                  onPress={() =>
+                    navigation.navigate("EditAssignmentScreen", {
+                      assignmentId: item.assignment_id, // chỉ gửi ID
+                    })
+                  }
+                />
+
+                <Button
+                  title="Xóa"
+                  color="red"
+                  onPress={() => handleDelete(item.assignment_id)}
+                />
+              </View>
+            )}
+          </View>
+        )}
+      />
+    )}
+  </View>
+);
+
 
   // Xóa bài tập
   async function handleDelete(id: number) {

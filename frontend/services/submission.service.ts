@@ -91,4 +91,20 @@ export const SubmissionService = {
       throw new Error(err.response?.data?.error || "Không thể chấm điểm bài nộp.");
     }
   },
+
+  async getSubmissionsByUser() {
+  try {
+    console.log("[Service] Fetching submissions of current user...");
+    const res = await SubmissionAPI.getSubmissionsByUser();
+
+    if (res.data.message) {
+      // Trường hợp không có bài nộp
+      return [];
+    }
+    return res.data;
+  } catch (err: any) {
+    console.error("Error fetching submissions by user:", err.response?.data || err);
+    throw new Error(err.response?.data?.error || "Không thể lấy danh sách bài nộp của sinh viên.");
+  }
+}
 };

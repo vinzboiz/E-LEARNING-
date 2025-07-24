@@ -11,22 +11,33 @@ async function createAll(begin_register, end_register, year, semester) {
   // Lấy danh sách tất cả user (sinh viên)
   const users = await db.query(`SELECT user_id FROM "users"`);
 
-  for (const user of users.rows) {
-    await db.query(
-      `INSERT INTO registercourse 
-        (user_id, create_at, begin_register, end_register, tuition, status, due_date_start, due_date_end, year, semester)
-       VALUES ($1, CURRENT_TIMESTAMP, $2, $3, 0, 'đang chờ xử lý', $4, $5, $6, $7)`,
-      [user.user_id, begin_register, end_register, due_start, due_end, year, semester]
+    for (const user of users.rows) {
+    const check = await db.query(
+      `SELECT 1 FROM registercourse 
+      WHERE user_id = $1 AND year = $2 AND semester = $3`,
+      [user.user_id, year, semester]
     );
+    const formatDate = (date) => new Date(date).toISOString().split("T")[0];
+    if (check.rowCount === 0) {
+      await db.query(
+        `INSERT INTO registercourse 
+          (user_id, create_at, begin_register, end_register, tuition, status, due_date_start, due_date_end, year, semester)
+        VALUES ($1, CURRENT_TIMESTAMP, $2, $3, 0, 'đang chờ xử lý', $4, $5, $6, $7)`,
+        [user.user_id, formatDate(begin_register), formatDate(end_register), formatDate(due_start), formatDate(due_end), year, semester]
+      );
+    }
   }
-
   return { message: "Đã tạo thành công đăng ký học phần cho toàn bộ user." };
 }
 
 // Sinh viên: Xem thông tin đăng ký học phần của chính mình
 async function getRegisterCourseByUser(userId) {
   const res = await db.query(
-    `SELECT * FROM registercourse WHERE user_id = $1 ORDER BY create_at DESC LIMIT 1`,
+    `SELECT r.*, u.name AS user_name, u.email
+     FROM registercourse r
+     JOIN users u ON r.user_id = u.user_id
+     WHERE r.user_id = $1
+     ORDER BY r.create_at DESC LIMIT 1`,
     [userId]
   );
   return res.rows;
@@ -34,7 +45,12 @@ async function getRegisterCourseByUser(userId) {
 
 // ADMIN: Xem tất cả các bản ghi đăng ký học phần
 async function getAllRegisterCourses() {
-  const res = await db.query(`SELECT * FROM registercourse ORDER BY create_at DESC`);
+  const res = await db.query(`
+    SELECT r.*, u.name AS user_name, u.email
+    FROM registercourse r
+    JOIN users u ON r.user_id = u.user_id
+    ORDER BY r.create_at DESC
+  `);
   return res.rows;
 }
 

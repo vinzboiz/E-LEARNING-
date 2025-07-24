@@ -7,27 +7,30 @@ import { AuthService } from "../../services/auth.service";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
+  const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
 
   const navigation = useNavigation<NavigationProp>();
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert("Thông báo", "Vui lòng nhập email và mật khẩu");
+  const handleSendOTP = async () => {
+    if (!name || !email || !password) {
+      Alert.alert("Thông báo", "Vui lòng nhập đầy đủ tên, email và mật khẩu");
       return;
     }
 
     try {
       setLoading(true);
-      const res = await AuthService.login(email, password);
-      Alert.alert("Thành công", res.message || "Đăng nhập thành công");
-      navigation.navigate("Main"); // Chuyển sang màn hình Main (BottomTab)
+      const res = await AuthService.sendOTP(name, email, password);
+      Alert.alert("Thông báo", res.message || "OTP đã được gửi tới email");
+      
+      // Chuyển sang màn hình OTP để xác thực
+      navigation.navigate("OTP", { name, email, password });
     } catch (error: any) {
-      console.log("Login error:", error.response?.data || error.message || error);
-      Alert.alert("Lỗi", error.response?.data?.message || "Đăng nhập thất bại");
+      console.log("Send OTP error:", error.response?.data || error.message || error);
+      Alert.alert("Lỗi", error.response?.data?.message || "Không thể gửi OTP");
     } finally {
       setLoading(false);
     }
@@ -35,7 +38,13 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Đăng Nhập</Text>
+      <Text style={styles.title}>Đăng Ký</Text>
+      <TextInput
+        placeholder="Tên đầy đủ"
+        style={styles.input}
+        value={name}
+        onChangeText={setName}
+      />
       <TextInput
         placeholder="Email"
         style={styles.input}
@@ -52,8 +61,8 @@ export default function LoginScreen() {
         onChangeText={setPassword}
       />
       <Button
-        title={loading ? "Đang đăng nhập..." : "Đăng nhập"}
-        onPress={handleLogin}
+        title={loading ? "Đang gửi OTP..." : "Đăng ký"}
+        onPress={handleSendOTP}
         disabled={loading}
       />
     </View>

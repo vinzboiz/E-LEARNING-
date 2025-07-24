@@ -10,6 +10,6 @@ router.get("/", authMiddleware, checkRole(1), controller.getAllRegisterCourses);
 router.put("/update-time", authMiddleware, checkRole(1), controller.updateRegisterTime);
 
 // Sinh viên (role = 2): xem thông tin đăng ký của chính mình
-router.get("/me", authMiddleware, checkRole(2), controller.getMyRegisterCourses);
+router.get("/me", authMiddleware, checkRole(1,2), controller.getMyRegisterCourses);
 
 module.exports = router;

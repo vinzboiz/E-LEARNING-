@@ -139,11 +139,39 @@ async function gradeSubmission(userId, role, submissionId, data) {
   return result.rows[0];
 }
 
+async function getSubmissionOfStudent(assignmentId, userId) {
+  const result = await db.query(
+    `SELECT s.*, u.name AS student_name
+     FROM submission s
+     JOIN users u ON u.user_id = s.user_id
+     WHERE s.assignment_id = $1 AND s.user_id = $2
+     ORDER BY s.submitted_at DESC`,
+    [assignmentId, userId]
+  );
+  return result.rows;
+}
+
+// Lấy tất cả bài nộp của 1 user
+async function getSubmissionsByUser(userId) {
+  const query = `
+    SELECT s.submission_id, s.assignment_id, a.title as assignment_title, 
+           s.submitted_at, s.score, s.feedback
+    FROM submission s
+    JOIN assignment a ON s.assignment_id = a.assignment_id
+    WHERE s.user_id = $1
+    ORDER BY s.submitted_at DESC;
+  `;
+  const result = await db.query(query, [userId]);
+  return result.rows;
+}
+
 module.exports = {
   createSubmission,
   updateSubmission,
   deleteSubmission,
   getSubmissionsByAssignment,
   getSubmissionById,
-  gradeSubmission
+  gradeSubmission,
+  getSubmissionOfStudent,
+  getSubmissionsByUser
 };

@@ -33,6 +33,9 @@ import StudentRegisteredCoursesScreen from "../screens/ClassMember/StudentRegist
 import StudentRegisteredCoursesDetailScreen from "../screens/ClassMember/StudentRegisteredCoursesDetailScreen";
 import EditAssignmentScreen from "../screens/Assignment/EditAssignmentScreen";
 import StudentCheckoutScreen from "../screens/Checkout/StudentCheckoutScreen";
+import SubmittedAssignmentsScreen from "../screens/Submission/SubmittedAssignmentsScreen";
+import SubmittedAssignmentDetailScreen from "../screens/Submission/SubmittedAssignmentDetailScreen";
+import { Submission } from "../screens/Submission/SubmittedAssignmentsScreen";
 
 export type RootStackParamList = {
   Main: undefined;
@@ -59,7 +62,7 @@ export type RootStackParamList = {
   AddRegistration: undefined;
   EditRegistration: { registration: any };
   CheckoutList: { courseId: number };
-  RegisterCourseDetail: { registerCourse: any };
+  RegisterCourseDetail: { courseId: number };
   AddAssignmentScreen: { lessonId: number };
   SubmitAssignmentScreen: { assignment: any };
   GradeSubmissionScreen: { submission: any };
@@ -68,6 +71,8 @@ export type RootStackParamList = {
   StudentRegisterCourseDetail: { course: any };
   EditAssignmentScreen: { assignmentId: number };
   StudentCheckout: undefined;
+  SubmittedAssignments: undefined;
+  SubmittedAssignmentDetail: { submission: Submission };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -152,6 +157,8 @@ export default function AppNavigator() {
       />
 
       <Stack.Screen name="StudentCheckout" component={StudentCheckoutScreen} />
+      <Stack.Screen name="SubmittedAssignments" component={SubmittedAssignmentsScreen} />
+      <Stack.Screen name="SubmittedAssignmentDetail" component={SubmittedAssignmentDetailScreen} />
     </Stack.Navigator>
   );
 }

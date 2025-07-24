@@ -1,3 +1,4 @@
+import axios from "axios";
 import api from "./axiosInstance"; // axiosInstance đã có baseURL
 
 const API_URL = "/api/submission";
@@ -52,4 +53,10 @@ export const gradeSubmission = (
 ) => {
   console.log(`[API] PUT ${API_URL}/${id}/grade`, data);
   return api.put(`${API_URL}/${id}/grade`, data);
+};
+
+// Lấy tất cả bài nộp của chính user (sinh viên)
+export const getSubmissionsByUser = () => {
+  console.log(`[API] GET ${API_URL}/my`);
+  return api.get(`${API_URL}/my`);
 };

@@ -10,6 +10,9 @@ router.use(authMiddleware);
 // Lấy tất cả submission của 1 assignment (Admin/Giảng viên)
 router.get("/assignment/:assignmentId", checkRole(1, 3), controller.getSubmissionsByAssignment);
 
+// Sinh viên xem tất cả bài nộp của mình
+router.get("/my", checkRole(2), controller.getMySubmissions);
+
 // Lấy submission theo ID (Admin/Giảng viên/Sinh viên - kiểm tra quyền trong model)
 router.get("/:id", checkRole(1, 2, 3), controller.getSubmissionById);
 

@@ -65,17 +65,26 @@ exports.deleteSubmission = async (req, res) => {
 // Lấy tất cả Submission của 1 Assignment
 exports.getSubmissionsByAssignment = async (req, res) => {
   try {
-    if (req.user.role === 2) {
-      // Sinh viên không được xem tất cả bài nộp của người khác
-      return res.status(403).json({ error: "Sinh viên không được xem tất cả bài nộp." });
+    const { assignmentId } = req.params;
+    const userId = req.user.id;
+    const role = req.user.role;
+
+    let submissions;
+
+    if (role === 2) {
+      // Sinh viên: chỉ xem bài nộp của chính họ
+      submissions = await submissionModel.getSubmissionOfStudent(assignmentId, userId);
+    } else {
+      // Admin/Giảng viên: xem tất cả
+      submissions = await submissionModel.getSubmissionsByAssignment(assignmentId);
     }
 
-    const submissions = await submissionModel.getSubmissionsByAssignment(req.params.assignmentId);
     res.json(submissions);
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
+
 
 // Lấy Submission theo ID
 exports.getSubmissionById = async (req, res) => {
@@ -112,3 +121,21 @@ exports.gradeSubmission = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+// Lấy tất cả Submission của 1 User (Sinh viên)
+exports.getMySubmissions = async (req, res) => {
+  try {
+    const userId = req.user.id; // Lấy userId từ token
+    const submissions = await submissionModel.getSubmissionsByUser(userId);
+
+    if (!submissions || submissions.length === 0) {
+      return res.status(200).json({ message: "Không có bài nộp nào." });
+    }
+
+    res.json(submissions);
+  } catch (err) {
+    console.error("[getMySubmissions] Error:", err.message);
+    res.status(500).json({ error: "Lỗi server khi lấy danh sách bài nộp." });
+  }
+};
+

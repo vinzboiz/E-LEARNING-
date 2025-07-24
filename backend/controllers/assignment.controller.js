@@ -88,3 +88,24 @@ exports.deleteAssignment = async (req, res) => {
     res.status(403).json({ error: err.message });
   }
 };
+
+exports.getSubmissionsByAssignment = async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+
+    // Nếu là sinh viên (role 2) thì chỉ trả về bài của chính họ
+    if (req.user.role === 2) {
+      const mySubmission = await submissionModel.getSubmissionByUser(
+        assignmentId,
+        req.user.id
+      );
+      return res.json(mySubmission ? [mySubmission] : []);
+    }
+
+    // Admin hoặc giảng viên xem toàn bộ
+    const submissions = await submissionModel.getSubmissionsByAssignment(assignmentId);
+    res.json(submissions);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
