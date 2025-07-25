@@ -87,3 +87,12 @@ exports.getAllClassMembers = async (req, res) => {
   }
 };
 
+exports.getPaidClassMembers = async (req, res) => {
+  try {
+    const result = await ClassMember.getPaidClassMembers();
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("[Controller] Error getPaidClassMembers:", err);
+    res.status(500).json({ message: "Lỗi server khi lấy danh sách đã thanh toán." });
+  }
+};

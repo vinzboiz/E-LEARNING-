@@ -97,13 +97,17 @@ exports.updateUser = async (req, res) => {
 // Xóa người dùng
 exports.deleteUser = async (req, res) => {
   try {
+    console.log("Deleting user with ID:", req.params.id);
     const deleted = await userModel.deleteUser(req.params.id);
     if (!deleted) {
-      return res.status(404).json({ error: "User not found or already deleted" });
+      return res
+        .status(404)
+        .json({ error: "User not found or already deleted" });
     }
     res.json({ message: "User deleted successfully", user: deleted });
   } catch (error) {
-    res.status(500).json({ error: "Failed to delete user" });
+    console.error("Error deleteUser:", error.message);
+    res.status(500).json({ error: error.message || "Failed to delete user" });
   }
 };
 

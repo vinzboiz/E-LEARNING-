@@ -8,22 +8,18 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { useRoute, useNavigation } from "@react-navigation/native";
-import { RegisterCourseService } from "../../services/registercourse.service";
+import { useNavigation } from "@react-navigation/native";
 
 export default function EditRegistrationScreen() {
-  const route = useRoute<any>();
   const navigation = useNavigation();
-  const { registration } = route.params;
 
-  const [beginRegister, setBeginRegister] = useState(
-    registration.begin_register
-  );
-  const [endRegister, setEndRegister] = useState(registration.end_register);
-  const [dueStart, setDueStart] = useState(registration.due_date_start);
-  const [dueEnd, setDueEnd] = useState(registration.due_date_end);
+  // Dữ liệu ảo (mock data)
+  const [beginRegister, setBeginRegister] = useState("2025-08-01");
+  const [endRegister, setEndRegister] = useState("2025-08-15");
+  const [dueStart, setDueStart] = useState("2025-08-20");
+  const [dueEnd, setDueEnd] = useState("2025-09-01");
 
-  // Hàm xử lý cập nhật thời gian
+  // Hàm xử lý cập nhật
   const handleSave = async () => {
     if (!beginRegister || !endRegister || !dueStart || !dueEnd) {
       Alert.alert("Thông báo", "Vui lòng nhập đầy đủ thông tin.");
@@ -31,15 +27,11 @@ export default function EditRegistrationScreen() {
     }
 
     try {
-      const data = {
-        begin: registration.begin_register,
-        end: registration.end_register,
-        newBegin: beginRegister,
-        newEnd: endRegister,
-      };
-
-      const result = await RegisterCourseService.updateRegisterTime(data);
-      Alert.alert("Thành công", result.message || "Cập nhật thành công.");
+      // Ở đây chỉ giả lập việc lưu
+      Alert.alert(
+        "Thành công",
+        `Cập nhật thời gian từ ${beginRegister} đến ${endRegister}`
+      );
       navigation.goBack();
     } catch (err: any) {
       Alert.alert("Lỗi", err.message || "Không thể cập nhật thời gian.");
@@ -72,7 +64,7 @@ export default function EditRegistrationScreen() {
         style={styles.input}
         value={dueStart}
         onChangeText={setDueStart}
-        editable={false} // không chỉnh sửa trực tiếp vì BE tự tính
+        editable={false}
       />
 
       <Text style={styles.label}>Ngày kết thúc đóng học phí</Text>
@@ -81,7 +73,7 @@ export default function EditRegistrationScreen() {
         style={styles.input}
         value={dueEnd}
         onChangeText={setDueEnd}
-        editable={false} // không chỉnh sửa trực tiếp vì BE tự tính
+        editable={false}
       />
 
       <Button title="Lưu thay đổi" onPress={handleSave} />

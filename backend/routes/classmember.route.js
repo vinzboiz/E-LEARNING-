@@ -11,6 +11,7 @@ router.post("/", authMiddleware, checkRole(2), controller.addCourseToClassMember
 router.delete("/", authMiddleware, checkRole(2), controller.removeCourseFromClassMember);
 router.post("/save", authMiddleware, checkRole(2), controller.saveRegisterCourses);
 router.post("/pay", authMiddleware, checkRole(2), controller.payTuition); // ✅ Đóng học phí
+router.get("/paid", authMiddleware, controller.getPaidClassMembers);
 
 // Admin (role = 1) – xem toàn bộ giỏ môn học của tất cả sinh viên
 router.get("/admin/all", authMiddleware, checkRole(1), controller.getAllClassMembers);

@@ -66,8 +66,19 @@ async function updateUser(id, data) {
 
 // Xóa người dùng
 async function deleteUser(id) {
-  const res = await db.query("DELETE FROM users WHERE user_id = $1 RETURNING *", [id]);
-  return res.rows[0];
+  try {
+    const res = await db.query(
+      "DELETE FROM users WHERE user_id = $1 RETURNING *",
+      [id]
+    );
+    if (res.rowCount > 0) {
+      return res.rows[0]; // trả về user vừa xóa
+    }
+    return null; // không tìm thấy user
+  } catch (err) {
+    console.error("Error in deleteUser model:", err.message);
+    throw err;
+  }
 }
 
 // Lấy danh sách giảng viên (role_id = 3)

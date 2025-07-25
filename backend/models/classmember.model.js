@@ -400,6 +400,39 @@ async function getAllClassMembers() {
   };
 }
 
+// Admin: lấy toàn bộ danh sách classmember đã thanh toán
+async function getPaidClassMembers() {
+  const result = await db.query(
+    `SELECT 
+       u.user_id,
+       u.name AS user_name,
+       c.course_id,
+       s.name AS subject_name,
+       c.price,
+       rc.status,
+       rc.due_date_end
+     FROM classmember cm
+     JOIN users u ON cm.user_id = u.user_id
+     JOIN course c ON cm.course_id = c.course_id
+     JOIN subject s ON c.subject_id = s.subject_id
+     JOIN registercourse rc ON cm.user_id = rc.user_id
+     WHERE rc.status = 'đã thanh toán'
+     ORDER BY u.user_id, cm.joined_at DESC`
+  );
+
+  if (result.rows.length === 0) {
+    return {
+      message: "Hiện chưa có sinh viên nào đã thanh toán.",
+      data: []
+    };
+  }
+
+  return {
+    message: "Lấy danh sách đã thanh toán thành công.",
+    data: result.rows
+  };
+}
+
 
 module.exports = {
   addClassMember,
@@ -409,4 +442,5 @@ module.exports = {
   saveRegisterCourse,
   payTuition,
   getAllClassMembers,
+  getPaidClassMembers,
 };

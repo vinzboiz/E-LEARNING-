@@ -3,10 +3,10 @@ import {
   View,
   Text,
   FlatList,
-  Button,
   StyleSheet,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -30,8 +30,8 @@ interface RegisterCourse {
   year: number;
   course_id: number;
   user_id: number;
-  user_name: string;  // từ BE
-  email: string;      // từ BE
+  user_name: string; // từ BE
+  email: string; // từ BE
 }
 
 const formatDate = (dateString: string) => {
@@ -44,47 +44,33 @@ export default function RegistrationListScreen() {
   const [registerCourses, setRegisterCourses] = useState<RegisterCourse[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Hàm tải dữ liệu từ API
- const fetchRegisterCourses = async () => {
-  try {
-    setLoading(true);
-    const data = await RegisterCourseService.getAll();
-    console.log("[DEBUG] Data Register Courses:", data);
-    setRegisterCourses(data);
-  } catch (err: any) {
-    Alert.alert("Lỗi", err.message || "Không thể tải danh sách đăng ký.");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  // Lấy dữ liệu từ API
+  const fetchRegisterCourses = async () => {
+    try {
+      setLoading(true);
+      const data = await RegisterCourseService.getAll();
+      console.log("[DEBUG] Data Register Courses:", data);
+      setRegisterCourses(data);
+    } catch (err: any) {
+      Alert.alert("Lỗi", err.message || "Không thể tải danh sách đăng ký.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchRegisterCourses();
   }, []);
 
-  const handleDelete = (id: number) => {
-    Alert.alert(
-      "Xác nhận xóa",
-      "Bạn có chắc muốn xóa đăng ký này?",
-      [
-        { text: "Hủy", style: "cancel" },
-        {
-          text: "Xóa",
-          style: "destructive",
-          onPress: () => {
-            setRegisterCourses((prev) =>
-              prev.filter((r) => r.registercourse_id !== id)
-            );
-            // TODO: Nếu có API xóa, gọi ở đây
-          },
-        },
-      ]
-    );
-  };
-
   const renderItem = ({ item }: { item: RegisterCourse }) => (
-    <View style={styles.item}>
+    <TouchableOpacity
+      style={styles.item}
+      onPress={() =>
+        navigation.navigate("RegisterCourseDetail", {
+          courseId: item.course_id,
+        })
+      }
+    >
       <Text style={styles.info}>
         Đăng ký học kỳ {item.semester}/{item.year}
       </Text>
@@ -92,34 +78,13 @@ export default function RegistrationListScreen() {
         Người dùng: {item.user_name} ({item.email})
       </Text>
       <Text style={styles.detail}>
-        Thời gian đăng ký: {formatDate(item.begin_register)} - {formatDate(item.end_register)}
+        Thời gian đăng ký: {formatDate(item.begin_register)} -{" "}
+        {formatDate(item.end_register)}
       </Text>
       <Text style={styles.detail}>
         Trạng thái: {item.status || "Chưa xác định"}
       </Text>
-
-      <View style={styles.actionRow}>
-        <Button
-          title="Chi tiết"
-          onPress={() =>
-            navigation.navigate("RegisterCourseDetail", {
-              courseId: item.course_id,
-            })
-          }
-        />
-        <Button
-          title="Sửa"
-          onPress={() =>
-            navigation.navigate("EditRegistration", { registration: item })
-          }
-        />
-        <Button
-          title="Xóa"
-          color="red"
-          onPress={() => handleDelete(item.registercourse_id)}
-        />
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 
   if (loading) {
@@ -134,11 +99,6 @@ export default function RegistrationListScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Danh sách đăng ký khóa học</Text>
-      <Button
-        title="Tạo đăng ký"
-        onPress={() => navigation.navigate("AddRegistration")}
-      />
-
       {registerCourses.length === 0 ? (
         <Text style={{ textAlign: "center", marginTop: 20 }}>
           Chưa có bản ghi đăng ký nào.
@@ -170,9 +130,4 @@ const styles = StyleSheet.create({
   },
   info: { fontSize: 16, fontWeight: "bold" },
   detail: { fontSize: 14, color: "#555", marginTop: 2 },
-  actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
 });
