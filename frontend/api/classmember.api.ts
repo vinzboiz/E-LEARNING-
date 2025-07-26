@@ -58,4 +58,9 @@ export const ClassMemberAPI = {
     return api.get(`${API_URL}/paid`);
   },
 
+  getStudentsByCourse: (courseId: number) => {
+    console.log("[API] GET", `${API_URL}/teacher/${courseId}/students`);
+    return api.get(`${API_URL}/teacher/${courseId}/students`);
+  },
+
 };

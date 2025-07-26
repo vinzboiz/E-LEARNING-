@@ -42,6 +42,21 @@ async function deleteRole(id) {
   return result.rows[0];
 }
 
+// Lấy tên role dựa vào user_id
+async function getRoleNameByUserId(userId) {
+  const result = await db.query(
+    `SELECT r.name AS role
+     FROM users u
+     LEFT JOIN role r ON u.role_id = r.role_id
+     WHERE u.user_id = $1`,
+    [userId]
+  );
+
+  if (result.rows.length === 0) return null;
+  return result.rows[0].role;
+}
+
+
 // Export tất cả hàm
 module.exports = {
   getAllRoles,
@@ -49,4 +64,5 @@ module.exports = {
   createRole,
   updateRole,
   deleteRole,
+  getRoleNameByUserId
 };

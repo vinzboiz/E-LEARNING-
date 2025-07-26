@@ -5,6 +5,7 @@ import {
   updateUserApi,
   deleteUserApi,
   getAllTeachersApi,
+  getRoleByUserIdApi
 } from "../api/user.api";
 
 export const UserService = {
@@ -67,10 +68,21 @@ export const UserService = {
   getAllTeachers: async () => {
     try {
       const response = await getAllTeachersApi();
-      return response.data?.data || response.data; // BE trả {data: teachers}
+      return response.data?.data || response.data;
     } catch (error: any) {
       console.log("Error getAllTeachers:", error.response?.data || error.message);
       throw new Error(error.response?.data?.error || "Lấy danh sách giảng viên thất bại");
+    }
+  },
+
+  // Lấy role của user theo user_id
+  getRoleByUserId: async (userId: number) => {
+    try {
+      const response = await getRoleByUserIdApi(userId);
+      return response.data; // { role: "teacher" hoặc "student" }
+    } catch (error: any) {
+      console.log("Error getRoleByUserId:", error.response?.data || error.message);
+      throw new Error(error.response?.data?.error || "Lấy role người dùng thất bại");
     }
   },
 };

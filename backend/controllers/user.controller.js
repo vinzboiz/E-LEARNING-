@@ -125,3 +125,19 @@ exports.getTeachers = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getUserRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const role = await userModel.getUserRoleById(id);
+
+    if (!role) {
+      return res.status(404).json({ error: "Role không tồn tại" });
+    }
+
+    res.json(role);
+  } catch (error) {
+    console.error("Error getUserRole:", error);
+    res.status(500).json({ error: "Lấy role người dùng thất bại" });
+  }
+};

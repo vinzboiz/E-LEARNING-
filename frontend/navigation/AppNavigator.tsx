@@ -6,6 +6,7 @@ import BottomTab from "./BottomTab";
 import LoginScreen from "../screens/Auth/LoginScreen";
 import RegisterScreen from "../screens/Auth/RegisterScreen";
 import OTPScreen from "../screens/Auth/OTPScreen";
+import ProfileScreen from "../screens/Auth/ProfileScreen";
 
 // Subject Screens
 import SubjectListScreen from "../screens/Subject/SubjectListScreen";
@@ -51,6 +52,7 @@ import StudentCourseListScreen from "../screens/ClassMember/StudentCourseListScr
 import StudentRegisteredCoursesScreen from "../screens/ClassMember/StudentRegisteredCoursesScreen";
 import AdminClassMemberListScreen from "../screens/ClassMember/AdminClassMemberListScreen";
 import CheckoutListScreen from "../screens/ClassMember/CheckoutListScreen";
+import TeacherStudentListScreen from "../screens/ClassMember/TeacherStudentListScreen";
 
 // Types
 import { Submission } from "../screens/Submission/SubmittedAssignmentsScreen";
@@ -60,6 +62,7 @@ export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   OTP: { name: string; email: string; password: string };
+  Profile: { user: any };
 
   SubjectList: undefined;
   AddSubject: undefined;
@@ -100,6 +103,7 @@ export type RootStackParamList = {
   StudentCheckout: undefined;
   CheckoutList: { courseId: number };
   AdminClassMemberList: undefined;
+  TeacherStudentList: { courseId: number };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -111,6 +115,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="OTP" component={OTPScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
 
       {/* Subject */}
       <Stack.Screen name="SubjectList" component={SubjectListScreen} />
@@ -208,6 +213,11 @@ export default function AppNavigator() {
         name="CheckoutList"
         component={CheckoutListScreen}
         options={{ title: "Danh sách Checkout" }}
+      />
+      <Stack.Screen
+        name="TeacherStudentList"
+        component={TeacherStudentListScreen}
+        options={{ title: "Danh sách sinh viên" }}
       />
     </Stack.Navigator>
   );

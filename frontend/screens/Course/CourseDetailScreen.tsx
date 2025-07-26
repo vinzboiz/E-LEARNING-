@@ -143,6 +143,18 @@ export default function CourseDetailScreen() {
           }
         />
       </View>
+      {role === 3 && ( // Chỉ giảng viên mới thấy nút này
+        <View style={{ marginTop: 10 }}>
+          <Button
+            title="Xem danh sách sinh viên"
+            onPress={() =>
+              navigation.navigate("TeacherStudentList", {
+                courseId: course.course_id,
+              })
+            }
+          />
+        </View>
+      )}
     </ScrollView>
   );
 }

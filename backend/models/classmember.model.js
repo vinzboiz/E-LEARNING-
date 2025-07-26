@@ -433,6 +433,27 @@ async function getPaidClassMembers() {
   };
 }
 
+// Lấy danh sách sinh viên của một khóa học, kiểm tra quyền giảng viên
+async function getStudentsByCourse(teacherId, courseId) {
+  console.log("DEBUG teacherId:", teacherId, "courseId:", courseId);
+  const check = await db.query(
+    `SELECT course_id, user_id FROM course WHERE course_id = $1`,
+    [courseId]
+  );
+
+  if (!check.rows.length || check.rows[0].user_id !== teacherId) {
+    return { allowed: false, data: [] };
+  }
+
+  const students = await db.query(
+    `SELECT u.user_id, u.name, u.email
+     FROM classmember cm
+     JOIN users u ON cm.user_id = u.user_id
+     WHERE cm.course_id = $1`,
+    [courseId]
+  );
+  return { allowed: true, data: students.rows };
+}
 
 module.exports = {
   addClassMember,
@@ -443,4 +464,5 @@ module.exports = {
   payTuition,
   getAllClassMembers,
   getPaidClassMembers,
+  getStudentsByCourse
 };

@@ -55,3 +55,17 @@ exports.deleteRole = async (req, res) => {
     res.status(500).json({ error: "Failed to delete role" });
   }
 };
+
+// API: Lấy tên role theo user_id
+exports.getRoleByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const roleName = await roleModel.getRoleNameByUserId(userId);
+    if (!roleName) {
+      return res.status(404).json({ message: "Role not found for this user" });
+    }
+    res.json({ role: roleName });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch role for user" });
+  }
+};

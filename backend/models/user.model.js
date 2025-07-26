@@ -92,6 +92,18 @@ async function getAllTeachers() {
   return result.rows;
 }
 
+// Lấy role của 1 user theo user_id
+async function getUserRoleById(userId) {
+  const result = await db.query(
+    `SELECT r.name AS role
+     FROM users u
+     JOIN role r ON u.role_id = r.role_id
+     WHERE u.user_id = $1`,
+    [userId]
+  );
+  return result.rows[0] || null;
+}
+
 // Export tất cả các hàm
 module.exports = {
   getAllUsers,
@@ -100,4 +112,5 @@ module.exports = {
   updateUser,
   deleteUser,
   getAllTeachers,
+  getUserRoleById
 };

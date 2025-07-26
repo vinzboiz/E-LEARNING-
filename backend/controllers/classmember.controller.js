@@ -96,3 +96,31 @@ exports.getPaidClassMembers = async (req, res) => {
     res.status(500).json({ message: "Lỗi server khi lấy danh sách đã thanh toán." });
   }
 };
+
+// API giảng viên xem danh sách sinh viên
+exports.getStudentsByCourse = async (req, res) => {
+  console.log("DEBUG user:", req.user);  // log ra user_id và role_id
+  console.log("DEBUG params courseId:", req.params.courseId);
+
+  try {
+    const { courseId } = req.params;
+    const teacherId = req.user.id;
+
+    const { allowed, data } = await ClassMember.getStudentsByCourse(
+      teacherId,
+      courseId
+    );
+
+    if (!allowed) {
+      return res.status(403).json({
+        message: "Bạn không có quyền xem danh sách khóa học này",
+        data: [],
+      });
+    }
+
+    return res.json({ message: "OK", data });
+  } catch (error) {
+    console.error("getStudentsByCourse error:", error);
+    return res.status(500).json({ message: "Lỗi server", data: [] });
+  }
+};

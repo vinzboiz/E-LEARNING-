@@ -97,5 +97,15 @@ async getAvailableCourses() {
       throw new Error("Không thể tải danh sách đã thanh toán.");
     }
   },
+  
+   async getStudentsByCourse(courseId: number) {
+    try {
+      const res = await ClassMemberAPI.getStudentsByCourse(courseId);
+      return res.data.data;
+    } catch (err: any) {
+      console.error("[ClassMemberService] Error getStudentsByCourse:", err);
+      throw new Error("Không thể tải danh sách sinh viên của khóa học");
+    }
+  },
 
 };

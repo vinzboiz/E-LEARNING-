@@ -28,5 +28,7 @@ router.put("/:id", authMiddleware, async (req, res, next) => {
 });
 
 router.delete("/:id", authMiddleware, checkRole(1), userController.deleteUser);
+router.get("/:id/role", authMiddleware, checkRole(1,2,3), userController.getUserRole);
+
 
 module.exports = router;
