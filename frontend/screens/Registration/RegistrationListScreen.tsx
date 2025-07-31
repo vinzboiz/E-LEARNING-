@@ -3,15 +3,27 @@ import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   ActivityIndicator,
   Alert,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { RegisterCourseService } from "../../services/registercourse.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+// Import styles
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -30,8 +42,8 @@ interface RegisterCourse {
   year: number;
   course_id: number;
   user_id: number;
-  user_name: string; // từ BE
-  email: string; // từ BE
+  user_name: string;
+  email: string;
 }
 
 const formatDate = (dateString: string) => {
@@ -49,7 +61,6 @@ export default function RegistrationListScreen() {
     try {
       setLoading(true);
       const data = await RegisterCourseService.getAll();
-      console.log("[DEBUG] Data Register Courses:", data);
       setRegisterCourses(data);
     } catch (err: any) {
       Alert.alert("Lỗi", err.message || "Không thể tải danh sách đăng ký.");
@@ -64,45 +75,74 @@ export default function RegistrationListScreen() {
 
   const renderItem = ({ item }: { item: RegisterCourse }) => (
     <TouchableOpacity
-      style={styles.item}
+      style={cardStyles.card}
       onPress={() =>
         navigation.navigate("RegisterCourseDetail", {
           courseId: item.course_id,
         })
       }
     >
-      <Text style={styles.info}>
-        Đăng ký học kỳ {item.semester}/{item.year}
-      </Text>
-      <Text style={styles.detail}>
-        Người dùng: {item.user_name} ({item.email})
-      </Text>
-      <Text style={styles.detail}>
-        Thời gian đăng ký: {formatDate(item.begin_register)} -{" "}
-        {formatDate(item.end_register)}
-      </Text>
-      <Text style={styles.detail}>
-        Trạng thái: {item.status || "Chưa xác định"}
-      </Text>
+      <View style={{ flex: 1 }}>
+        <Text style={textStyles.subjectName}>
+          Đăng ký học kỳ {item.semester}/{item.year}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          Người dùng: {item.user_name} ({item.email})
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          Thời gian đăng ký: {formatDate(item.begin_register)} -{" "}
+          {formatDate(item.end_register)}
+        </Text>
+        <Text style={[textStyles.subjectDesc, { color: colors.primary }]}>
+          Trạng thái: {item.status || "Chưa xác định"}
+        </Text>
+      </View>
     </TouchableOpacity>
   );
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007BFF" />
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text>Đang tải danh sách đăng ký...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Danh sách đăng ký khóa học</Text>
+    <View style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.registration}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Đăng ký</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Quản lý danh sách đăng ký khóa học của bạn
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Danh sách */}
+      <Text style={textStyles.listTitle}>Danh sách đăng ký</Text>
       {registerCourses.length === 0 ? (
-        <Text style={{ textAlign: "center", marginTop: 20 }}>
-          Chưa có bản ghi đăng ký nào.
-        </Text>
+        <View style={layoutStyles.center}>
+          <Image
+            source={Images.Common.nothing}
+            style={imageStyles.emptyImage}
+            resizeMode="contain"
+          />
+          <Text style={textStyles.emptyText}>Chưa có bản ghi đăng ký nào.</Text>
+        </View>
       ) : (
         <FlatList
           data={registerCourses}
@@ -110,24 +150,20 @@ export default function RegistrationListScreen() {
             (item?.registercourse_id ?? index).toString()
           }
           renderItem={renderItem}
+          ListFooterComponent={
+            <View style={{ alignItems: "center", marginVertical: 20 }}>
+              <Image
+                source={Images.More.img8}
+                style={imageStyles.footerImage}
+                resizeMode="contain"
+              />
+              <Text style={textStyles.footerText}>
+                Tiếp tục hành trình của bạn!
+              </Text>
+            </View>
+          }
         />
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  item: {
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#ddd",
-  },
-  info: { fontSize: 16, fontWeight: "bold" },
-  detail: { fontSize: 14, color: "#555", marginTop: 2 },
-});

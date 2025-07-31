@@ -3,15 +3,27 @@ import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { SubmissionService } from "../../services/submission.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+// Import style chung
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -31,7 +43,6 @@ export default function SubmittedAssignmentsScreen() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Hàm lấy danh sách bài nộp của sinh viên hiện tại
   const fetchSubmissions = async () => {
     try {
       setLoading(true);
@@ -57,59 +68,86 @@ export default function SubmittedAssignmentsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007BFF" />
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text>Đang tải danh sách bài đã nộp...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Bài tập đã nộp</Text>
+    <View style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.submission}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Bài tập đã nộp</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Xem tất cả bài tập bạn đã nộp
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Danh sách */}
       {submissions.length === 0 ? (
-        <Text style={{ textAlign: "center", color: "#555" }}>
-          Bạn chưa nộp bài tập nào.
-        </Text>
+        <View style={layoutStyles.center}>
+          <Image
+            source={Images.Common.nothing}
+            style={imageStyles.emptyImage}
+            resizeMode="contain"
+          />
+          <Text style={textStyles.emptyText}>Bạn chưa nộp bài tập nào.</Text>
+        </View>
       ) : (
         <FlatList
           data={submissions}
           keyExtractor={(item) => item.submission_id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={styles.item}
+              style={cardStyles.card}
               onPress={() =>
-                navigation.navigate("SubmittedAssignmentDetail", { submission: item })
-
+                navigation.navigate("SubmittedAssignmentDetail", {
+                  submission: item,
+                })
               }
             >
-              <Text style={styles.assignmentTitle}>
-                {item.assignment_title || "Không có tiêu đề"}
-              </Text>
-              <Text style={styles.assignmentDetail}>
-                Nộp lúc: {formatDate(item.submitted_at)}
-              </Text>
-              <Text style={styles.assignmentDetail}>
-                Điểm: {item.score !== null ? item.score : "Chưa chấm"}
-              </Text>
+              <View style={{ flex: 1 }}>
+                <Text style={textStyles.subjectName}>
+                  {item.assignment_title || "Không có tiêu đề"}
+                </Text>
+                <Text style={textStyles.subjectDesc}>
+                  Nộp lúc: {formatDate(item.submitted_at)}
+                </Text>
+                <Text style={textStyles.subjectDesc}>
+                  Điểm: {item.score !== null ? item.score : "Chưa chấm"}
+                </Text>
+              </View>
             </TouchableOpacity>
           )}
+          ListFooterComponent={
+            <View style={{ alignItems: "center", marginVertical: 20 }}>
+              <Image
+                source={Images.More.img4}
+                style={imageStyles.footerImage}
+                resizeMode="contain"
+              />
+              <Text style={textStyles.footerText}>
+                Hãy tiếp tục hoàn thành các bài tập sắp tới!
+              </Text>
+            </View>
+          }
         />
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
-  item: {
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
-  },
-  assignmentTitle: { fontSize: 18, fontWeight: "bold" },
-  assignmentDetail: { fontSize: 14, color: "#555" },
-});

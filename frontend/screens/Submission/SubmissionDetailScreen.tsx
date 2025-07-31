@@ -2,16 +2,26 @@ import React from "react";
 import {
   View,
   Text,
-  StyleSheet,
   ScrollView,
-  Button,
-  Linking,
   Alert,
+  Linking,
+  Image,
+  TouchableOpacity,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
+// Import style chung
+import { layoutStyles } from "../../constants/layoutStyles";
+import { textStyles } from "../../constants/textStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "SubmissionDetail"
@@ -39,56 +49,80 @@ export default function SubmissionDetailScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Chi tiết bài nộp</Text>
+    <ScrollView style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.submission}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Chi tiết bài nộp</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Thông tin và nội dung bài làm
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      <Text style={styles.label}>
-        Tên học sinh: {submission.student_name || "Không rõ"}
-      </Text>
-      <Text style={styles.label}>
-        Nộp lúc: {formatDateTime(submission.submitted_at)}
-      </Text>
-      <Text style={styles.label}>
-        Điểm: {submission.score != null ? submission.score : "Chưa chấm"}
-      </Text>
-      <Text style={styles.label}>
-        Đánh giá: {submission.feedback || "Chưa nhận xét"}
-      </Text>
+      {/* Nội dung bài nộp */}
+      <View style={[cardStyles.card, { margin: 15 }]}>
+        <Text style={textStyles.subjectName}>
+          Tên học sinh: {submission.student_name || "Không rõ"}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          Nộp lúc: {formatDateTime(submission.submitted_at)}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          Điểm: {submission.score != null ? submission.score : "Chưa chấm"}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          Đánh giá: {submission.feedback || "Chưa nhận xét"}
+        </Text>
 
-      <View style={styles.contentBox}>
-        <Text style={styles.content}>Nội dung bài làm:</Text>
-        <Text>{submission.content || "Không có nội dung"}</Text>
+        <Text style={[textStyles.subjectDesc, { marginTop: 10 }]}>
+          Nội dung bài làm:
+        </Text>
+        <Text style={textStyles.modalDesc}>
+          {submission.content || "Không có nội dung"}
+        </Text>
         {submission.drive_link && (
-          <Text style={styles.link} onPress={handleOpenDriveLink}>
+          <Text
+            style={[textStyles.linkText, { color: "blue" }]}
+            onPress={handleOpenDriveLink}
+          >
             Link bài nộp (Google Drive)
           </Text>
         )}
+
+        {/* Nút chấm điểm */}
+        <TouchableOpacity
+          style={[buttonStyles.primary, { marginTop: 15 }]}
+          onPress={() =>
+            navigation.navigate("GradeSubmissionScreen", { submission })
+          }
+        >
+          <Text style={buttonStyles.primaryText}>Chấm điểm</Text>
+        </TouchableOpacity>
       </View>
 
-      <Button
-        title="Chấm điểm"
-        onPress={() =>
-          navigation.navigate("GradeSubmissionScreen", { submission })
-        }
-      />
+      {/* Footer */}
+      <View style={{ alignItems: "center", marginVertical: 20 }}>
+        <Image
+          source={Images.More.img11}
+          style={imageStyles.footerImage}
+          resizeMode="contain"
+        />
+        <Text style={textStyles.footerText}>
+          Đánh giá bài làm để hỗ trợ sinh viên tốt hơn!
+        </Text>
+      </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  label: { fontSize: 16, marginBottom: 10 },
-  contentBox: {
-    padding: 10,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 5,
-    marginBottom: 20,
-  },
-  content: { fontWeight: "bold", marginBottom: 5 },
-  link: {
-    marginTop: 10,
-    color: "blue",
-    textDecorationLine: "underline",
-  },
-});

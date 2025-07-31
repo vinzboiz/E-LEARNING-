@@ -17,14 +17,29 @@ exports.getUsers = async (req, res) => {
 };
 
 // Lấy người dùng theo ID
+// Lấy người dùng theo ID
 exports.getUser = async (req, res) => {
   try {
-    const user = await userModel.getUserById(req.params.id);
+    const requestedId = Number(req.params.id); // id được truyền vào
+    const requesterId = req.user.id; // id của người gửi request
+    const requesterRole = req.user.role; // role của người gửi request
+
+    // Nếu không phải admin (1) và đang cố xem thông tin người khác → chặn
+    if (requesterRole !== 1 && requestedId !== requesterId) {
+      return res.status(403).json({ message: "Không có quyền xem thông tin người khác" });
+    }
+
+    const user = await userModel.getUserById(requestedId);
+    if (!user) {
+      return res.status(404).json({ message: "Không tìm thấy người dùng" });
+    }
+
     res.json(user);
   } catch (error) {
-    res.status(404).json({ error: error.message });
+    res.status(500).json({ error: "Lỗi khi lấy người dùng" });
   }
 };
+
 
 // Tạo người dùng mới (admin)
 exports.createUser = async (req, res) => {

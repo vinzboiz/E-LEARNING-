@@ -1,79 +1,80 @@
 import React, { useEffect, useState } from "react";
+import { StyleSheet, Platform, View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { AuthService } from "../services/auth.service";
+
 import HomeScreen from "../screens/HomeScreen";
 import AccountScreen from "../screens/Auth/AccountScreen";
-import SubjectListScreen from "../screens/Subject/SubjectListScreen";
 import CourseListScreen from "../screens/Course/CourseListScreen";
-import RegistrationListScreen from "../screens/Registration/RegistrationListScreen";
-import UserManagementScreen from "../screens/Auth/UserManagementScreen";
-import RegisterTimeScreen from "../screens/Registration/RegisterTimeScreen";
 import StudentCourseListScreen from "../screens/ClassMember/StudentCourseListScreen";
-import AdminClassMemberListScreen from "../screens/ClassMember/AdminClassMemberListScreen";
-import Icon from "react-native-vector-icons/Ionicons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import MoreScreen from "../screens/MoreScreen";
+import { colors } from "../constants/colors";
 
-export type BottomTabParamList = {
-  Home: undefined;
-  Subject: undefined;
-  Course: undefined;
-  Registration: undefined;
-  RegisterTime: undefined;
-  UserManagement: undefined;
-  Account: undefined;
-  StudentCourseListScreen: undefined;
-  AdminClassMemberListScreen: undefined;
-};
-
-const Tab = createBottomTabNavigator<BottomTabParamList>();
+const Tab = createBottomTabNavigator();
 
 export default function BottomTab() {
-  const [role, setRole] = useState<number | null>(null); // 1=Admin, 2=Student, 3=Teacher
+  const [roleId, setRoleId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchRole = async () => {
-      const savedRole = await AsyncStorage.getItem("role_id");
-      setRole(savedRole ? parseInt(savedRole, 10) : null);
+      try {
+        const user = await AuthService.getMe();
+        setRoleId(user.role_id);
+      } catch {
+        setRoleId(null);
+      }
     };
     fetchRole();
   }, []);
 
+  const screenOptions = ({ route }: { route: any }) => ({
+    tabBarIcon: ({ focused, color, size }: any) => {
+      let iconName = "home-outline";
+      if (route.name === "Home") iconName = focused ? "home" : "home-outline";
+      else if (route.name === "Course")
+        iconName = focused ? "book" : "book-outline";
+      else if (route.name === "Account")
+        iconName = focused ? "person" : "person-outline";
+      else if (route.name === "More")
+        iconName = focused ? "apps" : "apps-outline";
+      else if (route.name === "StudentCourseList")
+        iconName = focused ? "clipboard" : "clipboard-outline";
+
+      return <Ionicons name={iconName} size={size} color={color} />;
+    },
+    tabBarActiveTintColor: colors.primary,
+    tabBarInactiveTintColor: "#888",
+    headerShown: false,
+    tabBarStyle: styles.tabBar,
+    tabBarLabelStyle: { fontSize: 12, marginBottom: 5 },
+  });
+
   const renderTabs = () => {
-    if (role === 1) {
+    if (roleId === 1) {
       // Admin
       return (
         <>
           <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Subject" component={SubjectListScreen} />
+          <Tab.Screen name="Account" component={AccountScreen} />
           <Tab.Screen name="Course" component={CourseListScreen} />
           <Tab.Screen
-            name="Registration"
-            component={RegistrationListScreen}
-            options={{ title: "Mở đăng ký" }}
+            name="More"
+            component={MoreScreen}
+            options={{ title: "Dịch vụ" }}
           />
-          <Tab.Screen
-            name="RegisterTime"
-            component={RegisterTimeScreen}
-            options={{ title: "Thời gian đăng ký" }}
-          />
-          <Tab.Screen
-            name="UserManagement"
-            component={UserManagementScreen}
-            options={{ title: "Quản lý người dùng" }}
-          />
-          <Tab.Screen
-            name="AdminClassMemberListScreen"
-            component={AdminClassMemberListScreen}
-            options={{ title: "Đăng ký" }}
-          />
-          <Tab.Screen name="Account" component={AccountScreen} />
         </>
       );
-    } else if (role === 3) {
+    } else if (roleId === 3) {
       // Teacher
       return (
         <>
           <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Course" component={CourseListScreen} />
+          <Tab.Screen
+            name="CourseList"
+            component={CourseListScreen}
+            options={{ title: "Khóa học" }}
+          />
           <Tab.Screen name="Account" component={AccountScreen} />
         </>
       );
@@ -82,14 +83,13 @@ export default function BottomTab() {
       return (
         <>
           <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Course" component={CourseListScreen} />
           <Tab.Screen
-            name="RegisterTime"
-            component={RegisterTimeScreen}
-            options={{ title: "Thời gian đăng ký" }}
+            name="CourseList"
+            component={CourseListScreen}
+            options={{ title: "Khóa học" }}
           />
           <Tab.Screen
-            name="StudentCourseListScreen"
+            name="StudentCourseList"
             component={StudentCourseListScreen}
             options={{ title: "Đăng ký" }}
           />
@@ -100,30 +100,21 @@ export default function BottomTab() {
   };
 
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarIcon: ({ color, size }) => {
-          let iconName = "home-outline";
-          if (route.name === "Home") iconName = "home-outline";
-          else if (route.name === "Subject") iconName = "book-outline";
-          else if (route.name === "Course") iconName = "school-outline";
-          else if (route.name === "Registration") iconName = "clipboard-outline";
-          else if (route.name === "RegisterTime") iconName = "calendar-outline";
-          else if (route.name === "UserManagement") iconName = "people-outline";
-          else if (
-            route.name === "StudentCourseListScreen" ||
-            route.name === "AdminClassMemberListScreen"
-          )
-            iconName = "create-outline";
-          else if (route.name === "Account") iconName = "person-outline";
-          return <Icon name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: "tomato",
-        tabBarInactiveTintColor: "gray",
-      })}
-    >
-      {renderTabs()}
-    </Tab.Navigator>
+    <Tab.Navigator screenOptions={screenOptions}>{renderTabs()}</Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    backgroundColor: "#fff",
+
+    height: Platform.OS === "ios" ? 85 : 70,
+    paddingTop: 5,
+    paddingBottom: 5,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: -2 },
+    shadowRadius: 4,
+  },
+});

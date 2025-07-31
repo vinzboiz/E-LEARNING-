@@ -3,13 +3,26 @@ import {
   View,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
   Alert,
   ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { SubjectService } from "../../services/subject.service";
+
+// Import style constants
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { inputStyles } from "../../constants/inputStyles";
+import { textStyles } from "../../constants/textStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+import { colors } from "../../constants/colors";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 export default function EditSubjectScreen() {
   const route = useRoute<any>();
@@ -21,7 +34,6 @@ export default function EditSubjectScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Lấy thông tin môn học khi mở màn
   useEffect(() => {
     (async () => {
       try {
@@ -45,8 +57,7 @@ export default function EditSubjectScreen() {
 
     setSaving(true);
     try {
-      const data = { name, description };
-      await SubjectService.update(id, data);
+      await SubjectService.update(id, { name, description });
       Alert.alert("Thành công", "Môn học đã được cập nhật thành công!");
       navigation.goBack();
     } catch (error: any) {
@@ -58,56 +69,71 @@ export default function EditSubjectScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007bff" />
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text>Đang tải thông tin môn học...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Sửa Môn Học</Text>
+    <ScrollView contentContainerStyle={layoutStyles.scrollContainer}>
+      {/* Banner */}
+      <View>
+        <Image
+          source={Images.TopBanner.subject}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      <TextInput
-        placeholder="Tên môn học"
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-      />
+      <Text style={textStyles.pageTitle}>Sửa Môn Học</Text>
 
-      <TextInput
-        placeholder="Mô tả môn học"
-        style={[styles.input, styles.textArea]}
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={4}
-      />
+      <View style={inputStyles.formContainer}>
+        <Text style={inputStyles.inputTitle}>Tên môn học</Text>
+        <TextInput
+          placeholder="Tên môn học"
+          style={inputStyles.input}
+          value={name}
+          onChangeText={setName}
+        />
 
-      <Button
-        title={saving ? "Đang lưu..." : "Lưu"}
-        onPress={handleEdit}
-        disabled={saving}
-      />
-    </View>
+        <Text style={inputStyles.inputTitle}>Mô tả môn học</Text>
+        <TextInput
+          placeholder="Mô tả môn học"
+          style={[inputStyles.input, inputStyles.textArea]}
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={4}
+        />
+
+        {saving ? (
+          <ActivityIndicator size="large" color={colors.primary} />
+        ) : (
+          <TouchableOpacity
+            style={buttonStyles.primaryButton}
+            onPress={handleEdit}
+          >
+            <Ionicons name="save-outline" size={20} color="#fff" />
+            <Text style={buttonStyles.primaryButtonText}>Lưu</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <View style={layoutStyles.bottomImageContainer}>
+        <Image
+          source={Images.More.img8}
+          style={imageStyles.bottomImage}
+          resizeMode="contain"
+        />
+      </View>
+    </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 24, marginBottom: 20, textAlign: "center" },
-  input: {
-    borderWidth: 1,
-    padding: 10,
-    marginBottom: 20,
-    borderRadius: 5,
-    borderColor: "#ccc",
-    backgroundColor: "#fff",
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-});

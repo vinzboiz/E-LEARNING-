@@ -3,11 +3,10 @@ import {
   View,
   Text,
   FlatList,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
   Alert,
+  ActivityIndicator,
+  Image,
+  TouchableOpacity,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -15,6 +14,18 @@ import { RootStackParamList } from "../../navigation/AppNavigator";
 import { LessonService } from "../../services/lesson.service";
 import { AuthService } from "../../services/auth.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+// Import style chung
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -37,21 +48,22 @@ export default function LessonListScreen() {
   const [loading, setLoading] = useState(true);
   const [roleId, setRoleId] = useState<number | null>(null);
 
-  // Hàm lấy token và role từ AuthService
   const fetchUserRole = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) throw new Error("Chưa có token. Vui lòng đăng nhập lại.");
-      const user = await AuthService.getMe(); // getMe tự động dùng token
+      const user = await AuthService.getMe();
       setRoleId(user.role_id);
       return user.role_id;
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Không lấy được thông tin người dùng.");
+      Alert.alert(
+        "Lỗi",
+        error.message || "Không lấy được thông tin người dùng."
+      );
       return null;
     }
   };
 
-  // Lấy danh sách bài học theo role
   const fetchLessons = async () => {
     setLoading(true);
     try {
@@ -60,14 +72,9 @@ export default function LessonListScreen() {
 
       let data;
       if (userRole === 1 || userRole === 3) {
-        // Admin hoặc Giảng viên
         data = await LessonService.getAllLessons(courseId);
       } else if (userRole === 2) {
-        // Sinh viên
         data = await LessonService.getLessonsByStudent();
-      } else {
-        Alert.alert("Lỗi", "Không xác định được vai trò người dùng.");
-        return;
       }
       setLessons(data);
     } catch (err: any) {
@@ -77,7 +84,6 @@ export default function LessonListScreen() {
     }
   };
 
-  // Xóa bài học
   const handleDelete = (id: number) => {
     Alert.alert("Xác nhận", "Bạn có chắc chắn muốn xoá bài học này?", [
       { text: "Huỷ", style: "cancel" },
@@ -103,89 +109,137 @@ export default function LessonListScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007BFF" />
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text>Đang tải danh sách bài học...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        Danh sách bài học {courseId ? `- Course ID: ${courseId}` : ""}
-      </Text>
-
-      {roleId !== 2 && (
-        <Button
-          title="Thêm bài học"
-          onPress={() => navigation.navigate("AddLesson", { courseId })}
+    <View style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.lesson}
+          style={imageStyles.banner}
+          resizeMode="cover"
         />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Danh Sách Bài Học</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Quản lý bài học của khóa học (ID: {courseId})
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Nút FAB Thêm bài học */}
+      {roleId !== 2 && (
+        <TouchableOpacity
+          style={buttonStyles.fab}
+          onPress={() => navigation.navigate("AddLesson", { courseId })}
+        >
+          <Ionicons name="add" size={30} color="#fff" />
+        </TouchableOpacity>
       )}
 
-      <FlatList
-        data={lessons}
-        keyExtractor={(item) => item.lesson_id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.lessonItem}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("LessonDetail", { lessonId: item.lesson_id })
-              }
-            >
-              <Text style={styles.lessonTitle}>{item.title}</Text>
-              <Text style={styles.lessonDescription}>
-                {item.content?.slice(0, 50) || "Không có mô tả"}...
-              </Text>
-            </TouchableOpacity>
-            {roleId !== 2 && (
-              <View style={styles.actionRow}>
-                <Button
-                  title="Sửa"
-                  onPress={() =>
-                    navigation.navigate("EditLesson", {
-                      lessonId: item.lesson_id,
-                      courseId,
-                    })
-                  }
-                />
-                <Button
-                  title="Xoá"
-                  color="red"
-                  onPress={() => handleDelete(item.lesson_id)}
-                />
-                {/* Thêm nút xem bài tập */}
-          <Button
-            title="Xem bài tập"
-            color="green"
-            onPress={() =>
-              navigation.navigate("AssignmentList", { lessonId: item.lesson_id })
-            }
+      {/* Nếu không có bài học */}
+      {lessons.length === 0 ? (
+        <View style={layoutStyles.center}>
+          <Image
+            source={Images.Common.nothing}
+            style={imageStyles.emptyImage}
+            resizeMode="contain"
           />
-              </View>
-            )}
-          </View>
-        )}
-      />
+          <Text style={textStyles.emptyText}>Không có bài học nào!</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={lessons}
+          keyExtractor={(item) => item.lesson_id.toString()}
+          renderItem={({ item }) => (
+            <View style={cardStyles.card}>
+              <TouchableOpacity
+                style={{ flex: 1 }}
+                onPress={() =>
+                  navigation.navigate("LessonDetail", {
+                    lessonId: item.lesson_id,
+                  })
+                }
+              >
+                <Text style={textStyles.subjectName}>{item.title}</Text>
+                <Text
+                  style={textStyles.subjectDesc}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {item.content || "Không có mô tả"}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Hành động cho Admin/Teacher */}
+              {roleId !== 2 && (
+                <View style={cardStyles.cardActions}>
+                  <TouchableOpacity
+                    style={[
+                      buttonStyles.iconBtn,
+                      { backgroundColor: colors.primary },
+                    ]}
+                    onPress={() =>
+                      navigation.navigate("EditLesson", {
+                        lessonId: item.lesson_id,
+                        courseId,
+                      })
+                    }
+                  >
+                    <Ionicons name="create-outline" size={18} color="#fff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      buttonStyles.iconBtn,
+                      { backgroundColor: colors.danger },
+                    ]}
+                    onPress={() => handleDelete(item.lesson_id)}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#fff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[buttonStyles.iconBtn, { backgroundColor: "green" }]}
+                    onPress={() =>
+                      navigation.navigate("AssignmentList", {
+                        lessonId: item.lesson_id,
+                      })
+                    }
+                  >
+                    <Ionicons name="book-outline" size={18} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          )}
+          ListFooterComponent={
+            <View style={{ alignItems: "center", marginVertical: 20 }}>
+              <Image
+                source={Images.More.img3}
+                style={imageStyles.footerImage}
+                resizeMode="contain"
+              />
+              <Text style={textStyles.footerText}>
+                Tiếp tục hành trình học tập của bạn!
+              </Text>
+              <Text style={textStyles.totalText}>
+                Tổng số bài học: {lessons.length}
+              </Text>
+            </View>
+          }
+        />
+      )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
-  lessonItem: {
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
-  },
-  lessonTitle: { fontSize: 18, fontWeight: "bold" },
-  lessonDescription: { fontSize: 14, color: "#555" },
-  actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-});

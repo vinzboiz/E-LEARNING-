@@ -3,18 +3,32 @@ import {
   View,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
   Alert,
   ActivityIndicator,
   ScrollView,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { SubjectService } from "../../services/subject.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, "AddSubject">;
+// Import style constants
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { inputStyles } from "../../constants/inputStyles";
+import { textStyles } from "../../constants/textStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
+
+type NavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "AddSubject"
+>;
 
 export default function AddSubjectScreen() {
   const navigation = useNavigation<NavigationProp>();
@@ -45,57 +59,66 @@ export default function AddSubjectScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Thêm Môn Học</Text>
+    <ScrollView contentContainerStyle={layoutStyles.scrollContainer}>
+      {/* Banner */}
+      <View>
+        <Image
+          source={Images.TopBanner.subject}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        {/* Nút quay lại */}
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      <TextInput
-        placeholder="Tên môn học"
-        style={styles.input}
-        value={name}
-        onChangeText={setName}
-      />
+      {/* Tiêu đề dưới banner */}
+      <Text style={textStyles.pageTitle}>Thêm Môn Học</Text>
 
-      <TextInput
-        placeholder="Mô tả môn học"
-        style={[styles.input, styles.textArea]}
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={4}
-      />
+      {/* Form */}
+      <View style={inputStyles.formContainer}>
+        <Text style={inputStyles.inputTitle}>Tên môn học</Text>
+        <TextInput
+          placeholder="Tên môn học"
+          style={inputStyles.input}
+          value={name}
+          onChangeText={setName}
+        />
+        <Text style={inputStyles.inputTitle}>Mô tả môn học</Text>
+        <TextInput
+          placeholder="Mô tả môn học"
+          style={[inputStyles.input, inputStyles.textArea]}
+          value={description}
+          onChangeText={setDescription}
+          multiline
+          numberOfLines={4}
+        />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#007BFF" />
-      ) : (
-        <Button title="Tạo môn học" onPress={handleAddSubject} />
-      )}
+        {loading ? (
+          <ActivityIndicator size="large" color="#6C63FF" />
+        ) : (
+          <TouchableOpacity
+            style={buttonStyles.primaryButton}
+            onPress={handleAddSubject}
+          >
+            <Ionicons name="add-circle-outline" size={20} color="#fff" />
+            <Text style={buttonStyles.primaryButtonText}>Tạo môn học</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      {/* Ảnh minh họa dưới nút Tạo môn học */}
+      <View style={layoutStyles.bottomImageContainer}>
+        <Image
+          source={Images.More.img5}
+          style={imageStyles.bottomImage}
+          resizeMode="contain"
+        />
+      </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    padding: 20,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-    backgroundColor: "#fafafa",
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top", // để text bắt đầu từ trên
-  },
-});

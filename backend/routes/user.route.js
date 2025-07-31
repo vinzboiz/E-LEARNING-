@@ -8,7 +8,7 @@ const checkRole = require("../middlewares/checkRole");
 router.get("/", authMiddleware, checkRole(1), userController.getUsers);
 // Lấy danh sách giảng viên (chỉ admin)
 router.get("/teachers", authMiddleware, userController.getTeachers);
-router.get("/:id", authMiddleware, checkRole(1), userController.getUser);
+router.get("/:id", authMiddleware, userController.getUser);
 router.post("/", authMiddleware, checkRole(1), userController.createUser);
 router.put("/:id", authMiddleware, async (req, res, next) => {
   // Nếu là admin → cho qua controller
@@ -29,6 +29,5 @@ router.put("/:id", authMiddleware, async (req, res, next) => {
 
 router.delete("/:id", authMiddleware, checkRole(1), userController.deleteUser);
 router.get("/:id/role", authMiddleware, checkRole(1,2,3), userController.getUserRole);
-
 
 module.exports = router;

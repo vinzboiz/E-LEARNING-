@@ -2,16 +2,32 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  FlatList,
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Button,
+  FlatList,
+  TouchableOpacity,
+  Image,
 } from "react-native";
-import { useNavigation, useRoute, useIsFocused } from "@react-navigation/native";
+import {
+  useNavigation,
+  useRoute,
+  useIsFocused,
+} from "@react-navigation/native";
 import { CourseScheduleService } from "../../services/courseschedule.service";
 import { AuthService } from "../../services/auth.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
+// Import style chung
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 interface Schedule {
   schedule_id: number;
   date: string;
@@ -32,7 +48,6 @@ export default function ScheduleListScreen() {
   const [roleId, setRoleId] = useState<number | null>(null);
   const isFocused = useIsFocused();
 
-  // Lấy role từ AuthService
   const fetchRole = async () => {
     try {
       const me = await AuthService.getMe();
@@ -42,12 +57,10 @@ export default function ScheduleListScreen() {
     }
   };
 
-  // Lấy danh sách lịch học
   const fetchSchedules = async () => {
     setLoading(true);
     try {
       let data: any;
-
       if (roleId === 1) {
         data = await CourseScheduleService.getAllAdmin();
         data = data.data.filter((sch: Schedule) => sch.course_id === courseId);
@@ -60,7 +73,6 @@ export default function ScheduleListScreen() {
       } else {
         throw new Error("Không xác định quyền người dùng");
       }
-
       setSchedules(data);
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Không thể tải danh sách lịch học");
@@ -69,7 +81,6 @@ export default function ScheduleListScreen() {
     }
   };
 
-  // Hàm xóa (Admin)
   const handleDelete = async (id: number) => {
     Alert.alert("Xác nhận", "Bạn có chắc muốn xóa lịch học này?", [
       { text: "Hủy", style: "cancel" },
@@ -102,7 +113,7 @@ export default function ScheduleListScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color="#6C63FF" />
         <Text>Đang tải lịch học...</Text>
       </View>
     );
@@ -110,39 +121,78 @@ export default function ScheduleListScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Danh sách Lịch học</Text>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.schedule}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Tiêu đề */}
+      <Text style={styles.title}>Danh Sách Lịch Học</Text>
+      <Text style={styles.totalText}>Tổng số: {schedules.length} lịch học</Text>
+
+      {/* Danh sách */}
       <FlatList
         data={schedules}
         keyExtractor={(item) => item.schedule_id.toString()}
+        contentContainerStyle={{ paddingHorizontal: 15 }}
         renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.date}>Ngày: {item.date.split("T")[0]}</Text>
-            <Text>
-              Giờ: {item.start_time} - {item.end_time}
-            </Text>
-            <Text>Phòng: {item.room}</Text>
-            <Text>Ghi chú: {item.note}</Text>
+          <View style={styles.card}>
+            <View style={styles.row}>
+              <Ionicons name="calendar-outline" size={16} color="#6C63FF" />
+              <Text style={styles.cardText}>
+                Ngày: {item.date.split("T")[0]}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Ionicons name="time-outline" size={16} color="#6C63FF" />
+              <Text style={styles.cardText}>
+                Giờ: {item.start_time} - {item.end_time}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Ionicons name="home-outline" size={16} color="#6C63FF" />
+              <Text style={styles.cardText}>Phòng: {item.room}</Text>
+            </View>
+            {item.note ? (
+              <View style={styles.row}>
+                <Ionicons
+                  name="document-text-outline"
+                  size={16}
+                  color="#6C63FF"
+                />
+                <Text style={styles.cardText}>Ghi chú: {item.note}</Text>
+              </View>
+            ) : null}
+
             {roleId === 1 && (
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginTop: 10,
-                }}
-              >
-                <Button
-                  title="Sửa"
+              <View style={styles.actionRow}>
+                <TouchableOpacity
+                  style={[styles.actionButton, { backgroundColor: "#6C63FF" }]}
                   onPress={() =>
                     navigation.navigate("EditCourseSchedule", {
                       scheduleId: item.schedule_id,
                     })
                   }
-                />
-                <Button
-                  title="Xóa"
-                  color="red"
+                >
+                  <Text style={styles.actionText}>Sửa</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.actionButton, { backgroundColor: "#FF4D4D" }]}
                   onPress={() => handleDelete(item.schedule_id)}
-                />
+                >
+                  <Text style={styles.actionText}>Xóa</Text>
+                </TouchableOpacity>
               </View>
             )}
           </View>
@@ -153,14 +203,45 @@ export default function ScheduleListScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
-  item: {
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 5,
+  banner: { width: "100%", height: 160, marginBottom: 10 },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginHorizontal: 15,
+    marginBottom: 5,
+    color: "#333",
   },
-  date: { fontSize: 16, fontWeight: "bold" },
+  totalText: {
+    fontSize: 14,
+    color: "#666",
+    marginHorizontal: 15,
+    marginBottom: 10,
+  },
+  card: {
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  row: { flexDirection: "row", alignItems: "center", marginBottom: 5 },
+  cardText: { fontSize: 15, color: "#444", marginLeft: 8 },
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 10,
+    gap: 10,
+  },
+  actionButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 15,
+    borderRadius: 6,
+  },
+  actionText: { color: "#fff", fontWeight: "600" },
 });

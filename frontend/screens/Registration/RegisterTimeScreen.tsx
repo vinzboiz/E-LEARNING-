@@ -3,15 +3,33 @@ import {
   View,
   Text,
   TouchableOpacity,
-  StyleSheet,
   Modal,
   Alert,
   ActivityIndicator,
-  TextInput,
   FlatList,
+  Image,
+  ScrollView,
+  Platform,
+  TextInput,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RegisterCourseService } from "../../services/registercourse.service";
+
+// Import styles chung
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+import { inputStyles } from "../../constants/inputStyles";
+import { modalStyles } from "../../constants/modalStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 interface RegisterTime {
   begin_register: string;
@@ -23,27 +41,33 @@ interface RegisterTime {
 }
 
 export default function RegisterTimeScreen() {
+  const navigation = useNavigation();
   const [registerTimes, setRegisterTimes] = useState<RegisterTime[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [role, setRole] = useState<number | null>(null);
 
-  const [begin, setBegin] = useState("");
-  const [end, setEnd] = useState("");
+  const [begin, setBegin] = useState(new Date());
+  const [end, setEnd] = useState(new Date());
   const [year, setYear] = useState("");
   const [semester, setSemester] = useState("");
+
+  const [showBeginPicker, setShowBeginPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
+
   const [isEditing, setIsEditing] = useState(false);
   const [selectedTime, setSelectedTime] = useState<RegisterTime | null>(null);
 
-  // Format ngày giống DB (YYYY-MM-DD)
-  const formatDate = (dateStr: string) => {
-    return dateStr ? dateStr.slice(0, 10) : "";
+  const formatDate = (date: Date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = ("0" + (d.getMonth() + 1)).slice(-2);
+    const day = ("0" + d.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
   };
 
-  // Kiểm tra hết hạn
   const isExpired = (date: string) => new Date(date) < new Date();
 
-  // Lấy role
   useEffect(() => {
     const fetchRole = async () => {
       const savedRole = await AsyncStorage.getItem("role_id");
@@ -52,7 +76,6 @@ export default function RegisterTimeScreen() {
     fetchRole();
   }, []);
 
-  // Lấy dữ liệu từ BE
   const fetchRegisterTimes = async () => {
     try {
       setLoading(true);
@@ -61,10 +84,10 @@ export default function RegisterTimeScreen() {
       const unique = data.reduce((acc: RegisterTime[], curr: RegisterTime) => {
         const formattedCurr = {
           ...curr,
-          begin_register: formatDate(curr.begin_register),
-          end_register: formatDate(curr.end_register),
-          due_date_start: formatDate(curr.due_date_start),
-          due_date_end: formatDate(curr.due_date_end),
+          begin_register: curr.begin_register.slice(0, 10),
+          end_register: curr.end_register.slice(0, 10),
+          due_date_start: curr.due_date_start.slice(0, 10),
+          due_date_end: curr.due_date_end.slice(0, 10),
         };
         const exists = acc.find(
           (x) =>
@@ -75,16 +98,7 @@ export default function RegisterTimeScreen() {
         return acc;
       }, []);
 
-      // Sinh viên chỉ xem những khoảng còn hạn
-      const filtered =
-        role === 2
-          ? unique.filter(
-              (item: RegisterTime) =>
-                !isExpired(item.end_register) || !isExpired(item.due_date_end)
-            )
-          : unique;
-
-      setRegisterTimes(filtered);
+      setRegisterTimes(unique);
     } catch (err: any) {
       Alert.alert("Lỗi", err.message || "Không thể tải dữ liệu");
     } finally {
@@ -96,18 +110,17 @@ export default function RegisterTimeScreen() {
     if (role !== null) fetchRegisterTimes();
   }, [role]);
 
-  // Mở modal
   const openModal = (editData?: RegisterTime) => {
     if (editData) {
-      setBegin(editData.begin_register);
-      setEnd(editData.end_register);
+      setBegin(new Date(editData.begin_register));
+      setEnd(new Date(editData.end_register));
       setYear(editData.year.toString());
       setSemester(editData.semester.toString());
       setSelectedTime(editData);
       setIsEditing(true);
     } else {
-      setBegin("");
-      setEnd("");
+      setBegin(new Date());
+      setEnd(new Date());
       setYear("");
       setSemester("");
       setIsEditing(false);
@@ -115,9 +128,8 @@ export default function RegisterTimeScreen() {
     setModalVisible(true);
   };
 
-  // Lưu dữ liệu
   const saveRegisterTime = async () => {
-    if (!begin || !end || !year || !semester) {
+    if (!year || !semester) {
       Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin");
       return;
     }
@@ -128,14 +140,14 @@ export default function RegisterTimeScreen() {
         await RegisterCourseService.updateRegisterTime({
           begin: selectedTime.begin_register,
           end: selectedTime.end_register,
-          newBegin: begin,
-          newEnd: end,
+          newBegin: formatDate(begin),
+          newEnd: formatDate(end),
         });
         Alert.alert("Thành công", "Cập nhật thời gian thành công");
       } else {
         await RegisterCourseService.createForAll({
-          begin_register: begin,
-          end_register: end,
+          begin_register: formatDate(begin),
+          end_register: formatDate(end),
           year: Number(year),
           semester: Number(semester),
         });
@@ -151,144 +163,176 @@ export default function RegisterTimeScreen() {
   };
 
   const renderTimeCard = ({ item }: { item: RegisterTime }) => (
-    <View style={styles.card}>
-      <Text>Ngày bắt đầu: {item.begin_register}</Text>
-      <Text>Ngày kết thúc: {item.end_register}</Text>
-      <Text>Bắt đầu đóng học phí: {item.due_date_start}</Text>
-      <Text>Kết thúc đóng học phí: {item.due_date_end}</Text>
-      <Text>Học kỳ: {item.semester}</Text>
-      <Text>Năm học: {item.year}</Text>
+    <View style={cardStyles.card}>
+      <View style={{ flex: 1 }}>
+        <Text style={textStyles.subjectName}>
+          Học kỳ {item.semester} - {item.year}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          Bắt đầu: {item.begin_register}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          Kết thúc: {item.end_register}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          Đóng học phí: {item.due_date_start} - {item.due_date_end}
+        </Text>
+      </View>
       {role === 1 && !isExpired(item.end_register) && (
         <TouchableOpacity
-          style={styles.button}
+          style={[buttonStyles.smallBtn, { backgroundColor: colors.primary }]}
           onPress={() => openModal(item)}
         >
-          <Text style={styles.buttonText}>Cập nhật</Text>
+          <Text style={buttonStyles.smallBtnText}>Cập nhật</Text>
         </TouchableOpacity>
       )}
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Quản Lý Thời Gian Đăng Ký</Text>
+    <View style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.registerTime}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Thời gian đăng ký</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Quản lý và xem danh sách thời gian đăng ký
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
+      {/* Nội dung */}
       {loading ? (
-        <ActivityIndicator size="large" color="#6C63FF" />
-      ) : (
-        <>
-          <FlatList
-            data={registerTimes}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={renderTimeCard}
-            contentContainerStyle={{ paddingBottom: 20 }}
+        <ActivityIndicator size="large" color={colors.primary} />
+      ) : registerTimes.length === 0 ? (
+        <View style={layoutStyles.center}>
+          <Image
+            source={Images.Common.nothing}
+            style={imageStyles.emptyImage}
+            resizeMode="contain"
           />
-
-          {role === 1 && (
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: "green" }]}
-              onPress={() => openModal()}
-            >
-              <Text style={styles.buttonText}>+ Tạo Thời Gian Đăng Ký</Text>
-            </TouchableOpacity>
-          )}
-        </>
+          <Text style={textStyles.emptyText}>
+            Chưa có thời gian đăng ký nào!
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={registerTimes}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderTimeCard}
+          ListFooterComponent={
+            <View style={{ alignItems: "center", marginVertical: 20 }}>
+              <Image
+                source={Images.More.img6}
+                style={imageStyles.footerImage}
+                resizeMode="contain"
+              />
+              <Text style={textStyles.footerText}>
+                Tiếp tục hành trình của bạn!
+              </Text>
+              <Text style={textStyles.totalText}>
+                Tổng số thời gian đăng ký: {registerTimes.length}
+              </Text>
+            </View>
+          }
+        />
       )}
 
+      {/* Nút Tạo Thời Gian Đăng Ký - chỉ Admin */}
+      {role === 1 && (
+        <TouchableOpacity style={buttonStyles.fab} onPress={() => openModal()}>
+          <Ionicons name="add" size={30} color="#fff" />
+        </TouchableOpacity>
+      )}
+
+      {/* Modal chỉ dành cho Admin */}
       {role === 1 && (
         <Modal visible={modalVisible} transparent animationType="slide">
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>
+          <View style={modalStyles.modalContainer}>
+            <ScrollView style={modalStyles.modalContent}>
+              <Text style={textStyles.modalTitle}>
                 {isEditing ? "Cập nhật" : "Thêm"} thời gian
               </Text>
+
+              {/* Date Picker */}
+              <TouchableOpacity
+                style={inputStyles.dateInput}
+                onPress={() => setShowBeginPicker(true)}
+              >
+                <Text>Bắt đầu: {formatDate(begin)}</Text>
+              </TouchableOpacity>
+              {showBeginPicker && (
+                <DateTimePicker
+                  value={begin}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowBeginPicker(Platform.OS === "ios");
+                    if (selectedDate) setBegin(selectedDate);
+                  }}
+                />
+              )}
+
+              <TouchableOpacity
+                style={inputStyles.dateInput}
+                onPress={() => setShowEndPicker(true)}
+              >
+                <Text>Kết thúc: {formatDate(end)}</Text>
+              </TouchableOpacity>
+              {showEndPicker && (
+                <DateTimePicker
+                  value={end}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    setShowEndPicker(Platform.OS === "ios");
+                    if (selectedDate) setEnd(selectedDate);
+                  }}
+                />
+              )}
+
               <TextInput
-                style={styles.input}
-                placeholder="Ngày bắt đầu (YYYY-MM-DD)"
-                value={begin}
-                onChangeText={setBegin}
-              />
-              <TextInput
-                style={styles.input}
-                placeholder="Ngày kết thúc (YYYY-MM-DD)"
-                value={end}
-                onChangeText={setEnd}
-              />
-              <TextInput
-                style={styles.input}
+                style={inputStyles.input}
                 placeholder="Năm học"
                 keyboardType="numeric"
                 value={year}
                 onChangeText={setYear}
               />
               <TextInput
-                style={styles.input}
+                style={inputStyles.input}
                 placeholder="Học kỳ"
                 keyboardType="numeric"
                 value={semester}
                 onChangeText={setSemester}
               />
 
-              <TouchableOpacity style={styles.saveButton} onPress={saveRegisterTime}>
-                <Text style={styles.saveButtonText}>Lưu</Text>
+              <TouchableOpacity
+                style={buttonStyles.primary}
+                onPress={saveRegisterTime}
+              >
+                <Text style={buttonStyles.primaryText}>Lưu</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.saveButton, { backgroundColor: "#999" }]}
+                style={[buttonStyles.primary, { backgroundColor: "#999" }]}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.saveButtonText}>Hủy</Text>
+                <Text style={buttonStyles.primaryText}>Hủy</Text>
               </TouchableOpacity>
-            </View>
+            </ScrollView>
           </View>
         </Modal>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20, textAlign: "center" },
-  card: {
-    backgroundColor: "#f9f9f9",
-    padding: 20,
-    borderRadius: 10,
-    marginBottom: 10,
-    elevation: 2,
-  },
-  button: {
-    backgroundColor: "#6C63FF",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: { color: "#fff", fontWeight: "bold" },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    margin: 20,
-    padding: 20,
-    borderRadius: 10,
-  },
-  modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 15 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  },
-  saveButton: {
-    backgroundColor: "#6C63FF",
-    padding: 12,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  saveButtonText: { color: "#fff", fontWeight: "bold" },
-});

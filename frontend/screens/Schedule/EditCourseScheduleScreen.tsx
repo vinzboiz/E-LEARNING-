@@ -3,15 +3,18 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   ScrollView,
   StyleSheet,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { CourseScheduleService } from "../../services/courseschedule.service";
-
+//assets
+import { Images } from "../../constants/images/images";
 interface Schedule {
   schedule_id: number;
   date: string;
@@ -25,64 +28,52 @@ interface Schedule {
 export default function EditCourseScheduleScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation();
-  const { courseId } = route.params;
-  const { scheduleId } = route.params;
+  const { courseId, scheduleId } = route.params;
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Load lịch học từ BE
-  // const fetchSchedules = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const res = await CourseScheduleService.getAllAdmin(); // Admin lấy all
-  //     const filtered = res.data.filter((sch: Schedule) => sch.course_id === courseId);
-
-  //     // Format lại date cho dễ đọc
-  //     const formatted = filtered.map((sch: Schedule) => ({
-  //       ...sch,
-  //       date: sch.date.split("T")[0], // YYYY-MM-DD
-  //     }));
-  //     setSchedules(formatted);
-  //   } catch (error: any) {
-  //     Alert.alert("Lỗi", error.message || "Không thể tải lịch học");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
+  // Lấy 1 lịch học theo ID
   const fetchSchedule = async () => {
-  try {
-    setLoading(true);
-    const res = await CourseScheduleService.getByIdAdmin(scheduleId); // Lấy 1 lịch học
-    const sch = res.data;
-    sch.date = sch.date.split("T")[0];
-    setSchedules([sch]); // Dùng mảng 1 phần tử
-  } catch (error: any) {
-    Alert.alert("Lỗi", error.message || "Không thể tải lịch học");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      const res = await CourseScheduleService.getByIdAdmin(scheduleId);
+      const sch = res.data;
+      sch.date = sch.date.split("T")[0];
+      setSchedules([sch]);
+    } catch (error: any) {
+      Alert.alert("Lỗi", error.message || "Không thể tải lịch học");
+      navigation.goBack();
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // useEffect(() => {
-  //   fetchSchedules();
-  // }, [courseId]);
   useEffect(() => {
-  fetchSchedule();
-}, [scheduleId]);
+    fetchSchedule();
+  }, [scheduleId]);
 
-
-  const handleChange = (index: number, field: keyof Schedule, value: string) => {
+  const handleChange = (
+    index: number,
+    field: keyof Schedule,
+    value: string
+  ) => {
     const updated = [...schedules];
     updated[index] = { ...updated[index], [field]: value };
     setSchedules(updated);
   };
 
-  // Lưu 1 lịch học riêng lẻ
   const handleSaveOne = async (schedule: Schedule) => {
     try {
-      if (!schedule.date || !schedule.start_time || !schedule.end_time || !schedule.room) {
-        Alert.alert("Thông báo", `Vui lòng nhập đầy đủ thông tin cho lịch ID ${schedule.schedule_id}`);
+      if (
+        !schedule.date ||
+        !schedule.start_time ||
+        !schedule.end_time ||
+        !schedule.room
+      ) {
+        Alert.alert(
+          "Thông báo",
+          `Vui lòng nhập đầy đủ thông tin cho lịch ID ${schedule.schedule_id}`
+        );
         return;
       }
       await CourseScheduleService.update(schedule.schedule_id, {
@@ -93,7 +84,11 @@ export default function EditCourseScheduleScreen() {
         note: schedule.note || "",
         course_id: schedule.course_id,
       });
-      Alert.alert("Thành công", `Cập nhật lịch ID ${schedule.schedule_id} thành công!`);
+      Alert.alert(
+        "Thành công",
+        `Cập nhật lịch ID ${schedule.schedule_id} thành công!`,
+        [{ text: "OK", onPress: () => navigation.goBack() }]
+      );
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Không thể cập nhật lịch học");
     }
@@ -102,7 +97,7 @@ export default function EditCourseScheduleScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color="#6C63FF" />
         <Text>Đang tải dữ liệu lịch học...</Text>
       </View>
     );
@@ -110,41 +105,69 @@ export default function EditCourseScheduleScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Chỉnh sửa lịch học cho Course ID: {courseId}</Text>
+      {/* Banner */}
+      <View>
+        <Image
+          source={Images.TopBanner.schedule}
+          style={styles.banner}
+          resizeMode="cover"
+        />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.title}>Chỉnh Sửa Lịch Học</Text>
+
       {schedules.map((schedule, index) => (
         <View key={schedule.schedule_id} style={styles.scheduleBlock}>
           <Text style={styles.scheduleTitle}>Lịch #{index + 1}</Text>
+
+          <Text style={styles.label}>Ngày (YYYY-MM-DD)</Text>
           <TextInput
-            placeholder="Ngày (YYYY-MM-DD)"
             style={styles.input}
             value={schedule.date}
             onChangeText={(text) => handleChange(index, "date", text)}
           />
+
+          <Text style={styles.label}>Giờ bắt đầu (HH:MM)</Text>
           <TextInput
-            placeholder="Giờ bắt đầu (HH:MM)"
             style={styles.input}
             value={schedule.start_time}
             onChangeText={(text) => handleChange(index, "start_time", text)}
           />
+
+          <Text style={styles.label}>Giờ kết thúc (HH:MM)</Text>
           <TextInput
-            placeholder="Giờ kết thúc (HH:MM)"
             style={styles.input}
             value={schedule.end_time}
             onChangeText={(text) => handleChange(index, "end_time", text)}
           />
+
+          <Text style={styles.label}>Phòng học</Text>
           <TextInput
-            placeholder="Phòng học"
             style={styles.input}
             value={schedule.room}
             onChangeText={(text) => handleChange(index, "room", text)}
           />
+
+          <Text style={styles.label}>Ghi chú</Text>
           <TextInput
-            placeholder="Ghi chú"
             style={styles.input}
             value={schedule.note || ""}
             onChangeText={(text) => handleChange(index, "note", text)}
           />
-          <Button title="Lưu lịch này" onPress={() => handleSaveOne(schedule)} />
+
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={() => handleSaveOne(schedule)}
+          >
+            <Ionicons name="save-outline" size={18} color="#fff" />
+            <Text style={styles.saveButtonText}>Lưu Lịch Này</Text>
+          </TouchableOpacity>
         </View>
       ))}
     </ScrollView>
@@ -152,22 +175,65 @@ export default function EditCourseScheduleScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+  banner: { width: "100%", height: 180 },
+  backButton: {
+    position: "absolute",
+    top: 19,
+    left: 15,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 20,
+    padding: 4,
+  },
   title: {
     fontSize: 22,
     fontWeight: "bold",
-    marginBottom: 20,
     textAlign: "center",
+    marginVertical: 10,
+    color: "#333",
+  },
+  subTitle: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "#666",
+    marginBottom: 20,
   },
   scheduleBlock: {
+    marginHorizontal: 20,
     marginBottom: 20,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    padding: 15,
     backgroundColor: "#f8f8f8",
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
-  scheduleTitle: { fontSize: 18, marginBottom: 10, fontWeight: "600" },
-  input: { borderWidth: 1, padding: 10, marginBottom: 10, borderRadius: 5, backgroundColor: "#fff" },
+  scheduleTitle: { fontSize: 18, fontWeight: "600", marginBottom: 10 },
+  label: { fontSize: 14, fontWeight: "500", marginBottom: 5, color: "#555" },
+  input: {
+    borderWidth: 1,
+    padding: 10,
+    marginBottom: 12,
+    borderRadius: 5,
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
+  },
+  saveButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#6C63FF",
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  saveButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 5,
+  },
 });

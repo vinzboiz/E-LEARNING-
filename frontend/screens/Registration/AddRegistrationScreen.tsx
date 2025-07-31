@@ -11,6 +11,9 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { RegisterCourseService } from "../../services/registercourse.service";
 
+//assets
+import { Images } from "../../constants/images/images";
+
 export default function AddRegistrationScreen() {
   const navigation = useNavigation();
   const [beginRegister, setBeginRegister] = useState("");

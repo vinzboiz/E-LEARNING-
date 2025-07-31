@@ -7,6 +7,7 @@ import LoginScreen from "../screens/Auth/LoginScreen";
 import RegisterScreen from "../screens/Auth/RegisterScreen";
 import OTPScreen from "../screens/Auth/OTPScreen";
 import ProfileScreen from "../screens/Auth/ProfileScreen";
+import UserManagementScreen from "../screens/Auth/UserManagementScreen";
 
 // Subject Screens
 import SubjectListScreen from "../screens/Subject/SubjectListScreen";
@@ -63,6 +64,7 @@ export type RootStackParamList = {
   Register: undefined;
   OTP: { name: string; email: string; password: string };
   Profile: { user: any };
+  UserManagement: undefined;
 
   SubjectList: undefined;
   AddSubject: undefined;
@@ -116,6 +118,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="OTP" component={OTPScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="UserManagement" component={UserManagementScreen} />
 
       {/* Subject */}
       <Stack.Screen name="SubjectList" component={SubjectListScreen} />
@@ -163,7 +166,10 @@ export default function AppNavigator() {
         name="GradeSubmissionScreen"
         component={GradeSubmissionScreen}
       />
-      <Stack.Screen name="SubmissionDetail" component={SubmissionDetailScreen} />
+      <Stack.Screen
+        name="SubmissionDetail"
+        component={SubmissionDetailScreen}
+      />
       <Stack.Screen
         name="SubmittedAssignments"
         component={SubmittedAssignmentsScreen}
@@ -178,10 +184,7 @@ export default function AppNavigator() {
         name="RegistrationList"
         component={RegistrationListScreen}
       />
-      <Stack.Screen
-        name="AddRegistration"
-        component={AddRegistrationScreen}
-      />
+      <Stack.Screen name="AddRegistration" component={AddRegistrationScreen} />
       <Stack.Screen
         name="EditRegistration"
         component={EditRegistrationScreen}

@@ -3,14 +3,24 @@ import {
   View,
   Text,
   FlatList,
-  StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Button,
   Alert,
+  Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ClassMemberService } from "../../services/classmember.service";
+
+// Import CSS chung
+import { layoutStyles } from "../../constants/layoutStyles";
+import { textStyles } from "../../constants/textStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { colors } from "../../constants/colors";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 export default function StudentCourseListScreen() {
   const navigation = useNavigation<any>();
@@ -19,25 +29,23 @@ export default function StudentCourseListScreen() {
   const [selected, setSelected] = useState<number[]>([]);
 
   const fetchCourses = async () => {
-  try {
-    setLoading(true);
-    const res = await ClassMemberService.getAvailableCourses();
+    try {
+      setLoading(true);
+      const res = await ClassMemberService.getAvailableCourses();
 
-    // Nếu BE trả về message cảnh báo
-    if (res.message && (!res.data || res.data.length === 0)) {
-      Alert.alert("Thông báo", res.message);
-      setCourses([]);
-      return;
+      if (res.message && (!res.data || res.data.length === 0)) {
+        Alert.alert("Thông báo", res.message);
+        setCourses([]);
+        return;
+      }
+
+      setCourses(res.data || res);
+    } catch (err: any) {
+      Alert.alert("Lỗi", err.message || "Không thể tải danh sách khóa học");
+    } finally {
+      setLoading(false);
     }
-
-    setCourses(res.data || res); // fallback nếu BE không có 'data'
-  } catch (err: any) {
-    Alert.alert("Lỗi", err.message || "Không thể tải danh sách khóa học");
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchCourses();
@@ -50,79 +58,116 @@ export default function StudentCourseListScreen() {
   };
 
   const handleAddCourses = async () => {
-  try {
-    if (selected.length === 0) {
-      Alert.alert("Thông báo", "Vui lòng chọn ít nhất 1 môn để thêm vào giỏ.");
-      return;
-    }
-
-    for (const courseId of selected) {
-      const result = await ClassMemberService.addCourse(courseId);
-      if (result?.message && result.data === null) {
-        Alert.alert("Thông báo", result.message);
-        return; // Dừng luôn nếu BE từ chối
+    try {
+      if (selected.length === 0) {
+        Alert.alert(
+          "Thông báo",
+          "Vui lòng chọn ít nhất 1 môn để thêm vào giỏ."
+        );
+        return;
       }
+
+      for (const courseId of selected) {
+        const result = await ClassMemberService.addCourse(courseId);
+        if (result?.message && result.data === null) {
+          Alert.alert("Thông báo", result.message);
+          return;
+        }
+      }
+
+      Alert.alert("Thành công", "Đã thêm các môn đã chọn vào giỏ.");
+      setSelected([]);
+    } catch (error: any) {
+      Alert.alert("Lỗi", error.message);
     }
-
-    Alert.alert("Thành công", "Đã thêm các môn đã chọn vào giỏ.");
-    setSelected([]);
-  } catch (error: any) {
-    Alert.alert("Lỗi", error.message);
-  }
-};
-
+  };
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007BFF" />
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text>Đang tải danh sách khóa học...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Danh sách khóa học khả dụng</Text>
-      <FlatList
-        data={courses}
-        keyExtractor={(item) => item.course_id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.courseItem,
-              selected.includes(item.course_id) && styles.selected,
-            ]}
-            onPress={() => toggleSelectCourse(item.course_id)}
-          >
-            <Text style={styles.courseName}>{item.name || item.subject_name}</Text>
-            <Text style={styles.courseDetail}>
-              Học phí: {item.price?.toLocaleString()} VNĐ
-            </Text>
-          </TouchableOpacity>
-        )}
-      />
-      <Button title="Thêm vào giỏ" onPress={handleAddCourses} />
-      <View style={{ height: 10 }} />
-      <Button
-        title="Xem giỏ môn học"
+    <View style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.studentCourse}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Khóa học khả dụng</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Chọn khóa học phù hợp để thêm vào giỏ
+          </Text>
+        </View>
+      </View>
+
+      {/* Danh sách khóa học */}
+      {courses.length === 0 ? (
+        <View style={layoutStyles.center}>
+          <Image
+            source={Images.Common.nothing}
+            style={imageStyles.emptyImage}
+            resizeMode="contain"
+          />
+          <Text style={textStyles.emptyText}>
+            Không có khóa học nào khả dụng.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={courses}
+          keyExtractor={(item) => item.course_id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                cardStyles.card,
+                selected.includes(item.course_id) && {
+                  backgroundColor: "#d1f5d3",
+                },
+              ]}
+              onPress={() => toggleSelectCourse(item.course_id)}
+            >
+              <Text style={textStyles.subjectName}>
+                {item.name || item.subject_name}
+              </Text>
+              <Text style={textStyles.subjectDesc}>
+                Học phí: {item.price?.toLocaleString()} VNĐ
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      )}
+      <View style={{ alignItems: "center", marginVertical: 20 }}>
+        <Image
+          source={Images.More.img9}
+          style={imageStyles.footerImage}
+          resizeMode="contain"
+        />
+        <Text style={textStyles.footerText}>
+          Hãy chọn khóa học để bắt đầu hành trình của bạn!
+        </Text>
+      </View>
+      {/* Button thêm vào giỏ */}
+      <TouchableOpacity
+        style={[buttonStyles.primary, { marginTop: 20 }]}
+        onPress={handleAddCourses}
+      >
+        <Text style={buttonStyles.primaryText}>Thêm vào giỏ</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[buttonStyles.primary, { marginTop: 10 }]}
         onPress={() => navigation.navigate("StudentRegisteredCourses")}
-      />
+      >
+        <Text style={buttonStyles.primaryText}>Xem giỏ môn học</Text>
+      </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
-  courseItem: {
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
-  },
-  selected: { backgroundColor: "#d1f5d3" },
-  courseName: { fontSize: 18, fontWeight: "bold" },
-  courseDetail: { fontSize: 14, color: "#666" },
-});

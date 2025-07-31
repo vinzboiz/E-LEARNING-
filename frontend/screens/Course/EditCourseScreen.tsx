@@ -3,14 +3,18 @@ import {
   View,
   Text,
   TextInput,
-  Button,
   StyleSheet,
-  Alert,
-  ActivityIndicator,
   ScrollView,
+  Alert,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { CourseService } from "../../services/course.service";
+//assets
+import { Images } from "../../constants/images/images";
 
 export default function EditCourseScreen() {
   const route = useRoute<any>();
@@ -36,7 +40,10 @@ export default function EditCourseScreen() {
         setPrice(String(data.price || ""));
         setNumOfPeriods(String(data.numofperiods || ""));
       } catch (error: any) {
-        Alert.alert("Lỗi", error.message || "Không thể tải thông tin khóa học.");
+        Alert.alert(
+          "Lỗi",
+          error.message || "Không thể tải thông tin khóa học."
+        );
         navigation.goBack();
       } finally {
         setLoading(false);
@@ -62,8 +69,9 @@ export default function EditCourseScreen() {
         numofperiods: Number(numOfPeriods),
       };
       await CourseService.update(id, data);
-      Alert.alert("Thành công", "Khóa học đã được cập nhật thành công!");
-      navigation.goBack();
+      Alert.alert("Thành công", "Khóa học đã được cập nhật thành công!", [
+        { text: "OK", onPress: () => navigation.goBack() },
+      ]);
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Cập nhật khóa học thất bại.");
     } finally {
@@ -74,74 +82,133 @@ export default function EditCourseScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007bff" />
+        <ActivityIndicator size="large" color="#6C63FF" />
         <Text>Đang tải dữ liệu khóa học...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Sửa Course</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      {/* Banner */}
+      <View>
+        <Image
+          source={Images.TopBanner.course}
+          style={styles.banner}
+          resizeMode="cover"
+        />
+        {/* Nút quay lại */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      <TextInput
-        placeholder="Môn học (ID)"
-        style={styles.input}
-        value={subjectId}
-        onChangeText={setSubjectId}
-        keyboardType="numeric"
-      />
+      {/* Tiêu đề */}
+      <Text style={styles.pageTitle}>Sửa Khóa Học</Text>
 
-      <TextInput
-        placeholder="Học kỳ"
-        style={styles.input}
-        value={semester}
-        onChangeText={setSemester}
-      />
+      {/* Form */}
+      <View style={styles.formContainer}>
+        <Text style={styles.label}>Môn học (ID)</Text>
+        <TextInput
+          placeholder="Mã môn học"
+          style={styles.input}
+          value={subjectId}
+          onChangeText={setSubjectId}
+          keyboardType="numeric"
+        />
 
-      <TextInput
-        placeholder="Năm học"
-        style={styles.input}
-        value={year}
-        onChangeText={setYear}
-        keyboardType="numeric"
-      />
+        <Text style={styles.label}>Học kỳ</Text>
+        <TextInput
+          placeholder="VD: HK1"
+          style={styles.input}
+          value={semester}
+          onChangeText={setSemester}
+        />
 
-      <TextInput
-        placeholder="Giá khóa học"
-        style={styles.input}
-        value={price}
-        onChangeText={setPrice}
-        keyboardType="numeric"
-      />
+        <Text style={styles.label}>Năm học</Text>
+        <TextInput
+          placeholder="VD: 2025"
+          style={styles.input}
+          value={year}
+          onChangeText={setYear}
+          keyboardType="numeric"
+        />
 
-      <TextInput
-        placeholder="Số buổi học"
-        style={styles.input}
-        value={numOfPeriods}
-        onChangeText={setNumOfPeriods}
-        keyboardType="numeric"
-      />
+        <Text style={styles.label}>Giá khóa học (VNĐ)</Text>
+        <TextInput
+          placeholder="VD: 1000000"
+          style={styles.input}
+          value={price}
+          onChangeText={setPrice}
+          keyboardType="numeric"
+        />
 
-      <Button
-        title={saving ? "Đang lưu..." : "Lưu"}
-        onPress={handleEdit}
-        disabled={saving}
-      />
+        <Text style={styles.label}>Số buổi học</Text>
+        <TextInput
+          placeholder="VD: 12"
+          style={styles.input}
+          value={numOfPeriods}
+          onChangeText={setNumOfPeriods}
+          keyboardType="numeric"
+        />
+
+        {/* Nút Lưu */}
+        <TouchableOpacity
+          style={styles.saveBtn}
+          onPress={handleEdit}
+          disabled={saving}
+        >
+          <Text style={styles.saveText}>{saving ? "Đang lưu..." : "Lưu"}</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, padding: 20, backgroundColor: "#fff" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 24, marginBottom: 20, textAlign: "center" },
+  scrollContainer: { flexGrow: 1, backgroundColor: "#fff", paddingBottom: 20 },
+  banner: { width: "100%", height: 180 },
+  backButton: {
+    position: "absolute",
+    top: 19,
+    left: 15,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 20,
+    padding: 4,
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginVertical: 20,
+    color: "#333",
+  },
+  formContainer: { paddingHorizontal: 20 },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 6,
+    color: "#555",
+  },
   input: {
     borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
     borderColor: "#ccc",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
     backgroundColor: "#fafafa",
+    fontSize: 16,
   },
+  saveBtn: {
+    backgroundColor: "#6C63FF",
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  saveText: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
 });

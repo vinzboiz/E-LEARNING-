@@ -5,14 +5,28 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
-  StyleSheet,
   Modal,
   Alert,
   ActivityIndicator,
   ScrollView,
+  Image,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
 import { UserService } from "../../services/user.service";
+
+// Import styles
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+import { searchStyles } from "../../constants/searchStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 interface User {
   id?: number | string;
@@ -23,8 +37,10 @@ interface User {
 }
 
 export default function UserManagementScreen() {
+  const navigation = useNavigation();
   const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -34,15 +50,14 @@ export default function UserManagementScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"admin" | "student" | "teacher">("student");
+  const [searchText, setSearchText] = useState<string>("");
 
-  // Lấy danh sách user từ API
   const fetchUsers = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const data = await UserService.getAll();
-
       const formatted = data.map((u: any, index: number) => ({
-        id: u.id || u._id || u.user_id || `user-${index}`,
+        id: u.id || u.user_id || `user-${index}`,
         name: u.name,
         email: u.email,
         role:
@@ -50,9 +65,12 @@ export default function UserManagementScreen() {
           (u.role_id === 1 ? "admin" : u.role_id === 3 ? "teacher" : "student"),
       }));
       setUsers(formatted);
+      setFilteredUsers(formatted);
     } catch (error: any) {
-      console.log("Error fetchUsers:", error);
-      Alert.alert("Lỗi", error.message || "Không thể tải danh sách người dùng");
+      Alert.alert(
+        "Lỗi",
+        error.message || "Không thể tải danh sách người dùng."
+      );
     } finally {
       setLoading(false);
     }
@@ -62,7 +80,19 @@ export default function UserManagementScreen() {
     fetchUsers();
   }, []);
 
-  // Mở modal thêm user
+  const handleSearch = (text: string) => {
+    setSearchText(text);
+    if (!text.trim()) {
+      setFilteredUsers(users);
+    } else {
+      const lowerText = text.toLowerCase();
+      const filtered = users.filter((u) =>
+        u.name.toLowerCase().includes(lowerText)
+      );
+      setFilteredUsers(filtered);
+    }
+  };
+
   const openAddUser = () => {
     setIsEditing(false);
     setSelectedUser(null);
@@ -73,21 +103,19 @@ export default function UserManagementScreen() {
     setModalVisible(true);
   };
 
-  // Mở modal sửa user
   const openEditUser = (user: User) => {
     setIsEditing(true);
     setSelectedUser(user);
     setName(user.name);
     setEmail(user.email);
-    setPassword(""); // Mật khẩu không trả từ API, phải nhập lại
+    setPassword("");
     setRole(user.role as "admin" | "student" | "teacher");
     setModalVisible(true);
   };
 
-  // Lưu user (thêm hoặc cập nhật)
   const saveUser = async () => {
     if (!name || !email || (!isEditing && !password)) {
-      Alert.alert("Lỗi", "Vui lòng nhập đủ tên, email và mật khẩu");
+      Alert.alert("Lỗi", "Vui lòng nhập đầy đủ tên, email và mật khẩu");
       return;
     }
 
@@ -100,39 +128,27 @@ export default function UserManagementScreen() {
       };
 
       if (isEditing && selectedUser?.id) {
-        // Cập nhật user
-        const payload: any = {
-          name,
-          email,
-          role_id: roleMap[role],
-        };
+        const payload: any = { name, email, role_id: roleMap[role] };
         if (password) payload.password = password;
 
         await UserService.update(Number(selectedUser.id), payload);
-        setUsers((prev) =>
-          prev.map((u) =>
-            u.id === selectedUser.id ? { ...u, name, email, role } : u
-          )
-        );
+        fetchUsers();
         Alert.alert("Thành công", "Cập nhật người dùng thành công");
       } else {
-        // Thêm user mới
         const payload = { name, email, password, role_id: roleMap[role] };
-        const newUser = await UserService.create(payload);
-        setUsers((prev) => [...prev, newUser]);
+        await UserService.create(payload);
+        fetchUsers();
         Alert.alert("Thành công", "Thêm người dùng thành công");
       }
       setModalVisible(false);
     } catch (error: any) {
-      console.log("Error saveUser:", error);
       Alert.alert("Lỗi", error.message || "Không thể lưu người dùng");
     } finally {
       setLoading(false);
     }
   };
 
-  // Xóa user
-  const deleteUser = (id: number | string) => {
+  const handleDelete = (id: number | string) => {
     Alert.alert("Xác nhận", "Bạn có chắc muốn xóa người dùng này?", [
       { text: "Hủy", style: "cancel" },
       {
@@ -140,91 +156,165 @@ export default function UserManagementScreen() {
         style: "destructive",
         onPress: async () => {
           try {
-            setLoading(true);
             await UserService.delete(Number(id));
-            setUsers((prev) => prev.filter((u) => u.id !== id));
-            Alert.alert("Đã xóa", "Người dùng đã bị xóa");
+            fetchUsers();
+            Alert.alert("Thành công", "Người dùng đã được xóa.");
           } catch (error: any) {
-            console.log("Error delete:", error);
-            Alert.alert("Lỗi", error.message || "Xóa người dùng thất bại");
-          } finally {
-            setLoading(false);
+            Alert.alert("Lỗi", error.message || "Xóa người dùng thất bại.");
           }
         },
       },
     ]);
   };
 
-  const renderUser = ({ item }: { item: User }) => (
-    <View style={styles.userCard}>
-      <View>
-        <Text style={styles.userName}>{item.name}</Text>
-        <Text style={styles.userEmail}>{item.email}</Text>
-        <Text>Role: {item.role}</Text>
+  if (loading) {
+    return (
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text>Đang tải danh sách người dùng...</Text>
       </View>
-      <View style={styles.actionRow}>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: "#6C63FF" }]}
-          onPress={() => openEditUser(item)}
-        >
-          <Text style={styles.actionText}>Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.actionButton, { backgroundColor: "red" }]}
-          onPress={() => deleteUser(item.id!)}
-        >
-          <Text style={styles.actionText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Quản Lý Người Dùng</Text>
-      <TouchableOpacity style={styles.addButton} onPress={openAddUser}>
-        <Text style={styles.addButtonText}>+ Thêm User</Text>
+    <View style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.schedule}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Người dùng</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Quản lý danh sách người dùng của bạn
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={textStyles.listTitle}>Danh sách người dùng</Text>
+
+      {/* Thanh tìm kiếm */}
+      <View style={searchStyles.searchWrapper}>
+        <Ionicons
+          name="search"
+          size={20}
+          color="#999"
+          style={searchStyles.searchIcon}
+        />
+        <TextInput
+          style={searchStyles.searchInput}
+          placeholder="Tìm kiếm người dùng..."
+          value={searchText}
+          onChangeText={handleSearch}
+        />
+      </View>
+
+      {/* Nút thêm hình tròn */}
+      <TouchableOpacity style={buttonStyles.fab} onPress={openAddUser}>
+        <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#6C63FF" />
+      {/* Danh sách user */}
+      {filteredUsers.length === 0 ? (
+        <View style={layoutStyles.center}>
+          <Image
+            source={Images.Common.nothing}
+            style={imageStyles.emptyImage}
+            resizeMode="contain"
+          />
+          <Text style={textStyles.emptyText}>Không có người dùng nào!</Text>
+        </View>
       ) : (
         <FlatList
-          data={users}
-          keyExtractor={(item, index) => (item.id ? item.id.toString() : index.toString())}
-          renderItem={renderUser}
-          contentContainerStyle={{ paddingBottom: 20 }}
+          data={filteredUsers}
+          keyExtractor={(item) => item.id!.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={cardStyles.card}
+              onPress={() => openEditUser(item)}
+              activeOpacity={0.9}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={textStyles.subjectName}>{item.name}</Text>
+                <Text style={textStyles.subjectDesc}>{item.email}</Text>
+                <Text style={textStyles.subjectDesc}>Role: {item.role}</Text>
+              </View>
+              <View style={cardStyles.cardActions}>
+                <TouchableOpacity
+                  style={[
+                    buttonStyles.iconBtn,
+                    { backgroundColor: colors.primary },
+                  ]}
+                  onPress={() => openEditUser(item)}
+                >
+                  <Ionicons name="create-outline" size={18} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    buttonStyles.iconBtn,
+                    { backgroundColor: colors.danger },
+                  ]}
+                  onPress={() => handleDelete(item.id!)}
+                >
+                  <Ionicons name="trash-outline" size={18} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={
+            <View style={{ marginTop: 20, alignItems: "center" }}>
+              <Image
+                source={Images.More.img2}
+                style={imageStyles.footerImage}
+                resizeMode="contain"
+              />
+              <Text style={textStyles.footerText}>
+                Quản lý người dùng dễ dàng!
+              </Text>
+              <Text style={textStyles.totalText}>
+                Tổng số tài khoản: {filteredUsers.length}
+              </Text>
+            </View>
+          }
         />
       )}
 
       {/* Modal thêm/sửa user */}
       <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <ScrollView style={styles.modalContent}>
-            <Text style={styles.modalTitle}>
+        <View style={layoutStyles.modalOverlay}>
+          <ScrollView style={layoutStyles.modalContent}>
+            <Text style={textStyles.modalTitle}>
               {isEditing ? "Sửa User" : "Thêm User"}
             </Text>
 
             <TextInput
-              style={styles.input}
+              style={textStyles.input}
               placeholder="Tên"
               value={name}
               onChangeText={setName}
             />
             <TextInput
-              style={styles.input}
+              style={textStyles.input}
               placeholder="Email"
               value={email}
               onChangeText={setEmail}
             />
             <TextInput
-              style={styles.input}
+              style={textStyles.input}
               placeholder="Mật khẩu"
               value={password}
               secureTextEntry
               onChangeText={setPassword}
             />
-            <Text style={styles.label}>Role:</Text>
+            <Text style={textStyles.label}>Role:</Text>
             <Picker
               selectedValue={role}
               onValueChange={(itemValue) =>
@@ -237,16 +327,16 @@ export default function UserManagementScreen() {
               <Picker.Item label="Giảng Viên" value="teacher" />
             </Picker>
 
-            <TouchableOpacity style={styles.saveButton} onPress={saveUser}>
-              <Text style={styles.saveText}>
+            <TouchableOpacity style={buttonStyles.primary} onPress={saveUser}>
+              <Text style={buttonStyles.primaryText}>
                 {isEditing ? "Cập nhật" : "Thêm"}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.saveButton, { backgroundColor: "#999" }]}
+              style={[buttonStyles.primary, { backgroundColor: "#999" }]}
               onPress={() => setModalVisible(false)}
             >
-              <Text style={styles.saveText}>Hủy</Text>
+              <Text style={buttonStyles.primaryText}>Hủy</Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -254,68 +344,3 @@ export default function UserManagementScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  addButton: {
-    backgroundColor: "green",
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-    alignItems: "center",
-  },
-  addButtonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-  userCard: {
-    backgroundColor: "#f9f9f9",
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    elevation: 2,
-  },
-  userName: { fontSize: 18, fontWeight: "bold" },
-  userEmail: { color: "#666", marginBottom: 5 },
-  actionRow: { flexDirection: "row", gap: 10 },
-  actionButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 5,
-  },
-  actionText: { color: "#fff", fontWeight: "bold" },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: {
-    backgroundColor: "#fff",
-    margin: 20,
-    padding: 20,
-    borderRadius: 10,
-  },
-  modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 15 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  },
-  saveButton: {
-    backgroundColor: "#6C63FF",
-    padding: 12,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  saveText: { color: "#fff", fontWeight: "bold" },
-  label: { fontSize: 16, marginBottom: 5 },
-});

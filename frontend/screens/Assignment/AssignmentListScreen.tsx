@@ -3,17 +3,28 @@ import {
   View,
   Text,
   FlatList,
-  Button,
-  StyleSheet,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { AssignmentService } from "../../services/assignment.service";
 import { AuthService } from "../../services/auth.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+// Import style chung
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -36,38 +47,37 @@ export default function AssignmentListScreen() {
   const [loading, setLoading] = useState<boolean>(true);
   const [roleId, setRoleId] = useState<number | null>(null);
 
-  // Lấy thông tin role của user hiện tại
+  // Lấy thông tin role
   const fetchRole = async () => {
     try {
       const user = await AuthService.getMe();
-      console.log("User Info (Role):", user);
       setRoleId(user.role_id);
     } catch (error: any) {
-      console.error("Error fetching user role:", error);
-      Alert.alert("Lỗi", error.message || "Không lấy được thông tin người dùng.");
+      Alert.alert(
+        "Lỗi",
+        error.message || "Không lấy được thông tin người dùng."
+      );
     }
   };
 
-  // Lấy danh sách bài tập từ API
+  // Lấy danh sách bài tập
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      console.log(`[API] Fetching assignments for lessonId: ${lessonId}`);
       const data = await AssignmentService.getAssignmentsByLesson(lessonId);
-      console.log("Assignments fetched:", data);
       setAssignments(data || []);
     } catch (error: any) {
-      console.error("Error fetching assignments:", error);
       Alert.alert(
         "Lỗi",
-        error.response?.data?.error || error.message || "Không thể tải danh sách bài tập."
+        error.response?.data?.error ||
+          error.message ||
+          "Không thể tải danh sách bài tập."
       );
     } finally {
       setLoading(false);
     }
   };
 
-  // Khi màn hình focus hoặc mở
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", async () => {
       await fetchRole();
@@ -76,92 +86,8 @@ export default function AssignmentListScreen() {
     return unsubscribe;
   }, [navigation]);
 
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007BFF" />
-        <Text>Đang tải danh sách bài tập...</Text>
-      </View>
-    );
-  }
-
-  return (
-  <View style={styles.container}>
-    <Text style={styles.title}>Danh sách bài tập - Lesson ID: {lessonId}</Text>
-
-    {/* Nút "Xem bài đã nộp" cho sinh viên */}
-    {roleId === 2 && (
-      <View style={{ marginBottom: 10 }}>
-        <Button
-          title="Xem bài đã nộp"
-          color="#5B3FFF"
-          onPress={() => navigation.navigate("SubmittedAssignments")}
-        />
-      </View>
-    )}
-
-    {/* Chỉ admin (role 1) hoặc giảng viên (role 3) mới thấy nút Thêm */}
-    {(roleId === 1 || roleId === 3) && (
-      <Button
-        title="Thêm bài tập"
-        onPress={() => navigation.navigate("AddAssignmentScreen", { lessonId })}
-      />
-    )}
-
-    {assignments.length === 0 ? (
-      <Text style={{ marginTop: 20, textAlign: "center", color: "#555" }}>
-        Không có bài tập nào cho bài học này.
-      </Text>
-    ) : (
-      <FlatList
-        data={assignments}
-        keyExtractor={(item) => item.assignment_id.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.assignmentItem}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("AssignmentDetail", { assignment: item })
-              }
-            >
-              <Text style={styles.assignmentTitle}>{item.title}</Text>
-              <Text style={styles.assignmentDetail}>
-                Hạn nộp: {item.due_date_end || "Không có thông tin"}
-              </Text>
-              <Text style={styles.assignmentDetail}>
-                Trạng thái: {item.status || "Không xác định"}
-              </Text>
-            </TouchableOpacity>
-
-            {/* Chỉ admin hoặc giảng viên mới thấy nút Sửa và Xóa */}
-            {(roleId === 1 || roleId === 3) && (
-              <View style={styles.actionRow}>
-                <Button
-                  title="Sửa"
-                  color="orange"
-                  onPress={() =>
-                    navigation.navigate("EditAssignmentScreen", {
-                      assignmentId: item.assignment_id, // chỉ gửi ID
-                    })
-                  }
-                />
-
-                <Button
-                  title="Xóa"
-                  color="red"
-                  onPress={() => handleDelete(item.assignment_id)}
-                />
-              </View>
-            )}
-          </View>
-        )}
-      />
-    )}
-  </View>
-);
-
-
-  // Xóa bài tập
-  async function handleDelete(id: number) {
+  // Xoá bài tập
+  const handleDelete = async (id: number) => {
     Alert.alert("Xác nhận", "Bạn có chắc muốn xóa bài tập này?", [
       { text: "Hủy", style: "cancel" },
       {
@@ -170,33 +96,153 @@ export default function AssignmentListScreen() {
         onPress: async () => {
           try {
             await AssignmentService.deleteAssignment(id);
-            setAssignments((prev) => prev.filter((a) => a.assignment_id !== id));
+            setAssignments((prev) =>
+              prev.filter((a) => a.assignment_id !== id)
+            );
             Alert.alert("Thành công", "Đã xóa bài tập.");
           } catch (error: any) {
-            console.error("Error deleting assignment:", error);
             Alert.alert("Lỗi", error.message || "Không thể xóa bài tập.");
           }
         },
       },
     ]);
-  }
-}
+  };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 20 },
-  assignmentItem: {
-    padding: 15,
-    marginBottom: 10,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
-  },
-  assignmentTitle: { fontSize: 18, fontWeight: "bold" },
-  assignmentDetail: { fontSize: 14, color: "#555" },
-  actionRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
-  },
-});
+  if (loading) {
+    return (
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text>Đang tải danh sách bài tập...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.assignment}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Bài Tập</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Danh sách bài tập của bài học {lessonId}
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={textStyles.listTitle}>Danh sách bài tập</Text>
+
+      {/* Nếu không có bài tập */}
+      {assignments.length === 0 ? (
+        <View style={layoutStyles.center}>
+          <Image
+            source={Images.Common.nothing}
+            style={imageStyles.emptyImage}
+            resizeMode="contain"
+          />
+          <Text style={textStyles.emptyText}>
+            Không có bài tập nào cho bài học này.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={assignments}
+          keyExtractor={(item) => item.assignment_id.toString()}
+          renderItem={({ item }) => (
+            <View style={cardStyles.card}>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("AssignmentDetail", { assignment: item })
+                }
+                style={{ flex: 1 }}
+              >
+                <Text style={textStyles.subjectName}>{item.title}</Text>
+                <Text style={textStyles.subjectDesc}>
+                  Hạn nộp: {item.due_date_end || "Không có thông tin"}
+                </Text>
+                <Text style={textStyles.subjectDesc}>
+                  Trạng thái: {item.status || "Không xác định"}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Chỉ admin hoặc giáo viên */}
+              {(roleId === 1 || roleId === 3) && (
+                <View style={cardStyles.cardActions}>
+                  <TouchableOpacity
+                    style={[
+                      buttonStyles.iconBtn,
+                      { backgroundColor: colors.primary },
+                    ]}
+                    onPress={() =>
+                      navigation.navigate("EditAssignmentScreen", {
+                        assignmentId: item.assignment_id,
+                      })
+                    }
+                  >
+                    <Ionicons name="create-outline" size={18} color="#fff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      buttonStyles.iconBtn,
+                      { backgroundColor: colors.danger },
+                    ]}
+                    onPress={() => handleDelete(item.assignment_id)}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          )}
+          ListFooterComponent={
+            <View style={{ alignItems: "center", marginVertical: 20 }}>
+              <Image
+                source={Images.More.img5}
+                style={imageStyles.footerImage}
+                resizeMode="contain"
+              />
+              <Text style={textStyles.footerText}>
+                Tiếp tục hoàn thành các bài tập của bạn!
+              </Text>
+            </View>
+          }
+        />
+      )}
+
+      {/* Nút Thêm bài tập */}
+      {(roleId === 1 || roleId === 3) && (
+        <TouchableOpacity
+          style={buttonStyles.fab}
+          onPress={() =>
+            navigation.navigate("AddAssignmentScreen", { lessonId })
+          }
+        >
+          <Ionicons name="add" size={30} color="#fff" />
+        </TouchableOpacity>
+      )}
+
+      {/* Nút xem bài đã nộp cho student */}
+      {roleId === 2 && (
+        <TouchableOpacity
+          style={[
+            buttonStyles.fab,
+            { bottom: 80, backgroundColor: colors.primary },
+          ]}
+          onPress={() => navigation.navigate("SubmittedAssignments")}
+        >
+          <Ionicons name="document-text-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+}

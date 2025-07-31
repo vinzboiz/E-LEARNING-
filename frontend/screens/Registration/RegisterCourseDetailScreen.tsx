@@ -3,15 +3,26 @@ import {
   View,
   Text,
   StyleSheet,
-  Button,
   ScrollView,
   ActivityIndicator,
   Alert,
+  Image,
+  TouchableOpacity,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { RegisterCourseService } from "../../services/registercourse.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
+// Import style constants
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { inputStyles } from "../../constants/inputStyles";
+import { textStyles } from "../../constants/textStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -27,11 +38,10 @@ export default function RegisterCourseDetailScreen() {
   const [registerCourse, setRegisterCourse] = useState<any>(null);
 
   const formatDate = (dateString: string) => {
-  if (!dateString) return "";
-  return new Date(dateString).toISOString().split("T")[0];
-};
+    if (!dateString) return "";
+    return new Date(dateString).toISOString().split("T")[0];
+  };
 
-  // Lấy chi tiết đăng ký học phần
   const fetchRegisterCourse = async () => {
     try {
       setLoading(true);
@@ -56,7 +66,7 @@ export default function RegisterCourseDetailScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007BFF" />
+        <ActivityIndicator size="large" color="#6C63FF" />
         <Text>Đang tải dữ liệu...</Text>
       </View>
     );
@@ -68,90 +78,133 @@ export default function RegisterCourseDetailScreen() {
         <Text style={{ fontSize: 18, color: "red" }}>
           Không tìm thấy đăng ký học phần.
         </Text>
-        <Button title="Quay lại" onPress={() => navigation.goBack()} />
+        <Text style={styles.backText} onPress={() => navigation.goBack()}>
+          Quay lại
+        </Text>
       </View>
     );
   }
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Chi tiết đăng ký khóa học</Text>
-
-      {/* Hiển thị tên và email */}
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Người dùng:</Text>
-        <Text style={styles.value}>{registerCourse.user_name}</Text>
+      {/* Banner */}
+      <View style={styles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.registerTime}
+          style={styles.banner}
+          resizeMode="cover"
+        />
+        {/* Nút quay lại */}
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <View style={styles.bannerTextContainer}>
+          <Text style={styles.bannerTitle}>CHI TIẾT ĐĂNG KÝ</Text>
+          <Text style={styles.bannerSubtitle}>
+            Thông tin chi tiết về đăng ký khóa học
+          </Text>
+        </View>
       </View>
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Email:</Text>
-        <Text style={styles.value}>{registerCourse.email}</Text>
-      </View>
 
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Thời gian tạo:</Text>
-        <Text style={styles.value}>{formatDate(registerCourse.create_at)}</Text>
-      </View>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Thời gian đăng ký:</Text>
-        <Text style={styles.value}>
-          {formatDate(registerCourse.begin_register)} - {formatDate(registerCourse.end_register)}
+      {/* Card thông tin */}
+      <View style={styles.card}>
+        <Text style={styles.cardRow}>
+          <Text style={styles.label}>Người dùng: </Text>
+          {registerCourse.user_name} ({registerCourse.email})
         </Text>
-      </View>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Thời gian đóng học phí:</Text>
-        <Text style={styles.value}>
-          {formatDate(registerCourse.due_date_start)} - {formatDate(registerCourse.due_date_end)}
+        <Text style={styles.cardRow}>
+          <Text style={styles.label}>Thời gian tạo: </Text>
+          {formatDate(registerCourse.create_at)}
         </Text>
-      </View>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Học kì:</Text>
-        <Text style={styles.value}>{registerCourse.semester}</Text>
-      </View>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Năm học:</Text>
-        <Text style={styles.value}>{registerCourse.year}</Text>
-      </View>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Học phí:</Text>
-        <Text style={styles.value}>
-          {registerCourse.tuition?.toLocaleString() || 0} VNĐ
+        <Text style={styles.cardRow}>
+          <Text style={styles.label}>Đăng ký: </Text>
+          {formatDate(registerCourse.begin_register)} -{" "}
+          {formatDate(registerCourse.end_register)}
         </Text>
-      </View>
-
-      <View style={styles.infoBox}>
-        <Text style={styles.label}>Trạng thái:</Text>
+        <Text style={styles.cardRow}>
+          <Text style={styles.label}>Đóng học phí: </Text>
+          {formatDate(registerCourse.due_date_start)} -{" "}
+          {formatDate(registerCourse.due_date_end)}
+        </Text>
+        <Text style={styles.cardRow}>
+          <Text style={styles.label}>Học kỳ / Năm học: </Text>
+          {registerCourse.semester} / {registerCourse.year}
+        </Text>
+        <Text style={[styles.cardRow, { color: "red", fontWeight: "600" }]}>
+          <Text style={styles.label}>Học phí: </Text>
+          {registerCourse.tuition?.toLocaleString("vi-VN") || 0} VNĐ
+        </Text>
         <Text
           style={[
-            styles.value,
+            styles.cardRow,
             { color: registerCourse.status === "Mở" ? "green" : "red" },
           ]}
         >
+          <Text style={styles.label}>Trạng thái: </Text>
           {registerCourse.status}
         </Text>
       </View>
 
-      <Button
-        title="Xem danh sách Checkout"
-        onPress={() =>
-          navigation.navigate("CheckoutList", {
-            courseId: registerCourse.course_id,
-          })
-        }
-      />
+      {/* Ảnh minh họa dưới */}
+      <View style={styles.bottomImageContainer}>
+        <Image
+          source={Images.More.img4}
+          style={styles.bottomImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.footerText}>Tiếp tục học tập và phát triển!</Text>
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 1, backgroundColor: "#fff" },
   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  infoBox: { marginBottom: 10 },
-  label: { fontSize: 16, fontWeight: "600" },
-  value: { fontSize: 16, color: "#333" },
+  backText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#6C63FF",
+    fontWeight: "600",
+  },
+  bannerWrapper: { position: "relative" },
+  banner: { width: "100%", height: 180 },
+  bannerTextContainer: {
+    position: "absolute",
+    bottom: 15,
+    left: 20,
+  },
+  bannerTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  bannerSubtitle: {
+    fontSize: 14,
+    color: "#f0f0f0",
+  },
+  card: {
+    backgroundColor: "#fff",
+    margin: 20,
+    padding: 15,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  label: { fontWeight: "600", color: "#333" },
+  cardRow: {
+    fontSize: 15,
+    color: "#444",
+    marginBottom: 8,
+  },
+  bottomImageContainer: { marginTop: 20, alignItems: "center" },
+  bottomImage: { width: "70%", height: 160 },
+  footerText: { marginTop: 10, color: "#777", fontSize: 14 },
 });

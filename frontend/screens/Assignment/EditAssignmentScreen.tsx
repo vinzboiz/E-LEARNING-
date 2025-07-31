@@ -3,36 +3,61 @@ import {
   View,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
+  ScrollView,
   Alert,
   ActivityIndicator,
-  ScrollView,
+  TouchableOpacity,
+  Image,
+  Platform,
 } from "react-native";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { AssignmentService } from "../../services/assignment.service";
+
+// Import styles chung
+import { layoutStyles } from "../../constants/layoutStyles";
+import { textStyles } from "../../constants/textStyles";
+import { inputStyles } from "../../constants/inputStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { colors } from "../../constants/colors";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 export default function EditAssignmentScreen() {
   const navigation = useNavigation();
   const route = useRoute<any>();
-  const { assignmentId } = route.params || {}; // Nhận assignmentId từ navigation
+  const { assignmentId } = route.params || {};
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [dueDate, setDueDate] = useState("");
+  const [startDate, setStartDate] = useState<Date>(new Date());
+  const [dueDate, setDueDate] = useState<Date>(new Date());
   const [link, setLink] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Hàm load dữ liệu bài tập
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showDuePicker, setShowDuePicker] = useState(false);
+
+  const formatDate = (date: Date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = ("0" + (d.getMonth() + 1)).slice(-2);
+    const day = ("0" + d.getDate()).slice(-2);
+    return `${year}-${month}-${day}`;
+  };
+
   const fetchAssignment = async () => {
     setLoading(true);
     try {
       const data = await AssignmentService.getAssignmentById(assignmentId);
       setTitle(data.title || "");
       setDescription(data.description || "");
-      setStartDate(data.due_date_start || "");
-      setDueDate(data.due_date_end || "");
+      setStartDate(
+        data.due_date_start ? new Date(data.due_date_start) : new Date()
+      );
+      setDueDate(data.due_date_end ? new Date(data.due_date_end) : new Date());
       setLink(data.link_drive || "");
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Không thể tải dữ liệu bài tập.");
@@ -41,11 +66,9 @@ export default function EditAssignmentScreen() {
     }
   };
 
-  // Gọi API khi load màn hình
   useEffect(() => {
-    if (assignmentId) {
-      fetchAssignment();
-    } else {
+    if (assignmentId) fetchAssignment();
+    else {
       Alert.alert("Lỗi", "Không tìm thấy ID bài tập.");
       navigation.goBack();
     }
@@ -62,8 +85,8 @@ export default function EditAssignmentScreen() {
       await AssignmentService.updateAssignment(assignmentId, {
         title: title.trim(),
         description: description.trim(),
-        due_date_start: startDate.trim(),
-        due_date_end: dueDate.trim(),
+        due_date_start: formatDate(startDate),
+        due_date_end: formatDate(dueDate),
         link_drive: link?.trim() || undefined,
       });
 
@@ -78,70 +101,107 @@ export default function EditAssignmentScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007BFF" />
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text>Đang tải dữ liệu...</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Chỉnh sửa bài tập</Text>
+    <ScrollView style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.assignment}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Chỉnh sửa bài tập</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Cập nhật thông tin bài tập
+          </Text>
+        </View>
+      </View>
 
-      <TextInput
-        placeholder="Tiêu đề bài tập"
-        style={styles.input}
-        value={title}
-        onChangeText={setTitle}
-      />
-      <TextInput
-        placeholder="Mô tả bài tập"
-        style={[styles.input, styles.textArea]}
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
-      <TextInput
-        placeholder="Ngày bắt đầu (YYYY-MM-DD)"
-        style={styles.input}
-        value={startDate}
-        onChangeText={setStartDate}
-      />
-      <TextInput
-        placeholder="Hạn nộp (YYYY-MM-DD)"
-        style={styles.input}
-        value={dueDate}
-        onChangeText={setDueDate}
-      />
-      <TextInput
-        placeholder="Link nộp bài (Google Drive)"
-        style={styles.input}
-        value={link}
-        onChangeText={setLink}
-      />
+      {/* Form nhập liệu */}
+      <View style={{ padding: 20 }}>
+        <TextInput
+          placeholder="Tiêu đề bài tập"
+          style={inputStyles.input}
+          value={title}
+          onChangeText={setTitle}
+        />
+        <TextInput
+          placeholder="Mô tả bài tập"
+          style={[inputStyles.input, { height: 80, textAlignVertical: "top" }]}
+          value={description}
+          onChangeText={setDescription}
+          multiline
+        />
 
-      <Button title="Lưu thay đổi" onPress={handleSave} />
+        {/* Date Picker Start */}
+        <TouchableOpacity
+          style={buttonStyles.dateInput}
+          onPress={() => setShowStartPicker(true)}
+        >
+          <Text>Ngày bắt đầu: {formatDate(startDate)}</Text>
+        </TouchableOpacity>
+        {showStartPicker && (
+          <DateTimePicker
+            value={startDate}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowStartPicker(Platform.OS === "ios");
+              if (selectedDate) setStartDate(selectedDate);
+            }}
+          />
+        )}
+
+        {/* Date Picker Due */}
+        <TouchableOpacity
+          style={buttonStyles.dateInput}
+          onPress={() => setShowDuePicker(true)}
+        >
+          <Text>Hạn nộp: {formatDate(dueDate)}</Text>
+        </TouchableOpacity>
+        {showDuePicker && (
+          <DateTimePicker
+            value={dueDate}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowDuePicker(Platform.OS === "ios");
+              if (selectedDate) setDueDate(selectedDate);
+            }}
+          />
+        )}
+
+        <TextInput
+          placeholder="Link nộp bài (Google Drive)"
+          style={inputStyles.input}
+          value={link}
+          onChangeText={setLink}
+        />
+
+        <TouchableOpacity style={buttonStyles.primary} onPress={handleSave}>
+          <Text style={buttonStyles.primaryText}>Lưu thay đổi</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Footer */}
+      <View style={{ alignItems: "center", marginVertical: 20 }}>
+        <Image
+          source={Images.More.img7}
+          style={imageStyles.footerImage}
+          resizeMode="contain"
+        />
+        <Text style={textStyles.footerText}>
+          Hoàn thiện bài tập giúp bạn tiến bộ hơn!
+        </Text>
+      </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 20,
-    borderRadius: 5,
-    backgroundColor: "#fff",
-  },
-  textArea: { height: 80, textAlignVertical: "top" },
-});

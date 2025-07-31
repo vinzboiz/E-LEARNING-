@@ -4,11 +4,10 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
-  StyleSheet,
-  Button,
   ActivityIndicator,
   Alert,
   Linking,
+  Image,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -16,6 +15,18 @@ import { RootStackParamList } from "../../navigation/AppNavigator";
 import { AssignmentService } from "../../services/assignment.service";
 import { AuthService } from "../../services/auth.service";
 import { SubmissionService } from "../../services/submission.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+// Import CSS chung
+import { layoutStyles } from "../../constants/layoutStyles";
+import { textStyles } from "../../constants/textStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { colors } from "../../constants/colors";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -42,39 +53,35 @@ export default function AssignmentDetailScreen() {
   const [assignmentDetail, setAssignmentDetail] = useState<any>(assignment);
 
   const fetchData = async () => {
-  if (!assignment || !assignment.assignment_id) {
-    Alert.alert("Lỗi", "Không có thông tin bài tập.");
-    return;
-  }
+    if (!assignment || !assignment.assignment_id) {
+      Alert.alert("Lỗi", "Không có thông tin bài tập.");
+      return;
+    }
 
-  setLoading(true);
-  try {
-    const user = await AuthService.getMe();
-    setRoleId(user.role_id);
+    setLoading(true);
+    try {
+      const user = await AuthService.getMe();
+      setRoleId(user.role_id);
 
-    const detail = await AssignmentService.getAssignmentById(
-      assignment.assignment_id
-    );
-    setAssignmentDetail(detail);
-
-    // Chỉ admin/giảng viên mới gọi API danh sách bài nộp
-    if (user.role_id !== 2) {
-      const res = await SubmissionService.getSubmissionsByAssignment(
+      const detail = await AssignmentService.getAssignmentById(
         assignment.assignment_id
       );
-      console.log("[DEBUG] Submissions:", res);
-      setSubmissions(res);
-    }
-  } catch (error: any) {
-    // Không báo lỗi nếu là lỗi 403 cho sinh viên
-    if (error.message && !error.message.includes("quyền")) {
-      Alert.alert("Lỗi", error.message || "Không thể tải chi tiết bài tập.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
+      setAssignmentDetail(detail);
 
+      if (user.role_id !== 2) {
+        const res = await SubmissionService.getSubmissionsByAssignment(
+          assignment.assignment_id
+        );
+        setSubmissions(res);
+      }
+    } catch (error: any) {
+      if (error.message && !error.message.includes("quyền")) {
+        Alert.alert("Lỗi", error.message || "Không thể tải chi tiết bài tập.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -82,8 +89,8 @@ export default function AssignmentDetailScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007BFF" />
+      <View style={layoutStyles.center}>
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text>Đang tải dữ liệu...</Text>
       </View>
     );
@@ -91,106 +98,127 @@ export default function AssignmentDetailScreen() {
 
   const renderSubmissionItem = ({ item }: { item: Submission }) => (
     <TouchableOpacity
-      style={styles.submissionItem}
+      style={[cardStyles.card, { marginHorizontal: 20, marginVertical: 5 }]}
       onPress={() =>
         navigation.navigate("SubmissionDetail", { submission: item })
       }
     >
-      <Text style={styles.studentName}>
+      <Text style={textStyles.subjectName}>
         {item.content || "Không có nội dung"}
       </Text>
-      <Text style={styles.submissionInfo}>
+      <Text style={textStyles.subjectDesc}>
         Nộp lúc: {item.submitted_at || "Chưa có"}
       </Text>
-      <Text style={styles.submissionInfo}>
+      <Text style={textStyles.subjectDesc}>
         Điểm: {item.score ?? "Chưa chấm"}
       </Text>
     </TouchableOpacity>
   );
 
   return (
-    <FlatList
-      data={roleId !== 2 ? submissions : []}
-      keyExtractor={(item) => item.submission_id.toString()}
-      renderItem={renderSubmissionItem}
-      ListHeaderComponent={
-        <View style={styles.assignmentBox}>
-          <Text style={styles.title}>
-            {assignmentDetail?.title || "Không có tiêu đề"}
-          </Text>
-          <Text style={styles.desc}>
-            {assignmentDetail?.description || "Không có mô tả"}
-          </Text>
-          <Text style={styles.date}>
-            Thời gian: {assignmentDetail?.due_date_start} -{" "}
-            {assignmentDetail?.due_date_end}
-          </Text>
-          {assignmentDetail?.link_drive ? (
-            <Text
-              style={[styles.link, { textDecorationLine: "underline" }]}
-              onPress={() => Linking.openURL(assignmentDetail.link_drive)}
-            >
-              Link bài tập: {assignmentDetail.link_drive}
+    <View style={layoutStyles.container}>
+      <FlatList
+        data={roleId !== 2 ? submissions : []}
+        keyExtractor={(item) => item.submission_id.toString()}
+        renderItem={renderSubmissionItem}
+        ListHeaderComponent={
+          <>
+            {/* Banner */}
+            <View style={layoutStyles.bannerWrapper}>
+              <Image
+                source={Images.TopBanner.assignment}
+                style={imageStyles.banner}
+                resizeMode="cover"
+              />
+              <View style={layoutStyles.bannerTextContainer}>
+                <Text style={textStyles.bannerTitle}>Chi tiết bài tập</Text>
+                <Text style={textStyles.bannerSubtitle}>
+                  Thông tin và bài nộp của sinh viên
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={buttonStyles.backButton}
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons name="arrow-back" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Nội dung Assignment */}
+            <View style={[cardStyles.card, { margin: 15 }]}>
+              <Text style={textStyles.subjectName}>
+                {assignmentDetail?.title || "Không có tiêu đề"}
+              </Text>
+              <Text style={textStyles.subjectDesc}>
+                {assignmentDetail?.description || "Không có mô tả"}
+              </Text>
+              <Text style={textStyles.subjectDesc}>
+                Thời gian: {assignmentDetail?.due_date_start} -{" "}
+                {assignmentDetail?.due_date_end}
+              </Text>
+              {assignmentDetail?.link_drive ? (
+                <Text
+                  style={[textStyles.subjectDesc, { color: "blue" }]}
+                  onPress={() => Linking.openURL(assignmentDetail.link_drive)}
+                >
+                  Link bài tập: {assignmentDetail.link_drive}
+                </Text>
+              ) : (
+                <Text style={textStyles.subjectDesc}>
+                  Link bài tập: Không có
+                </Text>
+              )}
+              <Text style={textStyles.subjectDesc}>
+                Trạng thái: {assignmentDetail?.status || "Chưa xác định"}
+              </Text>
+
+              {roleId === 2 && assignmentDetail?.status !== "đã hết hạn" && (
+                <TouchableOpacity
+                  style={[buttonStyles.primary, { marginTop: 10 }]}
+                  onPress={() =>
+                    navigation.navigate("SubmitAssignmentScreen", {
+                      assignment,
+                    })
+                  }
+                >
+                  <Text style={buttonStyles.primaryText}>Nộp bài tập</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+
+            {/* Danh sách bài nộp */}
+            {roleId !== 2 && (
+              <Text
+                style={[
+                  textStyles.listTitle,
+                  { marginTop: 10, marginLeft: 20, marginBottom: 10 },
+                ]}
+              >
+                Danh sách bài nộp:
+              </Text>
+            )}
+          </>
+        }
+        ListFooterComponent={
+          <View style={{ alignItems: "center", marginVertical: 20 }}>
+            <Image
+              source={Images.More.img4}
+              style={imageStyles.footerImage}
+              resizeMode="contain"
+            />
+            <Text style={textStyles.footerText}>
+              Hãy theo dõi tiến độ bài tập của bạn!
             </Text>
-          ) : (
-            <Text style={styles.link}>Link bài tập: Không có</Text>
-          )}
-          <Text style={styles.status}>
-            Trạng thái: {assignmentDetail?.status || "Chưa xác định"}
-          </Text>
-
-          {/* Nút nộp bài (student) */}
-          {roleId === 2 && assignmentDetail?.status !== "đã hết hạn" && (
-  <View style={{ marginTop: 15 }}>
-    <Button
-      title="Nộp bài tập"
-      onPress={() =>
-        navigation.navigate("SubmitAssignmentScreen", { assignment })
-      }
-    />
-  </View>
-)}
-
-
-          {/* Tiêu đề danh sách nộp bài */}
-          {roleId !== 2 && (
-            <Text style={styles.subTitle}>Danh sách bài nộp:</Text>
-          )}
-        </View>
-      }
-      ListEmptyComponent={
-        roleId !== 2 ? (
-          <Text style={{ textAlign: "center", marginTop: 10 }}>
-            Chưa có bài nộp nào.
-          </Text>
-        ) : null
-      }
-    />
+          </View>
+        }
+        ListEmptyComponent={
+          roleId !== 2 ? (
+            <Text style={{ textAlign: "center", marginTop: 10 }}>
+              Chưa có bài nộp nào.
+            </Text>
+          ) : null
+        }
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  assignmentBox: {
-    marginBottom: 20,
-    padding: 15,
-    borderRadius: 8,
-    backgroundColor: "#f2f2f2",
-  },
-  title: { fontSize: 22, fontWeight: "bold", marginBottom: 5 },
-  desc: { fontSize: 16, marginBottom: 5 },
-  date: { fontSize: 14, color: "#444", marginBottom: 5 },
-  link: { fontSize: 14, color: "blue", marginBottom: 5 },
-  status: { fontSize: 14, color: "green" },
-  subTitle: { fontSize: 20, fontWeight: "bold", marginTop: 20, marginBottom: 10 },
-  submissionItem: {
-    padding: 12,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    marginBottom: 10,
-    marginHorizontal: 20,
-  },
-  studentName: { fontSize: 16, fontWeight: "bold" },
-  submissionInfo: { fontSize: 14, color: "#555" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-});

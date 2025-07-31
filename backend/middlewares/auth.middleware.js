@@ -22,7 +22,7 @@ module.exports = async function (req, res, next) {
 
     req.user = {
       id: userRes.rows[0].user_id,
-      role: userRes.rows[0].role_id,
+      role: Number(userRes.rows[0].role_id),
     };
 
     next(); // Không kiểm tra quyền ở đây

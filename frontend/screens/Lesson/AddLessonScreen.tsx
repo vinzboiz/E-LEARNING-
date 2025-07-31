@@ -3,15 +3,26 @@ import {
   View,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
   ScrollView,
   Alert,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { LessonService } from "../../services/lesson.service";
 import { AuthService } from "../../services/auth.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
+// Import style chung
+import { layoutStyles } from "../../constants/layoutStyles";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { inputStyles } from "../../constants/inputStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
 
 export default function AddLessonScreen() {
   const route = useRoute<any>();
@@ -27,10 +38,13 @@ export default function AddLessonScreen() {
   // Lấy role khi mở màn
   const fetchRole = async () => {
     try {
-      const user = await AuthService.getMe(); // Lấy thông tin user
+      const user = await AuthService.getMe();
       setRoleId(user.role_id);
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Không lấy được thông tin người dùng.");
+      Alert.alert(
+        "Lỗi",
+        error.message || "Không lấy được thông tin người dùng."
+      );
     }
   };
 
@@ -40,30 +54,28 @@ export default function AddLessonScreen() {
 
   // Chọn file PDF
   const pickPdfFile = async () => {
-  try {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: "application/pdf",
-      copyToCacheDirectory: true,
-    });
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
+        copyToCacheDirectory: true,
+      });
 
-    // Kiểm tra nếu user cancel
-    if (result.canceled) {
-      Alert.alert("Thông báo", "Bạn đã hủy chọn file PDF.");
-      return;
+      if (result.canceled) {
+        Alert.alert("Thông báo", "Bạn đã hủy chọn file PDF.");
+        return;
+      }
+
+      const file = result.assets[0];
+      setPdfFile({
+        uri: file.uri,
+        name: file.name || "document.pdf",
+        type: file.mimeType || "application/pdf",
+      });
+    } catch (error) {
+      console.error("Lỗi chọn file PDF:", error);
+      Alert.alert("Lỗi", "Không thể chọn file PDF.");
     }
-
-    // Lấy file đầu tiên từ assets
-    const file = result.assets[0];
-    setPdfFile({
-      uri: file.uri,
-      name: file.name || "document.pdf",
-      type: file.mimeType || "application/pdf",
-    });
-  } catch (error) {
-    console.error("Lỗi chọn file PDF:", error);
-    Alert.alert("Lỗi", "Không thể chọn file PDF.");
-  }
-};
+  };
 
   // Thêm bài học
   const handleAddLesson = async () => {
@@ -90,7 +102,6 @@ export default function AddLessonScreen() {
         course_id: courseId,
         file: pdfFile,
       });
-      console.log("Gửi bài học:", { title, content, courseId, pdfFile });
 
       Alert.alert("Thành công", `Đã thêm bài học: ${newLesson.title}`);
       navigation.goBack();
@@ -102,47 +113,75 @@ export default function AddLessonScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Thêm bài học</Text>
+    <ScrollView style={layoutStyles.container}>
+      {/* Banner */}
+      <View style={layoutStyles.bannerWrapper}>
+        <Image
+          source={Images.TopBanner.lesson}
+          style={imageStyles.banner}
+          resizeMode="cover"
+        />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={textStyles.bannerTitle}>Thêm Bài Học</Text>
+          <Text style={textStyles.bannerSubtitle}>
+            Tạo bài học mới cho khóa học
+          </Text>
+        </View>
+        <TouchableOpacity
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      <TextInput
-        placeholder="Tiêu đề bài học"
-        style={styles.input}
-        value={title}
-        onChangeText={setTitle}
-      />
+      <View style={{ padding: 20 }}>
+        <TextInput
+          placeholder="Tiêu đề bài học"
+          style={inputStyles.input}
+          value={title}
+          onChangeText={setTitle}
+        />
 
-      <TextInput
-        placeholder="Nội dung chi tiết"
-        style={[styles.input, styles.textArea]}
-        value={content}
-        onChangeText={setContent}
-        multiline
-      />
+        <TextInput
+          placeholder="Nội dung chi tiết"
+          style={[inputStyles.input, { height: 100 }]}
+          value={content}
+          onChangeText={setContent}
+          multiline
+        />
 
-      <Button title="Chọn file PDF" onPress={pickPdfFile} />
-      {pdfFile && <Text style={styles.fileName}>Đã chọn: {pdfFile.name}</Text>}
+        <TouchableOpacity style={buttonStyles.primary} onPress={pickPdfFile}>
+          <Text style={buttonStyles.primaryText}>Chọn file PDF</Text>
+        </TouchableOpacity>
+        {pdfFile && (
+          <Text style={[textStyles.subjectDesc, { marginTop: 10 }]}>
+            Đã chọn: {pdfFile.name}
+          </Text>
+        )}
 
-      <Button
-        title={loading ? "Đang thêm..." : "Thêm bài học"}
-        onPress={handleAddLesson}
-        disabled={loading}
-      />
+        <TouchableOpacity
+          style={[buttonStyles.primary, { marginTop: 15 }]}
+          onPress={handleAddLesson}
+          disabled={loading}
+        >
+          <Text style={buttonStyles.primaryText}>
+            {loading ? "Đang thêm..." : "Thêm bài học"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* Footer */}
+      <View style={{ alignItems: "center", marginVertical: 20 }}>
+        <Image
+          source={Images.More.img12}
+          style={imageStyles.footerImage}
+          resizeMode="contain"
+        />
+        <Text style={textStyles.footerText}>
+          Tiếp tục xây dựng kiến thức cho khóa học của bạn!
+        </Text>
+      </View>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 15,
-    borderRadius: 5,
-    backgroundColor: "#fff",
-  },
-  textArea: { height: 100, textAlignVertical: "top" },
-  fileName: { marginTop: 10, fontSize: 14, color: "green" },
-});
