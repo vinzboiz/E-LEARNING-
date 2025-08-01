@@ -11,5 +11,8 @@ router.put("/update-time", authMiddleware, checkRole(1), controller.updateRegist
 
 // Sinh viên (role = 2): xem thông tin đăng ký của chính mình
 router.get("/me", authMiddleware, checkRole(1,2), controller.getMyRegisterCourses);
+// Lấy chi tiết đăng ký học phần theo id
+router.get("/:id", authMiddleware, checkRole(1, 2), controller.getRegisterCourseDetail);
+
 
 module.exports = router;

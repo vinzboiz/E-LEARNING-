@@ -32,7 +32,7 @@ type NavigationProp = NativeStackNavigationProp<
 export default function RegisterCourseDetailScreen() {
   const navigation = useNavigation<NavigationProp>();
   const route = useRoute<any>();
-  const { courseId } = route.params || {};
+  const { registerId } = route.params; // ✅ Nhận đúng id
 
   const [loading, setLoading] = useState(true);
   const [registerCourse, setRegisterCourse] = useState<any>(null);
@@ -45,13 +45,8 @@ export default function RegisterCourseDetailScreen() {
   const fetchRegisterCourse = async () => {
     try {
       setLoading(true);
-      const data = await RegisterCourseService.getMyRegisterCourse();
-      if (courseId) {
-        const found = data.find((c: any) => c.course_id === courseId);
-        setRegisterCourse(found || null);
-      } else {
-        setRegisterCourse(data[0] || null);
-      }
+      const data = await RegisterCourseService.getById(registerId); // ✅ API mới
+      setRegisterCourse(data || null);
     } catch (err: any) {
       Alert.alert("Lỗi", err.message || "Không thể tải chi tiết đăng ký.");
     } finally {
@@ -61,7 +56,7 @@ export default function RegisterCourseDetailScreen() {
 
   useEffect(() => {
     fetchRegisterCourse();
-  }, []);
+  }, [registerId]);
 
   if (loading) {
     return (
@@ -148,6 +143,23 @@ export default function RegisterCourseDetailScreen() {
         </Text>
       </View>
 
+      {/* Danh sách khóa học đã đăng ký */}
+{registerCourse.courses && registerCourse.courses.length > 0 && (
+  <View style={styles.card}>
+    <Text style={[styles.label, { marginBottom: 8 }]}>
+      Danh sách môn học đã đăng ký:
+    </Text>
+    {registerCourse.courses.map((course: any, idx: number) => (
+      <View key={idx} style={styles.courseItem}>
+        <Text style={styles.courseName}>{course.subject_name}</Text>
+        <Text style={styles.coursePrice}>
+          {course.price?.toLocaleString("vi-VN")} VNĐ
+        </Text>
+      </View>
+    ))}
+  </View>
+)}
+
       {/* Ảnh minh họa dưới */}
       <View style={styles.bottomImageContainer}>
         <Image
@@ -207,4 +219,15 @@ const styles = StyleSheet.create({
   bottomImageContainer: { marginTop: 20, alignItems: "center" },
   bottomImage: { width: "70%", height: 160 },
   footerText: { marginTop: 10, color: "#777", fontSize: 14 },
+
+  courseItem: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  paddingVertical: 6,
+  borderBottomWidth: 1,
+  borderBottomColor: "#eee",
+},
+courseName: { fontSize: 15, color: "#333" },
+coursePrice: { fontSize: 14, color: "red" },
+
 });

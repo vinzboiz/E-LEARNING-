@@ -7,6 +7,7 @@ jest.mock("../../api/registercourse.api", () => ({
     getAll: jest.fn(),
     updateRegisterTime: jest.fn(),
     getMyRegisterCourse: jest.fn(),
+    getById: jest.fn(),
   },
 }));
 
@@ -104,4 +105,24 @@ describe("Kiểm thử RegisterCourseService", () => {
       await expect(RegisterCourseService.getMyRegisterCourse()).rejects.toThrow("Không thể lấy thông tin đăng ký.");
     });
   });
+  describe("getById", () => {
+  it("Lấy chi tiết đăng ký học phần theo ID thành công", async () => {
+    const mockData = { register_id: 5, year: 2025, semester: 1 };
+    (RegisterCourseAPI.getById as jest.Mock).mockResolvedValueOnce({ data: mockData });
+
+    const result = await RegisterCourseService.getById(5);
+
+    expect(RegisterCourseAPI.getById).toHaveBeenCalledWith(5);
+    expect(result).toEqual(mockData);
+  });
+
+  it("Báo lỗi khi getById thất bại", async () => {
+    (RegisterCourseAPI.getById as jest.Mock).mockRejectedValueOnce(new Error("Không thể lấy chi tiết đăng ký học phần."));
+
+    await expect(RegisterCourseService.getById(999))
+      .rejects
+      .toThrow("Không thể lấy chi tiết đăng ký học phần.");
+  });
+});
+
 });

@@ -36,4 +36,11 @@ export const RegisterCourseAPI = {
     console.log("[API] GET", `${API_URL}/me`);
     return api.get(`${API_URL}/me`);
   },
+
+  // Lấy chi tiết 1 đăng ký học phần theo ID
+  getById: (id: number) => {
+    console.log("[API] GET", `${API_URL}/${id}`);
+    return api.get(`${API_URL}/${id}`);
+  },
+
 };

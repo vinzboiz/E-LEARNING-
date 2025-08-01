@@ -96,7 +96,7 @@ export type RootStackParamList = {
   RegistrationList: undefined;
   AddRegistration: undefined;
   EditRegistration: undefined;
-  RegisterCourseDetail: { courseId: number };
+  RegisterCourseDetail: { registerId: number };
   RegisterTime: undefined;
 
   StudentCourseList: undefined;

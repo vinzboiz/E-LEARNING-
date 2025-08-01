@@ -46,7 +46,7 @@ export const ClassMemberAPI = {
     return api.get(`${API_URL}/admin/all`);
   },
 
-   // Lấy danh sách khóa học khả dụng cho sinh viên
+  // Lấy danh sách khóa học khả dụng cho sinh viên
   getAvailableCourses: () => {
     console.log("[API] GET", COURSE_URL);
     return api.get(COURSE_URL);
@@ -62,5 +62,8 @@ export const ClassMemberAPI = {
     console.log("[API] GET", `${API_URL}/teacher/${courseId}/students`);
     return api.get(`${API_URL}/teacher/${courseId}/students`);
   },
-
+  getByStatusStrict: (status: string) => {
+    console.log("[API] GET", `${API_URL}/filter-strict?status=${status}`);
+    return api.get(`${API_URL}/filter-strict?status=${status}`);
+  },
 };

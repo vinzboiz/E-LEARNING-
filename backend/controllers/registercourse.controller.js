@@ -51,3 +51,28 @@ exports.updateRegisterTime = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+// Lấy chi tiết đăng ký học phần theo id
+exports.getRegisterCourseDetail = async (req, res) => {
+  try {
+    const registerId = parseInt(req.params.id);
+    if (isNaN(registerId)) {
+      return res.status(400).json({ error: "register_id không hợp lệ" });
+    }
+
+    const data = await RegisterCourse.getRegisterCourseById(
+      registerId,
+      req.user.id,
+      req.user.role
+    );
+
+    if (!data) {
+      return res.status(404).json({ error: "Không tìm thấy bản ghi" });
+    }
+
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+

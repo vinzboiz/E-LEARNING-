@@ -4,7 +4,7 @@ const ClassMember = require("../models/classmember.model");
 exports.getMyClassMembers = async (req, res) => {
   try {
     const result = await ClassMember.getClassMembersByUser(req.user.id);
-    res.status(200).json(result); 
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -48,13 +48,32 @@ exports.getClassMembersByStatus = async (req, res) => {
       return res.status(400).json({ message: "Thiếu trạng thái cần lọc" });
     }
 
-    const result = await ClassMember.getClassMembersByStatus(req.user.id, status);
+    const result = await ClassMember.getClassMembersByStatus(
+      req.user.id,
+      status
+    );
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+// Lọc danh sách môn học theo trạng thái (Strict)
+exports.getClassMembersByStatusStrict = async (req, res) => {
+  try {
+    const { status } = req.query;
+    if (!status) {
+      return res.status(400).json({ message: "Thiếu trạng thái cần lọc" });
+    }
 
+    const result = await ClassMember.getClassMembersByStatusStrict(
+      req.user.id,
+      status
+    );
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 
 // API để sinh viên nhấn "Lưu" giỏ tạm và cập nhật tổng học phí
 exports.saveRegisterCourses = async (req, res) => {
@@ -65,7 +84,6 @@ exports.saveRegisterCourses = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 // API để sinh viên đóng học phí
 exports.payTuition = async (req, res) => {
@@ -93,13 +111,15 @@ exports.getPaidClassMembers = async (req, res) => {
     res.status(200).json(result);
   } catch (err) {
     console.error("[Controller] Error getPaidClassMembers:", err);
-    res.status(500).json({ message: "Lỗi server khi lấy danh sách đã thanh toán." });
+    res
+      .status(500)
+      .json({ message: "Lỗi server khi lấy danh sách đã thanh toán." });
   }
 };
 
 // API giảng viên xem danh sách sinh viên
 exports.getStudentsByCourse = async (req, res) => {
-  console.log("DEBUG user:", req.user);  // log ra user_id và role_id
+  console.log("DEBUG user:", req.user); // log ra user_id và role_id
   console.log("DEBUG params courseId:", req.params.courseId);
 
   try {

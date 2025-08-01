@@ -43,12 +43,13 @@ async function getRegisterCourseByUser(userId) {
   return res.rows;
 }
 
-// ADMIN: Xem tất cả các bản ghi đăng ký học phần
+// ADMIN: Xem tất cả các bản ghi đăng ký học phần (chỉ sinh viên)
 async function getAllRegisterCourses() {
   const res = await db.query(`
-    SELECT r.*, u.name AS user_name, u.email
+    SELECT r.*, u.name AS user_name, u.email, u.role_id
     FROM registercourse r
     JOIN users u ON r.user_id = u.user_id
+    WHERE u.role_id = 2
     ORDER BY r.create_at DESC
   `);
   return res.rows;
@@ -73,9 +74,45 @@ async function updateRegisterTimeForAll(begin, end, newBegin, newEnd) {
   return { message: "Cập nhật thời gian đăng ký cho toàn hệ thống thành công" };
 }
 
+// Lấy chi tiết đăng ký học phần theo register_id
+async function getRegisterCourseById(registerId, userId, role) {
+  let query = `
+    SELECT r.*, u.name AS user_name, u.email
+    FROM registercourse r
+    JOIN users u ON r.user_id = u.user_id
+    WHERE r.register_id = $1
+  `;
+  let params = [registerId];
+
+  // Nếu là sinh viên thì phải kiểm tra đúng của mình mới được xem
+  if (role === 2) {
+    query += ` AND r.user_id = $2`;
+    params.push(userId);
+  }
+
+  const registerRes = await db.query(query, params);
+  if (registerRes.rows.length === 0) return null;
+
+  // Lấy danh sách môn học trong lần đăng ký này
+  const coursesRes = await db.query(`
+    SELECT c.course_id, s.name AS subject_name, c.price
+    FROM classmember cm
+    JOIN course c ON cm.course_id = c.course_id
+    JOIN subject s ON c.subject_id = s.subject_id
+    WHERE cm.register_id = $1
+  `, [registerId]);
+
+  return {
+    ...registerRes.rows[0],
+    courses: coursesRes.rows
+  };
+}
+
+
 module.exports = {
   createAll,
   getRegisterCourseByUser,
   getAllRegisterCourses,
-  updateRegisterTimeForAll
+  updateRegisterTimeForAll,
+  getRegisterCourseById 
 };

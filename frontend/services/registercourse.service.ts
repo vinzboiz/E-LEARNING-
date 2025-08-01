@@ -54,4 +54,16 @@ export const RegisterCourseService = {
       throw new Error(err.response?.data?.error || "Không thể lấy thông tin đăng ký.");
     }
   },
+
+  // Lấy chi tiết đăng ký học phần theo ID
+  async getById(id: number) {
+    try {
+      const res = await RegisterCourseAPI.getById(id);
+      return res.data;
+    } catch (err: any) {
+      console.error("[RegisterCourseService] Error getById:", err);
+      throw new Error(err.response?.data?.error || "Không thể lấy chi tiết đăng ký học phần.");
+    }
+  },
+
 };

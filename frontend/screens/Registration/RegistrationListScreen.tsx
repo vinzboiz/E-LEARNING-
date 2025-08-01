@@ -31,7 +31,7 @@ type NavigationProp = NativeStackNavigationProp<
 >;
 
 interface RegisterCourse {
-  registercourse_id: number;
+  register_id: number;
   begin_register: string;
   end_register: string;
   due_date_start: string;
@@ -78,7 +78,7 @@ export default function RegistrationListScreen() {
       style={cardStyles.card}
       onPress={() =>
         navigation.navigate("RegisterCourseDetail", {
-          courseId: item.course_id,
+          registerId: item.register_id,
         })
       }
     >
@@ -147,8 +147,8 @@ export default function RegistrationListScreen() {
         <FlatList
           data={registerCourses}
           keyExtractor={(item, index) =>
-            (item?.registercourse_id ?? index).toString()
-          }
+  (item?.register_id ?? index).toString()
+}
           renderItem={renderItem}
           ListFooterComponent={
             <View style={{ alignItems: "center", marginVertical: 20 }}>
