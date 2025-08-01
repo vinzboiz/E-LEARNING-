@@ -149,6 +149,7 @@ export default function SubjectListScreen() {
 
       {/* Nút thêm hình tròn */}
       <TouchableOpacity
+        accessibilityLabel={`addSubject`}
         style={buttonStyles.fab}
         onPress={() => navigation.navigate("AddSubject")}
       >
@@ -191,6 +192,7 @@ export default function SubjectListScreen() {
                 </View>
                 <View style={cardStyles.cardActions}>
                   <TouchableOpacity
+                    accessibilityLabel={`edit-${item.subject_id}`}
                     style={[
                       buttonStyles.iconBtn,
                       { backgroundColor: colors.primary },
@@ -204,6 +206,7 @@ export default function SubjectListScreen() {
                     <Ionicons name="create-outline" size={18} color="#fff" />
                   </TouchableOpacity>
                   <TouchableOpacity
+                    accessibilityLabel={`delete-${item.subject_id}`}
                     style={[
                       buttonStyles.iconBtn,
                       { backgroundColor: colors.danger },
