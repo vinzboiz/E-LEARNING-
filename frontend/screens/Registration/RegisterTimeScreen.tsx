@@ -32,12 +32,14 @@ import { modalStyles } from "../../constants/modalStyles";
 import { Images } from "../../constants/images/images";
 
 interface RegisterTime {
-  begin_register: string;
-  end_register: string;
+  begin_register: string; // ngày gốc từ DB (timestamp)
+  end_register: string;   // ngày gốc từ DB (timestamp)
   due_date_start: string;
   due_date_end: string;
   year: number;
   semester: number;
+  begin_display?: string; // ngày hiển thị
+  end_display?: string;   // ngày hiển thị
 }
 
 export default function RegisterTimeScreen() {
@@ -58,13 +60,10 @@ export default function RegisterTimeScreen() {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedTime, setSelectedTime] = useState<RegisterTime | null>(null);
 
-  const formatDate = (date: Date) => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = ("0" + (d.getMonth() + 1)).slice(-2);
-    const day = ("0" + d.getDate()).slice(-2);
-    return `${year}-${month}-${day}`;
-  };
+  const formatDate = (date: Date | string) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
 
   const isExpired = (date: string) => new Date(date) < new Date();
 
@@ -81,18 +80,19 @@ export default function RegisterTimeScreen() {
       setLoading(true);
       const data = await RegisterCourseService.getAll();
 
+      // Không ghi đè ngày gốc từ DB, chỉ thêm ngày hiển thị
       const unique = data.reduce((acc: RegisterTime[], curr: RegisterTime) => {
-        const formattedCurr = {
+        const formattedCurr: RegisterTime = {
           ...curr,
-          begin_register: curr.begin_register.slice(0, 10),
-          end_register: curr.end_register.slice(0, 10),
+          begin_display: curr.begin_register.slice(0, 10),
+          end_display: curr.end_register.slice(0, 10),
           due_date_start: curr.due_date_start.slice(0, 10),
           due_date_end: curr.due_date_end.slice(0, 10),
         };
         const exists = acc.find(
           (x) =>
-            x.begin_register === formattedCurr.begin_register &&
-            x.end_register === formattedCurr.end_register
+            x.begin_display === formattedCurr.begin_display &&
+            x.end_display === formattedCurr.end_display
         );
         if (!exists) acc.push(formattedCurr);
         return acc;
@@ -112,11 +112,12 @@ export default function RegisterTimeScreen() {
 
   const openModal = (editData?: RegisterTime) => {
     if (editData) {
-      setBegin(new Date(editData.begin_register));
-      setEnd(new Date(editData.end_register));
+      // Dùng ngày hiển thị cho UI
+      setBegin(new Date(editData.begin_display!));
+      setEnd(new Date(editData.end_display!));
       setYear(editData.year.toString());
       setSemester(editData.semester.toString());
-      setSelectedTime(editData);
+      setSelectedTime(editData); // Lưu để update match với DB
       setIsEditing(true);
     } else {
       setBegin(new Date());
@@ -137,21 +138,38 @@ export default function RegisterTimeScreen() {
     try {
       setLoading(true);
       if (isEditing && selectedTime) {
-        await RegisterCourseService.updateRegisterTime({
-          begin: selectedTime.begin_register,
-          end: selectedTime.end_register,
+        const payload = {
+          // Giữ nguyên ngày gốc từ DB để BE so sánh
+          begin: formatDate(selectedTime.begin_register),
+          end: formatDate(selectedTime.end_register),
           newBegin: formatDate(begin),
           newEnd: formatDate(end),
-        });
+        };
+
+        console.log("[SCREEN] Payload gửi service:", payload);
+
+        await RegisterCourseService.updateRegisterTime(payload);
         Alert.alert("Thành công", "Cập nhật thời gian thành công");
       } else {
-        await RegisterCourseService.createForAll({
-          begin_register: formatDate(begin),
-          end_register: formatDate(end),
-          year: Number(year),
-          semester: Number(semester),
-        });
-        Alert.alert("Thành công", "Thêm thời gian đăng ký thành công");
+        const res = await RegisterCourseService.createForAll({
+  begin_register: formatDate(begin),
+  end_register: formatDate(end),
+  year: Number(year),
+  semester: Number(semester),
+});
+
+if (res?.message) {
+  // Nếu BE trả về message thì hiển thị message đó
+  if (res.message.includes("tồn tại")) {
+    Alert.alert("Thông báo", res.message);
+    setModalVisible(false);
+    return; // Không cần fetch lại vì không có thay đổi
+  } else {
+    Alert.alert("Thành công", res.message);
+  }
+} else {
+  Alert.alert("Thành công", "Thêm thời gian đăng ký thành công");
+}
       }
       setModalVisible(false);
       fetchRegisterTimes();
@@ -169,16 +187,16 @@ export default function RegisterTimeScreen() {
           Học kỳ {item.semester} - {item.year}
         </Text>
         <Text style={textStyles.subjectDesc}>
-          Bắt đầu: {item.begin_register}
+          Bắt đầu: {item.begin_display}
         </Text>
         <Text style={textStyles.subjectDesc}>
-          Kết thúc: {item.end_register}
+          Kết thúc: {item.end_display}
         </Text>
         <Text style={textStyles.subjectDesc}>
           Đóng học phí: {item.due_date_start} - {item.due_date_end}
         </Text>
       </View>
-      {role === 1 && !isExpired(item.end_register) && (
+      {role === 1 && !isExpired(item.end_display!) && (
         <TouchableOpacity
           style={[buttonStyles.smallBtn, { backgroundColor: colors.primary }]}
           onPress={() => openModal(item)}
@@ -251,7 +269,9 @@ export default function RegisterTimeScreen() {
 
       {/* Nút Tạo Thời Gian Đăng Ký - chỉ Admin */}
       {role === 1 && (
-        <TouchableOpacity style={buttonStyles.fab} onPress={() => openModal()}>
+        <TouchableOpacity 
+          accessibilityLabel="add-register-time-button"
+          style={buttonStyles.fab} onPress={() => openModal()}>
           <Ionicons name="add" size={30} color="#fff" />
         </TouchableOpacity>
       )}

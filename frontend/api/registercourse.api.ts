@@ -28,6 +28,7 @@ export const RegisterCourseAPI = {
     newEnd: string;
   }) => {
     console.log("[API] PUT", `${API_URL}/update-time`, data);
+    console.log("[API BODY]", JSON.stringify(data, null, 2)); // log JSON đẹp
     return api.put(`${API_URL}/update-time`, data);
   },
 

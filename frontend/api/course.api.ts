@@ -5,8 +5,8 @@ const API_URL = "/api/course";
 
 // ==================== ADMIN ====================
 // Lấy tất cả khóa học (Admin)
-export const getAllCoursesAdminApi = () => {
-  return api.get(`${API_URL}/admin/all`);
+export const getAllCoursesAdminApi = async() => {
+  return await api.get(`${API_URL}/admin/all`);
 };
 
 // Lấy chi tiết khóa học (Admin)
@@ -41,8 +41,8 @@ export const getCourseByIdStudentApi = (id: number) => {
 };
 
 // Lấy khóa học cho Student theo 3 điều kiện (mới)
-export const getCoursesForStudentApi = () => {
-  return api.get(`${API_URL}/student/courses`);
+export const getCoursesForStudentApi = async() => {
+  return await api.get(`${API_URL}/student/courses`);
 };
 
 // ==================== TEACHER ====================

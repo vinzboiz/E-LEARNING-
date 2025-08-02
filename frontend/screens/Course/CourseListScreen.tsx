@@ -114,6 +114,7 @@ export default function CourseListScreen() {
 
   useEffect(() => {
     if (roleId !== null) {
+      fetchCourses();
       const unsubscribe = navigation.addListener("focus", fetchCourses);
       return unsubscribe;
     }

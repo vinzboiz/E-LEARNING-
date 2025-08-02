@@ -30,19 +30,20 @@ export const RegisterCourseService = {
 
   // Admin: Cập nhật thời gian đăng ký
   async updateRegisterTime(data: {
-    begin: string;
-    end: string;
-    newBegin: string;
-    newEnd: string;
-  }) {
-    try {
-      const res = await RegisterCourseAPI.updateRegisterTime(data);
-      return res.data;
-    } catch (err: any) {
-      console.error("[RegisterCourseService] Error updateRegisterTime:", err);
-      throw new Error(err.response?.data?.error || "Không thể cập nhật thời gian.");
-    }
-  },
+  begin: string;
+  end: string;
+  newBegin: string;
+  newEnd: string;
+}) {
+  console.log("[SERVICE] Dữ liệu chuẩn bị gửi:", data);
+  try {
+    const res = await RegisterCourseAPI.updateRegisterTime(data);
+    return res.data;
+  } catch (err: any) {
+    console.error("[SERVICE] Lỗi updateRegisterTime:", err);
+    throw new Error(err.response?.data?.error || "Không thể cập nhật thời gian.");
+  }
+},
 
   // Sinh viên: Lấy thông tin đăng ký của chính mình
   async getMyRegisterCourse() {

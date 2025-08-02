@@ -39,6 +39,9 @@ exports.getAllRegisterCourses = async (req, res) => {
 // Admin: Cập nhật thời gian đăng ký toàn hệ thống
 exports.updateRegisterTime = async (req, res) => {
   try {
+    console.log("=== DỮ LIỆU NHẬN TỪ FE ===");
+    console.log(req.body);
+
     const { begin, end, newBegin, newEnd } = req.body;
 
     if (!begin || !end || !newBegin || !newEnd) {
@@ -51,6 +54,7 @@ exports.updateRegisterTime = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
 
 // Lấy chi tiết đăng ký học phần theo id
 exports.getRegisterCourseDetail = async (req, res) => {
