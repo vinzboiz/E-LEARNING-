@@ -55,6 +55,9 @@ import AdminClassMemberListScreen from "../screens/ClassMember/AdminClassMemberL
 import CheckoutListScreen from "../screens/ClassMember/CheckoutListScreen";
 import TeacherStudentListScreen from "../screens/ClassMember/TeacherStudentListScreen";
 
+import AdminUserListScreen from "../screens/Timetable/AdminUserListScreen";
+import UserTimetableScreen from "../screens/Timetable/UserTimetableScreen";
+
 // Types
 import { Submission } from "../screens/Submission/SubmittedAssignmentsScreen";
 
@@ -106,6 +109,10 @@ export type RootStackParamList = {
   CheckoutList: { courseId: number };
   AdminClassMemberList: undefined;
   TeacherStudentList: { courseId: number };
+
+  // Thời khóa biểu (thêm mới)
+  AdminUserList: undefined;
+  UserTimetable: { userId: number; userName: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -221,6 +228,17 @@ export default function AppNavigator() {
         name="TeacherStudentList"
         component={TeacherStudentListScreen}
         options={{ title: "Danh sách sinh viên" }}
+      />
+      <Stack.Screen
+        name="AdminUserList"
+        component={AdminUserListScreen}
+        options={{ title: "Danh sách người dùng" }}
+      />
+
+      <Stack.Screen
+        name="UserTimetable"
+        component={UserTimetableScreen}
+        options={{ title: "Thời khóa biểu" }}
       />
     </Stack.Navigator>
   );

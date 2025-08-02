@@ -128,7 +128,14 @@ export default function ScheduleListScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={[textStyles.bannerTitle, { color: "#fcf958ff" }]}>
+            Lịch học
+          </Text>
+          <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
+            Quản lý lịch học
+          </Text>
+        </View>
         <TouchableOpacity
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
@@ -195,6 +202,24 @@ export default function ScheduleListScreen() {
                 </TouchableOpacity>
               </View>
             )}
+          </View>
+        )}
+        ListFooterComponent={() => (
+          <View
+            style={{
+              marginTop: 20,
+              alignItems: "center",
+              marginBottom: 30,
+            }}
+          >
+            <Image
+              source={Images.More.img9}
+              style={imageStyles.footerImage}
+              resizeMode="contain"
+            />
+            <Text style={textStyles.footerText}>
+              Lịch trình rõ ràng – Học tập dễ dàng, thành công vững vàng
+            </Text>
           </View>
         )}
       />

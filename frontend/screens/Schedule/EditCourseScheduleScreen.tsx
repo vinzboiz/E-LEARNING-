@@ -12,7 +12,17 @@ import {
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { CourseScheduleService } from "../../services/courseschedule.service";
+// Import styles
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+import { searchStyles } from "../../constants/searchStyles";
+
 //assets
 import { Images } from "../../constants/images/images";
 interface Schedule {
@@ -28,11 +38,18 @@ interface Schedule {
 export default function EditCourseScheduleScreen() {
   const route = useRoute<any>();
   const navigation = useNavigation();
-  const { courseId, scheduleId } = route.params;
+  const { scheduleId } = route.params;
+
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Lấy 1 lịch học theo ID
+  // State hiển thị Date/Time Picker
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  // Lấy lịch học theo ID
   const fetchSchedule = async () => {
     try {
       setLoading(true);
@@ -52,6 +69,7 @@ export default function EditCourseScheduleScreen() {
     fetchSchedule();
   }, [scheduleId]);
 
+  // Hàm thay đổi dữ liệu
   const handleChange = (
     index: number,
     field: keyof Schedule,
@@ -62,6 +80,7 @@ export default function EditCourseScheduleScreen() {
     setSchedules(updated);
   };
 
+  // Hàm lưu lịch học
   const handleSaveOne = async (schedule: Schedule) => {
     try {
       if (
@@ -112,6 +131,14 @@ export default function EditCourseScheduleScreen() {
           style={styles.banner}
           resizeMode="cover"
         />
+        <View style={layoutStyles.bannerTextContainer}>
+          <Text style={[textStyles.bannerTitle, { color: "#fcf958ff" }]}>
+            Lịch học
+          </Text>
+          <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
+            Quản lý lịch học
+          </Text>
+        </View>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
@@ -126,27 +153,43 @@ export default function EditCourseScheduleScreen() {
         <View key={schedule.schedule_id} style={styles.scheduleBlock}>
           <Text style={styles.scheduleTitle}>Lịch #{index + 1}</Text>
 
-          <Text style={styles.label}>Ngày (YYYY-MM-DD)</Text>
-          <TextInput
+          {/* Ngày học */}
+          <Text style={styles.label}>Ngày học</Text>
+          <TouchableOpacity
             style={styles.input}
-            value={schedule.date}
-            onChangeText={(text) => handleChange(index, "date", text)}
-          />
+            onPress={() => {
+              setActiveIndex(index);
+              setShowDatePicker(true);
+            }}
+          >
+            <Text>{schedule.date || "Chọn ngày"}</Text>
+          </TouchableOpacity>
 
-          <Text style={styles.label}>Giờ bắt đầu (HH:MM)</Text>
-          <TextInput
+          {/* Giờ bắt đầu */}
+          <Text style={styles.label}>Giờ bắt đầu</Text>
+          <TouchableOpacity
             style={styles.input}
-            value={schedule.start_time}
-            onChangeText={(text) => handleChange(index, "start_time", text)}
-          />
+            onPress={() => {
+              setActiveIndex(index);
+              setShowStartTimePicker(true);
+            }}
+          >
+            <Text>{schedule.start_time || "Chọn giờ bắt đầu"}</Text>
+          </TouchableOpacity>
 
-          <Text style={styles.label}>Giờ kết thúc (HH:MM)</Text>
-          <TextInput
+          {/* Giờ kết thúc */}
+          <Text style={styles.label}>Giờ kết thúc</Text>
+          <TouchableOpacity
             style={styles.input}
-            value={schedule.end_time}
-            onChangeText={(text) => handleChange(index, "end_time", text)}
-          />
+            onPress={() => {
+              setActiveIndex(index);
+              setShowEndTimePicker(true);
+            }}
+          >
+            <Text>{schedule.end_time || "Chọn giờ kết thúc"}</Text>
+          </TouchableOpacity>
 
+          {/* Phòng học */}
           <Text style={styles.label}>Phòng học</Text>
           <TextInput
             style={styles.input}
@@ -154,6 +197,7 @@ export default function EditCourseScheduleScreen() {
             onChangeText={(text) => handleChange(index, "room", text)}
           />
 
+          {/* Ghi chú */}
           <Text style={styles.label}>Ghi chú</Text>
           <TextInput
             style={styles.input}
@@ -161,6 +205,7 @@ export default function EditCourseScheduleScreen() {
             onChangeText={(text) => handleChange(index, "note", text)}
           />
 
+          {/* Nút lưu */}
           <TouchableOpacity
             style={styles.saveButton}
             onPress={() => handleSaveOne(schedule)}
@@ -170,6 +215,87 @@ export default function EditCourseScheduleScreen() {
           </TouchableOpacity>
         </View>
       ))}
+
+      {/* Date Picker */}
+      {showDatePicker && activeIndex !== null && (
+        <DateTimePicker
+          value={
+            schedules[activeIndex].date
+              ? new Date(schedules[activeIndex].date)
+              : new Date()
+          }
+          mode="date"
+          display="default"
+          onChange={(event, selectedDate) => {
+            setShowDatePicker(false);
+            if (selectedDate) {
+              const dateStr = selectedDate.toISOString().split("T")[0];
+              handleChange(activeIndex, "date", dateStr);
+            }
+          }}
+        />
+      )}
+
+      {/* Start Time Picker */}
+      {showStartTimePicker && activeIndex !== null && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={(event, selectedTime) => {
+            setShowStartTimePicker(false);
+            if (selectedTime) {
+              const timeStr = selectedTime
+                .toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+                .slice(0, 5);
+              handleChange(activeIndex, "start_time", timeStr);
+            }
+          }}
+        />
+      )}
+
+      {/* End Time Picker */}
+      {showEndTimePicker && activeIndex !== null && (
+        <DateTimePicker
+          value={new Date()}
+          mode="time"
+          is24Hour={true}
+          display="default"
+          onChange={(event, selectedTime) => {
+            setShowEndTimePicker(false);
+            if (selectedTime) {
+              const timeStr = selectedTime
+                .toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+                .slice(0, 5);
+              handleChange(activeIndex, "end_time", timeStr);
+            }
+          }}
+        />
+      )}
+      {/* Footer */}
+      <View
+        style={{
+          marginTop: 20,
+          alignItems: "center",
+          marginBottom: 30,
+        }}
+      >
+        <Image
+          source={Images.More.img9}
+          style={imageStyles.footerImage}
+          resizeMode="contain"
+        />
+        <Text style={textStyles.footerText}>
+          Lịch trình rõ ràng – Học tập dễ dàng, thành công vững vàng
+        </Text>
+      </View>
     </ScrollView>
   );
 }
@@ -193,12 +319,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     color: "#333",
   },
-  subTitle: {
-    fontSize: 16,
-    textAlign: "center",
-    color: "#666",
-    marginBottom: 20,
-  },
   scheduleBlock: {
     marginHorizontal: 20,
     marginBottom: 20,
@@ -220,6 +340,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: "#ccc",
     backgroundColor: "#fff",
+    justifyContent: "center",
   },
   saveButton: {
     flexDirection: "row",

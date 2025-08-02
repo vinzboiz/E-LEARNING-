@@ -24,8 +24,8 @@ import { imageStyles } from "../../constants/imageStyles";
 import { layoutStyles } from "../../constants/layoutStyles";
 import { searchStyles } from "../../constants/searchStyles";
 import { formatPrice } from "../../utils/format";
-//assets
 import { Images } from "../../constants/images/images";
+
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "CourseList"
@@ -42,44 +42,71 @@ interface Course {
 
 export default function CourseListScreen() {
   const navigation = useNavigation<NavigationProp>();
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [roleId, setRoleId] = useState<number | null>(null);
-  const [searchText, setSearchText] = useState<string>("");
 
+  const [coursesData, setCoursesData] = useState<{
+    completed: Course[];
+    current: Course[];
+    notStarted: Course[];
+  }>({ completed: [], current: [], notStarted: [] });
+
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [roleId, setRoleId] = useState<number | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState<
+    "completed" | "current" | "notStarted"
+  >("current");
+
+  // Lấy role người dùng
   const fetchRole = async () => {
     try {
       const user = await AuthService.getMe();
       setRoleId(user.role_id);
     } catch (error: any) {
-      Alert.alert(
-        "Lỗi",
-        error.message || "Không lấy được thông tin người dùng."
-      );
+      Alert.alert("Lỗi", error.message || "Không lấy được thông tin người dùng.");
     }
   };
 
+  // Lấy danh sách khóa học
   const fetchCourses = async () => {
     if (!roleId) return;
     setLoading(true);
     try {
-      let data: any[] = [];
       if (roleId === 1) {
-        data = await CourseService.getAllAdmin();
+        const data = await CourseService.getAllAdmin();
+        setCoursesData({ completed: [], current: data, notStarted: [] });
       } else if (roleId === 2) {
-        data = await CourseService.getCoursesForStudent();
+        const result = await CourseService.getCoursesForStudent();
+        setCoursesData({
+          completed: result.completed || [],
+          current: result.current || [],
+          notStarted: result.notStarted || [],
+        });
       } else if (roleId === 3) {
-        data = await CourseService.getMyCoursesTeacher();
+        const data = await CourseService.getMyCoursesTeacher();
+        setCoursesData({ completed: [], current: data, notStarted: [] });
       }
-      setCourses(data);
-      setFilteredCourses(data);
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Lấy danh sách khóa học thất bại.");
     } finally {
       setLoading(false);
     }
   };
+
+  // Cập nhật filteredCourses khi đổi filter hoặc dữ liệu mới
+  useEffect(() => {
+    let list = coursesData[selectedFilter] || [];
+    if (searchText.trim()) {
+      const lower = searchText.toLowerCase();
+      list = list.filter(
+        (c) =>
+          c.subject_name.toLowerCase().includes(lower) ||
+          c.semester.toLowerCase().includes(lower) ||
+          String(c.year).includes(lower)
+      );
+    }
+    setFilteredCourses(list);
+  }, [coursesData, selectedFilter, searchText]);
 
   useEffect(() => {
     fetchRole();
@@ -91,22 +118,6 @@ export default function CourseListScreen() {
       return unsubscribe;
     }
   }, [navigation, roleId]);
-
-  const handleSearch = (text: string) => {
-    setSearchText(text);
-    if (!text.trim()) {
-      setFilteredCourses(courses);
-    } else {
-      const lower = text.toLowerCase();
-      const filtered = courses.filter(
-        (c) =>
-          c.subject_name.toLowerCase().includes(lower) ||
-          c.semester.toLowerCase().includes(lower) ||
-          String(c.year).includes(lower)
-      );
-      setFilteredCourses(filtered);
-    }
-  };
 
   const handleDelete = (id: number) => {
     Alert.alert("Xác nhận", "Bạn có chắc muốn xóa khóa học này?", [
@@ -138,6 +149,7 @@ export default function CourseListScreen() {
 
   return (
     <View style={layoutStyles.container}>
+      {/* Banner */}
       <View style={layoutStyles.bannerWrapper}>
         <Image
           source={Images.TopBanner.course}
@@ -147,7 +159,7 @@ export default function CourseListScreen() {
         <View
           style={[
             layoutStyles.bannerTextContainer,
-            { alignItems: "flex-end", left: undefined, right: 25 },
+            { alignItems: "flex-end", right: 25 },
           ]}
         >
           <Text
@@ -169,6 +181,7 @@ export default function CourseListScreen() {
         </View>
       </View>
 
+      {/* Thanh tìm kiếm */}
       <Text style={textStyles.title}>Danh sách khóa học</Text>
       <View style={searchStyles.searchWrapper}>
         <Ionicons
@@ -181,11 +194,49 @@ export default function CourseListScreen() {
           style={searchStyles.searchInput}
           placeholder="Tìm kiếm khóa học..."
           value={searchText}
-          onChangeText={handleSearch}
+          onChangeText={setSearchText}
         />
       </View>
 
-      {/* Nếu không có khóa học */}
+      {/* Nút lọc */}
+      {roleId === 2 && (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-around",
+            marginVertical: 10,
+          }}
+        >
+          {[
+            { key: "completed", label: "Đã học" },
+            { key: "current", label: "Đang học" },
+            { key: "notStarted", label: "Chưa học" },
+          ].map((btn) => (
+            <TouchableOpacity
+              key={btn.key}
+              onPress={() => setSelectedFilter(btn.key as any)}
+              style={{
+                paddingVertical: 8,
+                paddingHorizontal: 15,
+                backgroundColor:
+                  selectedFilter === btn.key ? colors.primary : colors.gray,
+                borderRadius: 20,
+              }}
+            >
+              <Text
+                style={{
+                  color:
+                    selectedFilter === btn.key ? "#fff" : colors.textDark,
+                }}
+              >
+                {btn.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* Danh sách khóa học */}
       {filteredCourses.length === 0 ? (
         <View style={layoutStyles.center}>
           <Image
@@ -196,92 +247,75 @@ export default function CourseListScreen() {
           <Text style={textStyles.emptyText}>Chưa có khóa học nào!</Text>
         </View>
       ) : (
-        <>
-          <FlatList
-            data={filteredCourses}
-            keyExtractor={(item) => item.course_id.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={cardStyles.card}
-                onPress={() =>
-                  navigation.navigate("CourseDetail", {
-                    courseId: item.course_id,
-                  })
-                }
-                activeOpacity={0.8}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "bold",
-                      color: colors.textDark,
-                    }}
-                  >
-                    {item.subject_name.charAt(0).toUpperCase() +
-                      item.subject_name.slice(1)}
-                  </Text>
-                  <Text style={{ fontSize: 13, color: colors.textLight }}>
-                    Học kỳ: {item.semester} - Năm học: {item.year}
-                  </Text>
-                  <Text
-                    style={{ fontSize: 15, color: "red", fontWeight: "600" }}
-                  >
-                    {formatPrice(item.price)} VNĐ
-                  </Text>
-                </View>
-                {roleId === 1 && (
-                  <View style={cardStyles.cardActions}>
-                    <TouchableOpacity
-                      style={[
-                        buttonStyles.iconBtn,
-                        { backgroundColor: colors.primary },
-                      ]}
-                      onPress={() =>
-                        navigation.navigate("EditCourse", {
-                          id: item.course_id,
-                        })
-                      }
-                    >
-                      <Ionicons name="create-outline" size={18} color="#fff" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[
-                        buttonStyles.iconBtn,
-                        { backgroundColor: colors.danger },
-                      ]}
-                      onPress={() => handleDelete(item.course_id)}
-                    >
-                      <Ionicons name="trash-outline" size={18} color="#fff" />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </TouchableOpacity>
-            )}
-            ListFooterComponent={
-              <View
-                style={{
-                  marginTop: 20,
-                  alignItems: "center",
-                  marginBottom: 30,
-                }}
-              >
-                <Image
-                  source={Images.More.img11}
-                  style={imageStyles.footerImage}
-                  resizeMode="contain"
-                />
-                <Text style={textStyles.footerText}>
-                  Tiếp tục hành trình của bạn!
+        <FlatList
+          data={filteredCourses}
+          keyExtractor={(item) => item.course_id.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={cardStyles.card}
+              onPress={() =>
+                navigation.navigate("CourseDetail", {
+                  courseId: item.course_id,
+                })
+              }
+              activeOpacity={0.8}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                  {item.subject_name}
                 </Text>
-                <Text style={textStyles.total}>
-                  Tổng số khóa học: {filteredCourses.length}
+                <Text style={{ fontSize: 13, color: colors.textLight }}>
+                  Học kỳ: {item.semester} - Năm học: {item.year}
+                </Text>
+                <Text style={{ fontSize: 15, color: "red", fontWeight: "600" }}>
+                  {formatPrice(item.price)} VNĐ
                 </Text>
               </View>
-            }
-            contentContainerStyle={{ paddingBottom: 100 }}
-          />
-        </>
+              {roleId === 1 && (
+                <View style={cardStyles.cardActions}>
+                  <TouchableOpacity
+                    style={[
+                      buttonStyles.iconBtn,
+                      { backgroundColor: colors.primary },
+                    ]}
+                    onPress={() =>
+                      navigation.navigate("EditCourse", {
+                        id: item.course_id,
+                      })
+                    }
+                  >
+                    <Ionicons name="create-outline" size={18} color="#fff" />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      buttonStyles.iconBtn,
+                      { backgroundColor: colors.danger },
+                    ]}
+                    onPress={() => handleDelete(item.course_id)}
+                  >
+                    <Ionicons name="trash-outline" size={18} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+              )}
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={
+            <View style={{ marginTop: 20, alignItems: "center", marginBottom: 30 }}>
+              <Image
+                source={Images.More.img11}
+                style={imageStyles.footerImage}
+                resizeMode="contain"
+              />
+              <Text style={textStyles.footerText}>
+                Tiếp tục hành trình của bạn!
+              </Text>
+              <Text style={textStyles.total}>
+                Tổng số khóa học: {filteredCourses.length}
+              </Text>
+            </View>
+          }
+          contentContainerStyle={{ paddingBottom: 100 }}
+        />
       )}
 
       {roleId === 1 && (

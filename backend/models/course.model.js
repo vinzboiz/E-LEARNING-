@@ -152,74 +152,134 @@ async function getCoursesByLecturer(userId) {
   return result.rows;
 }
 
-async function getCoursesForStudent(userId) {
-  console.log("DEBUG Model: userId =", userId, "typeof =", typeof userId);
-  if (!userId) {
-    throw new Error("userId không hợp lệ");
-  }
+// async function getCoursesForStudent(userId) {
+//   console.log("DEBUG Model: userId =", userId, "typeof =", typeof userId);
+//   if (!userId) {
+//     throw new Error("userId không hợp lệ");
+//   }
 
-  const now = new Date();
-  console.log("DEBUG Model: now =", now);
+//   // Lấy tất cả các khóa học sinh viên đã thanh toán
+//   const paidCourses = await db.query(
+//     `SELECT c.course_id, c.semester, c.year, c.price, rc.status, s.name AS subject_name
+//      FROM RegisterCourse rc
+//      JOIN ClassMember cm ON rc.register_id = cm.register_id
+//      JOIN Course c ON cm.course_id = c.course_id
+//      JOIN Subject s ON c.subject_id = s.subject_id
+//      WHERE rc.user_id = $1
+//        AND rc.status = 'đã thanh toán'
+//      ORDER BY c.course_id DESC`,
+//     [userId]
+//   );
 
-  // 1. Kiểm tra nếu đang trong thời gian đăng ký
-  const checkReg = await db.query(
-    `SELECT COUNT(*) AS total
-     FROM RegisterCourse
-     WHERE $1 BETWEEN begin_register AND end_register`,
-    [now]
-  );
-  console.log("DEBUG Model: checkReg =", checkReg.rows[0]);
+//   console.log("DEBUG Model: paidCourses count =", paidCourses.rows.length);
+//   return paidCourses.rows;
+// }
 
-  if (Number(checkReg.rows[0].total) > 0) {
-    console.log("DEBUG Model: Đang trong thời gian đăng ký");
-    const allCourses = await db.query(
-      `SELECT c.course_id, c.semester, c.year, c.price, s.name AS subject_name
-       FROM Course c
-       JOIN Subject s ON c.subject_id = s.subject_id
-       ORDER BY c.course_id DESC`
-    );
-    return allCourses.rows;
-  }
+// Trường hợp đã học
+async function getCompletedCourses(userId) {
+  const result = await db.query(`
+    WITH LatestRegister AS (
+        SELECT 
+            MAX(end_register) AS latest_end_register,
+            MAX(due_date_end) AS latest_due_date_end
+        FROM registercourse
+        WHERE user_id = $1
+          AND status = 'đã thanh toán'
+    )
+    SELECT DISTINCT 
+        c.course_id, 
+        c.semester, 
+        c.year, 
+        c.price, 
+        s.name AS subject_name
+    FROM registercourse rc
+    JOIN classmember cm 
+      ON rc.register_id = cm.register_id
+    JOIN course c 
+      ON cm.course_id = c.course_id
+    JOIN subject s 
+      ON c.subject_id = s.subject_id
+    JOIN LatestRegister lr ON TRUE
+    WHERE rc.user_id = $1
+      AND rc.status = 'đã thanh toán'
+      AND rc.end_register < lr.latest_end_register
+      AND rc.due_date_end < lr.latest_due_date_end
+    ORDER BY c.course_id DESC
+  `, [userId]);
 
-  // 2. Nếu đang trong hạn đóng học phí
-  const checkPaymentPeriod = await db.query(
-    `SELECT COUNT(*) AS total
-     FROM RegisterCourse
-     WHERE user_id = $1 AND $2 BETWEEN due_date_start AND due_date_end`,
-    [userId, now]
-  );
-  console.log("DEBUG Model: checkPaymentPeriod =", checkPaymentPeriod.rows[0]);
-
-  if (Number(checkPaymentPeriod.rows[0].total) > 0) {
-    console.log("DEBUG Model: Trong hạn đóng học phí");
-    const regCourses = await db.query(
-      `SELECT c.course_id, c.semester, c.year, c.price, rc.status, s.name AS subject_name
-       FROM RegisterCourse rc
-       JOIN ClassMember cm ON rc.register_id = cm.register_id
-       JOIN Course c ON cm.course_id = c.course_id
-       JOIN Subject s ON c.subject_id = s.subject_id
-       WHERE rc.user_id = $1
-       ORDER BY c.course_id DESC`,
-      [userId]
-    );
-    return regCourses.rows;
-  }
-
-  // 3. Nếu hết hạn đóng học phí
-  console.log("DEBUG Model: Hết hạn đóng học phí -> chỉ xem đã thanh toán");
-  const paidCourses = await db.query(
-    `SELECT c.course_id, c.semester, c.year, c.price, rc.status, s.name AS subject_name
-     FROM RegisterCourse rc
-     JOIN ClassMember cm ON rc.register_id = cm.register_id
-     JOIN Course c ON cm.course_id = c.course_id
-     JOIN Subject s ON c.subject_id = s.subject_id
-     WHERE rc.user_id = $1 AND rc.status = 'đã thanh toán'
-     ORDER BY c.course_id DESC`,
-    [userId]
-  );
-
-  return paidCourses.rows;
+  return result.rows;
 }
+
+// Trường hợp đang học
+async function getCurrentCourses(userId) {
+  const result = await db.query(`
+    WITH LatestRegister AS (
+        SELECT 
+            MAX(end_register) AS latest_end_register,
+            MAX(due_date_end) AS latest_due_date_end
+        FROM registercourse
+        WHERE user_id = $1
+          AND status = 'đã thanh toán'
+    )
+    SELECT DISTINCT 
+        c.course_id, 
+        c.semester, 
+        c.year, 
+        c.price, 
+        s.name AS subject_name
+    FROM registercourse rc
+    JOIN classmember cm 
+      ON rc.register_id = cm.register_id
+    JOIN course c 
+      ON cm.course_id = c.course_id
+    JOIN subject s 
+      ON c.subject_id = s.subject_id
+    JOIN LatestRegister lr ON TRUE
+    WHERE rc.user_id = $1
+      AND rc.status = 'đã thanh toán'
+      AND rc.end_register = lr.latest_end_register
+      AND rc.due_date_end = lr.latest_due_date_end
+    ORDER BY c.course_id DESC
+  `, [userId]);
+
+  return result.rows;
+}
+
+// Trường hợp chưa học
+async function getNotStartedCourses(userId, currentDate) {
+  // 1. Lấy toàn bộ khóa học
+  const allCoursesRes = await db.query(`
+    SELECT DISTINCT 
+        c.course_id, 
+        c.semester, 
+        c.year, 
+        c.price, 
+        s.name AS subject_name
+    FROM course c
+    JOIN subject s ON c.subject_id = s.subject_id
+    ORDER BY c.course_id DESC
+  `);
+  const allCourses = allCoursesRes.rows;
+
+  // 2. Lấy danh sách đã học
+  const completedCourses = await getCompletedCourses(userId, currentDate);
+
+  // 3. Lấy danh sách đang học
+  const currentCourses = await getCurrentCourses(userId, currentDate);
+
+  // 4. Trừ các khóa đã học + đang học
+  const excludeIds = new Set([
+    ...completedCourses.map(c => c.course_id),
+    ...currentCourses.map(c => c.course_id)
+  ]);
+
+  const notStartedCourses = allCourses.filter(
+    course => !excludeIds.has(course.course_id)
+  );
+
+  return notStartedCourses;
+}
+
 
 module.exports = {
   createCourse,
@@ -228,5 +288,7 @@ module.exports = {
   updateCourse,
   deleteCourse,
   getCoursesByLecturer,
-  getCoursesForStudent
+  getCompletedCourses,
+  getCurrentCourses,
+  getNotStartedCourses
 };

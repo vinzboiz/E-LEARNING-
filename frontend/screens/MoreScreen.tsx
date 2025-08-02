@@ -21,7 +21,7 @@ export default function MoreScreen() {
 
     {
       icon: "calendar-outline",
-      label: "Mở đăng ký",
+      label: "Danh sách đăng ký",
       screen: "RegistrationList",
     },
     {
@@ -33,11 +33,6 @@ export default function MoreScreen() {
       icon: "people-outline",
       label: "Quản lý người dùng",
       screen: "UserManagement",
-    },
-    {
-      icon: "list-outline",
-      label: "Danh sách đăng ký",
-      screen: "AdminClassMemberList",
     },
   ];
 

@@ -83,22 +83,45 @@ exports.getMyAssignedCourses = async (req, res) => {
   }
 };
 
-// Lấy danh sách khóa học cho sinh viên
+// Lấy danh sách khóa học theo đã, đang, chưa
 exports.getCoursesForStudent = async (req, res) => {
   try {
-    console.log("DEBUG Controller: req.user =", req.user);
-
     const userId = req.user?.id;
-    console.log("DEBUG Controller: userId =", userId);
-
     if (!userId) {
       return res.status(400).json({ message: "Không tìm thấy userId từ token" });
     }
 
-    const courses = await Course.getCoursesForStudent(userId);
-    res.status(200).json(courses);
+    // Lấy dữ liệu từ model
+    const completed = await Course.getCompletedCourses(userId);
+    const current = await Course.getCurrentCourses(userId);
+    const notStarted = await Course.getNotStartedCourses(userId);
+
+    res.status(200).json({
+      completed,
+      current,
+      notStarted
+    });
   } catch (error) {
     console.error("Error getCoursesForStudent:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
+// Lấy lên những môn chưa học để đăng ký ở giỏ hàng
+exports.getAllCoursesForCart = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(400).json({ message: "Không tìm thấy userId từ token" });
+    }
+
+    const notStarted = await Course.getNotStartedCourses(userId);
+
+    res.status(200).json(notStarted);
+  } catch (error) {
+    console.error("Error getAllCoursesForCart:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+

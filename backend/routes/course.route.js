@@ -15,6 +15,7 @@ router.get("/admin/all", checkRole(1), controller.findAll);             // Xem t
 router.get("/admin/:id", checkRole(1), controller.findById);            // Xem chi tiết
 
 // ==================== SINH VIÊN (role = 2) ====================
+router.get("/student/all-courses", checkRole(2), controller.getAllCoursesForCart); // Lấy lên những môn chưa học để đăng ký ở giỏ hàng
 router.get("/student/all", checkRole(2), controller.findAll);           // Xem tất cả
 router.get("/student/courses", checkRole(2), controller.getCoursesForStudent);
 router.get("/student/:id", checkRole(2), controller.findById);          // Xem chi tiết

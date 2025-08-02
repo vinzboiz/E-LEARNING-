@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Platform, View, Text } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { AuthService } from "../services/auth.service";
@@ -9,6 +9,8 @@ import AccountScreen from "../screens/Auth/AccountScreen";
 import CourseListScreen from "../screens/Course/CourseListScreen";
 import StudentCourseListScreen from "../screens/ClassMember/StudentCourseListScreen";
 import MoreScreen from "../screens/MoreScreen";
+import UserTimetableScreen from "../screens/Timetable/UserTimetableScreen"; // sửa import
+import AdminUserListScreen from "../screens/Timetable/AdminUserListScreen"; // sửa import
 import { colors } from "../constants/colors";
 
 const Tab = createBottomTabNavigator();
@@ -31,8 +33,9 @@ export default function BottomTab() {
   const screenOptions = ({ route }: { route: any }) => ({
     tabBarIcon: ({ focused, color, size }: any) => {
       let iconName = "home-outline";
+
       if (route.name === "Home") iconName = focused ? "home" : "home-outline";
-      else if (route.name === "Course")
+      else if (route.name === "Course" || route.name === "CourseList")
         iconName = focused ? "book" : "book-outline";
       else if (route.name === "Account")
         iconName = focused ? "person" : "person-outline";
@@ -40,6 +43,8 @@ export default function BottomTab() {
         iconName = focused ? "apps" : "apps-outline";
       else if (route.name === "StudentCourseList")
         iconName = focused ? "clipboard" : "clipboard-outline";
+      else if (route.name === "Timetable" || route.name === "TimetableUsers")
+        iconName = focused ? "calendar" : "calendar-outline";
 
       return <Ionicons name={iconName} size={size} color={color} />;
     },
@@ -52,12 +57,17 @@ export default function BottomTab() {
 
   const renderTabs = () => {
     if (roleId === 1) {
-      // Admin
+      // Admin → Trang chọn user để xem TKB
       return (
         <>
           <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Account" component={AccountScreen} />
+          <Tab.Screen
+            name="TimetableUsers"
+            component={AdminUserListScreen}
+            options={{ title: "Thời khóa biểu" }}
+          />
           <Tab.Screen name="Course" component={CourseListScreen} />
+          <Tab.Screen name="Account" component={AccountScreen} />
           <Tab.Screen
             name="More"
             component={MoreScreen}
@@ -66,10 +76,15 @@ export default function BottomTab() {
         </>
       );
     } else if (roleId === 3) {
-      // Teacher
+      // Teacher → Xem TKB của chính mình
       return (
         <>
           <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen
+            name="Timetable"
+            component={UserTimetableScreen}
+            options={{ title: "Thời khóa biểu" }}
+          />
           <Tab.Screen
             name="CourseList"
             component={CourseListScreen}
@@ -79,10 +94,15 @@ export default function BottomTab() {
         </>
       );
     } else {
-      // Student
+      // Student → Xem TKB của chính mình
       return (
         <>
           <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen
+            name="Timetable"
+            component={UserTimetableScreen}
+            options={{ title: "Thời khóa biểu" }}
+          />
           <Tab.Screen
             name="CourseList"
             component={CourseListScreen}
@@ -107,7 +127,6 @@ export default function BottomTab() {
 const styles = StyleSheet.create({
   tabBar: {
     backgroundColor: "#fff",
-
     height: Platform.OS === "ios" ? 85 : 70,
     paddingTop: 5,
     paddingBottom: 5,

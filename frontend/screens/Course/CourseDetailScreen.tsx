@@ -13,6 +13,7 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { CourseService } from "../../services/course.service";
+import { SubjectService } from "../../services/subject.service"; // ✅ thêm import
 import { AuthService } from "../../services/auth.service";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Images } from "../../constants/images/images";
@@ -22,23 +23,20 @@ type NavigationProp = NativeStackNavigationProp<
   "CourseDetail"
 >;
 
-interface Schedule {
-  schedule_id?: number;
-  date: string;
-  start_time: string;
-  end_time: string;
-  room?: string;
-  note?: string;
-}
-
 interface Course {
   course_id: number;
+  subject_id: number; // ✅ cần trường này
   subject_name: string;
   semester: string;
   year: number;
   price: number;
   numofperiods: number;
-  schedules?: Schedule[];
+}
+
+interface Subject {
+  subject_id: number;
+  name: string;
+  description?: string;
 }
 
 export default function CourseDetailScreen() {
@@ -47,6 +45,7 @@ export default function CourseDetailScreen() {
   const { courseId } = route.params;
 
   const [course, setCourse] = useState<Course | null>(null);
+  const [subject, setSubject] = useState<Subject | null>(null); // ✅ subject state
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<number | null>(null);
 
@@ -58,7 +57,14 @@ export default function CourseDetailScreen() {
       else if (role === 2) data = await CourseService.getByIdStudent(courseId);
       else if (role === 3) data = await CourseService.getByIdTeacher(courseId);
       else throw new Error("Không xác định quyền người dùng.");
+
       setCourse(data);
+
+      // ✅ Gọi API lấy chi tiết môn học
+      if (data.subject_id) {
+        const sub = await SubjectService.getById(data.subject_id);
+        setSubject(sub);
+      }
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Không thể tải chi tiết khóa học.");
       navigation.goBack();
@@ -143,41 +149,18 @@ export default function CourseDetailScreen() {
         </View>
       </View>
 
-      {/* Lịch học */}
-      {course.schedules && course.schedules.length > 0 && (
-        <>
-          <Text style={styles.subtitle}>Lịch Học</Text>
-          {course.schedules.map((sch, index) => (
-            <View key={index} style={styles.scheduleItem}>
-              <View style={styles.scheduleRow}>
-                <Ionicons name="calendar-outline" size={16} color="#FF9800" />
-                <Text style={styles.scheduleText}>Ngày: {sch.date}</Text>
-              </View>
-              <View style={styles.scheduleRow}>
-                <Ionicons name="time-outline" size={16} color="#FF9800" />
-                <Text style={styles.scheduleText}>
-                  Giờ: {sch.start_time} - {sch.end_time}
-                </Text>
-              </View>
-              {sch.room && (
-                <View style={styles.scheduleRow}>
-                  <Ionicons name="home-outline" size={16} color="#FF9800" />
-                  <Text style={styles.scheduleText}>Phòng: {sch.room}</Text>
-                </View>
-              )}
-              {sch.note && (
-                <View style={styles.scheduleRow}>
-                  <Ionicons
-                    name="document-text-outline"
-                    size={16}
-                    color="#FF9800"
-                  />
-                  <Text style={styles.scheduleText}>Ghi chú: {sch.note}</Text>
-                </View>
-              )}
-            </View>
-          ))}
-        </>
+      {/* ✅ Thông tin môn học */}
+      {subject && (
+        <View style={styles.subjectBox}>
+          <Text style={styles.subjectTitle}>Môn học: {subject.name}</Text>
+
+          {/* ScrollView cho phần mô tả */}
+          <ScrollView style={styles.subjectScroll}>
+            <Text style={styles.subjectDesc}>
+              {subject.description || "Không có mô tả."}
+            </Text>
+          </ScrollView>
+        </View>
       )}
 
       {/* Nút chức năng */}
@@ -244,31 +227,35 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-
   infoRow: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
   info: { fontSize: 16, color: "#444", marginLeft: 8 },
   price: { fontSize: 17, fontWeight: "bold", color: "#FF4D4F", marginLeft: 8 },
-  subtitle: {
-    fontSize: 20,
+
+  // ✅ Style cho phần môn học
+  subjectBox: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    padding: 15,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#eee",
+  },
+  subjectTitle: {
+    fontSize: 18,
     fontWeight: "bold",
-    marginHorizontal: 20,
-    marginBottom: 10,
     color: "#333",
+    marginBottom: 8,
   },
-  scheduleItem: {
-    backgroundColor: "#fefefe",
-    marginHorizontal: 20,
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+  subjectDesc: {
+    fontSize: 15,
+    color: "#555",
+    lineHeight: 20,
+    maxWidth: 400,
   },
-  scheduleRow: { flexDirection: "row", alignItems: "center", marginBottom: 5 },
-  scheduleText: { fontSize: 15, color: "#555", marginLeft: 6 },
+  subjectScroll: {
+    maxHeight: 250, // ✅ Chiều cao cố định
+  },
   button: {
     backgroundColor: "#6C63FF",
     marginHorizontal: 20,

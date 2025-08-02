@@ -1,7 +1,7 @@
 import api from "./axiosInstance";
 
 const API_URL = "/api/classmember";
-const COURSE_URL = "/api/course/student/courses";
+const COURSE_URL = "/api/course/student/all-courses";
 
 export const ClassMemberAPI = {
   // Lấy danh sách khóa học trong giỏ của sinh viên
@@ -46,7 +46,7 @@ export const ClassMemberAPI = {
     return api.get(`${API_URL}/admin/all`);
   },
 
-  // Lấy danh sách khóa học khả dụng cho sinh viên
+  // Lấy danh sách những môn chưa học để đăng ký ở giỏ hàng
   getAvailableCourses: () => {
     console.log("[API] GET", COURSE_URL);
     return api.get(COURSE_URL);

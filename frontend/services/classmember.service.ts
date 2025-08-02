@@ -1,8 +1,7 @@
 import { ClassMemberAPI } from "../api/classmember.api";
 
 export const ClassMemberService = {
-  // Gọi API lấy khóa học khả dụng
-  // ClassMemberService.ts
+  // Lấy lên những môn chưa học để đăng ký ở giỏ hàng
   async getAvailableCourses() {
     try {
       const res = await ClassMemberAPI.getAvailableCourses();
