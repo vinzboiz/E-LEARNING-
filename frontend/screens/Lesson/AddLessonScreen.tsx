@@ -20,7 +20,7 @@ import { textStyles } from "../../constants/textStyles";
 import { buttonStyles } from "../../constants/buttonStyles";
 import { imageStyles } from "../../constants/imageStyles";
 import { inputStyles } from "../../constants/inputStyles";
-
+import { colors } from "../../constants/colors";
 //assets
 import { Images } from "../../constants/images/images";
 
@@ -121,20 +121,25 @@ export default function AddLessonScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Thêm Bài Học</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View style={[layoutStyles.bannerTextContainer, { right: 20 }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.background }]}>
+            Thêm Bài Học
+          </Text>
+          <Text
+            style={[textStyles.bannerSubtitle, { color: colors.background }]}
+          >
             Tạo bài học mới cho khóa học
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <Text style={textStyles.listTitle}>Thêm bài học </Text>
       <View style={{ padding: 20 }}>
         <TextInput
           placeholder="Tiêu đề bài học"
@@ -151,7 +156,11 @@ export default function AddLessonScreen() {
           multiline
         />
 
-        <TouchableOpacity style={buttonStyles.primary} onPress={pickPdfFile}>
+        <TouchableOpacity
+          accessibilityLabel={`pickPDFFile`}
+          style={buttonStyles.primary}
+          onPress={pickPdfFile}
+        >
           <Text style={buttonStyles.primaryText}>Chọn file PDF</Text>
         </TouchableOpacity>
         {pdfFile && (
@@ -161,6 +170,7 @@ export default function AddLessonScreen() {
         )}
 
         <TouchableOpacity
+          accessibilityLabel={`addLesson`}
           style={[buttonStyles.primary, { marginTop: 15 }]}
           onPress={handleAddLesson}
           disabled={loading}

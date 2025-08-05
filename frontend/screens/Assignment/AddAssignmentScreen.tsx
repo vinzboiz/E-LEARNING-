@@ -92,20 +92,25 @@ export default function AddAssignmentScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Thêm Bài Tập</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View style={[layoutStyles.bannerTextContainer, { right: 20 }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
+            Thêm Bài Tập
+          </Text>
+          <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
             Thêm bài tập cho Lesson {lessonId}
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <Text style={[textStyles.title, { marginBottom: -10 }]}>
+        Thêm bài tập mới
+      </Text>
       {/* Form */}
       <View style={{ padding: 20 }}>
         <TextInput
@@ -170,7 +175,11 @@ export default function AddAssignmentScreen() {
         {loading ? (
           <ActivityIndicator size="large" color={colors.primary} />
         ) : (
-          <TouchableOpacity style={buttonStyles.primary} onPress={handleAdd}>
+          <TouchableOpacity
+            accessibilityLabel={`addAssignment`}
+            style={buttonStyles.primary}
+            onPress={handleAdd}
+          >
             <Text style={buttonStyles.primaryText}>Thêm bài tập</Text>
           </TouchableOpacity>
         )}

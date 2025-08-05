@@ -16,6 +16,14 @@ import { CourseService } from "../../services/course.service";
 import { SubjectService } from "../../services/subject.service"; // ✅ thêm import
 import { AuthService } from "../../services/auth.service";
 import Ionicons from "react-native-vector-icons/Ionicons";
+// Import style chung
+import { layoutStyles } from "../../constants/layoutStyles";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { inputStyles } from "../../constants/inputStyles";
+import { colors } from "../../constants/colors";
+//assets
 import { Images } from "../../constants/images/images";
 
 type NavigationProp = NativeStackNavigationProp<
@@ -114,7 +122,26 @@ export default function CourseDetailScreen() {
           style={styles.banner}
           resizeMode="cover"
         />
+        <View
+          style={[
+            layoutStyles.bannerTextContainer,
+            { right: 40, maxWidth: 150, top: 30 },
+          ]}
+        >
+          <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
+            Chi Tiết Khóa Học
+          </Text>
+          <Text
+            style={[
+              textStyles.bannerSubtitle,
+              { color: colors.primary, marginTop: 20 },
+            ]}
+          >
+            Thông tin chi tiết của khóa học
+          </Text>
+        </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -165,6 +192,7 @@ export default function CourseDetailScreen() {
 
       {/* Nút chức năng */}
       <TouchableOpacity
+        accessibilityLabel={`goScheduleList`}
         style={styles.button}
         onPress={() =>
           navigation.navigate("ScheduleList", { courseId: course.course_id })
@@ -173,6 +201,7 @@ export default function CourseDetailScreen() {
         <Text style={styles.buttonText}>Xem Lịch Học</Text>
       </TouchableOpacity>
       <TouchableOpacity
+        accessibilityLabel={`goLessonList`}
         style={styles.button}
         onPress={() =>
           navigation.navigate("LessonList", { courseId: course.course_id })
@@ -182,7 +211,8 @@ export default function CourseDetailScreen() {
       </TouchableOpacity>
       {role === 3 && (
         <TouchableOpacity
-          style={styles.button}
+          accessibilityLabel={`goStudentList`}
+          style={[styles.button, { marginBottom: 20 }]}
           onPress={() =>
             navigation.navigate("TeacherStudentList", {
               courseId: course.course_id,

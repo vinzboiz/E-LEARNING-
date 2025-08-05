@@ -52,6 +52,9 @@ export default function UserManagementScreen() {
   const [role, setRole] = useState<"admin" | "student" | "teacher">("student");
   const [searchText, setSearchText] = useState<string>("");
 
+  // ✅ State để hiển thị/ẩn mật khẩu
+  const [showPassword, setShowPassword] = useState(false);
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -185,13 +188,14 @@ export default function UserManagementScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 20 }]}>
           <Text style={textStyles.bannerTitle}>Người dùng</Text>
           <Text style={textStyles.bannerSubtitle}>
             Quản lý danh sách người dùng của bạn
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel="back-button"
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -218,7 +222,9 @@ export default function UserManagementScreen() {
       </View>
 
       {/* Nút thêm hình tròn */}
-      <TouchableOpacity style={buttonStyles.fab} onPress={openAddUser}>
+      <TouchableOpacity 
+        accessibilityLabel="add-user-button"
+        style={buttonStyles.fab} onPress={openAddUser}>
         <Ionicons name="add" size={30} color="#fff" />
       </TouchableOpacity>
 
@@ -245,10 +251,13 @@ export default function UserManagementScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={textStyles.subjectName}>{item.name}</Text>
                 <Text style={textStyles.subjectDesc}>{item.email}</Text>
-                <Text style={textStyles.subjectDesc}>Role: {item.role}</Text>
+                <Text style={textStyles.subjectDesc}>
+                  {`Role: ${item.role}`}
+                </Text>
               </View>
-              <View style={cardStyles.cardActions}>
+              <View style={[cardStyles.cardActions, { marginTop: 5 }]}>
                 <TouchableOpacity
+                  accessibilityLabel={`edit-user-${item.id}`}
                   style={[
                     buttonStyles.iconBtn,
                     { backgroundColor: colors.primary },
@@ -258,6 +267,7 @@ export default function UserManagementScreen() {
                   <Ionicons name="create-outline" size={18} color="#fff" />
                 </TouchableOpacity>
                 <TouchableOpacity
+                  accessibilityLabel={`delete-user-${item.id}`}
                   style={[
                     buttonStyles.iconBtn,
                     { backgroundColor: colors.danger },
@@ -290,8 +300,17 @@ export default function UserManagementScreen() {
       {/* Modal thêm/sửa user */}
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={layoutStyles.modalOverlay}>
-          <ScrollView style={layoutStyles.modalContent}>
-            <Text style={textStyles.modalTitle}>
+          <ScrollView style={[layoutStyles.modalContent, { maxHeight: "60%" }]}>
+            <Text
+              style={[
+                textStyles.modalTitle,
+                {
+                  textTransform: "uppercase",
+                  width: "100%",
+                  textAlign: "center",
+                },
+              ]}
+            >
               {isEditing ? "Sửa User" : "Thêm User"}
             </Text>
 
@@ -307,13 +326,32 @@ export default function UserManagementScreen() {
               value={email}
               onChangeText={setEmail}
             />
-            <TextInput
-              style={textStyles.input}
-              placeholder="Mật khẩu"
-              value={password}
-              secureTextEntry
-              onChangeText={setPassword}
-            />
+
+            {/* ✅ Input mật khẩu có icon xem/ẩn */}
+            <View style={{ position: "relative", marginBottom: 10 }}>
+              <TextInput
+                style={[textStyles.input, { paddingRight: 40 }]}
+                placeholder="Mật khẩu"
+                value={password}
+                secureTextEntry={!showPassword}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity
+                style={{
+                  position: "absolute",
+                  right: 10,
+                  top: 12,
+                }}
+                onPress={() => setShowPassword((prev) => !prev)}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color="#666"
+                />
+              </TouchableOpacity>
+            </View>
+
             <Text style={textStyles.label}>Role:</Text>
             <Picker
               selectedValue={role}
@@ -327,7 +365,10 @@ export default function UserManagementScreen() {
               <Picker.Item label="Giảng Viên" value="teacher" />
             </Picker>
 
-            <TouchableOpacity style={buttonStyles.primary} onPress={saveUser}>
+            <TouchableOpacity
+              style={[buttonStyles.primary, { marginBottom: 10 }]}
+              onPress={saveUser}
+            >
               <Text style={buttonStyles.primaryText}>
                 {isEditing ? "Cập nhật" : "Thêm"}
               </Text>

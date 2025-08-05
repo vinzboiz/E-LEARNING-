@@ -3,6 +3,7 @@ import {
   View,
   Text,
   FlatList,
+  StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
@@ -175,9 +176,13 @@ export default function StudentCourseListScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Khóa học khả dụng</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View style={[layoutStyles.bannerTextContainer, { right: 10 }]}>
+          <Text style={[textStyles.bannerTitle, { color: "#ffff" }]}>
+            Đăng Ký khóa học
+          </Text>
+          <Text
+            style={[textStyles.bannerSubtitle, { color: "#ffff", left: 50 }]}
+          >
             Chọn khóa học phù hợp để thêm vào giỏ
           </Text>
         </View>
@@ -191,6 +196,8 @@ export default function StudentCourseListScreen() {
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         >
           <Text style={{ fontWeight: "bold" }}>
@@ -208,6 +215,8 @@ export default function StudentCourseListScreen() {
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         >
           <Text style={{ fontWeight: "bold" }}>
@@ -225,6 +234,8 @@ export default function StudentCourseListScreen() {
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         >
           <Text style={{ fontWeight: "bold" }}>
@@ -241,6 +252,8 @@ export default function StudentCourseListScreen() {
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         >
           <Text style={{ fontWeight: "bold" }}>
@@ -258,6 +271,8 @@ export default function StudentCourseListScreen() {
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         >
           <Text style={{ fontWeight: "bold" }}>
@@ -309,6 +324,7 @@ export default function StudentCourseListScreen() {
           padding: 8,
           borderRadius: 8,
           marginBottom: 10,
+          marginHorizontal: 10,
         }}
         placeholder="🔍 Tìm kiếm khóa học..."
         value={search}
@@ -321,7 +337,7 @@ export default function StudentCourseListScreen() {
         data={filteredCourses}
         keyExtractor={(item) => item.course_id.toString()}
         ListEmptyComponent={
-          <View style={layoutStyles.center}>
+          <View style={[layoutStyles.center, { marginTop: 30 }]}>
             <Image
               source={Images.Common.nothing}
               style={imageStyles.emptyImage}
@@ -365,14 +381,20 @@ export default function StudentCourseListScreen() {
 
       {/* Buttons */}
       <TouchableOpacity
-        style={[buttonStyles.primary, { marginBottom: 10 }]}
+        style={[
+          buttonStyles.primary,
+          { marginBottom: 10, marginHorizontal: 10 },
+        ]}
         onPress={handleAddCourses}
       >
         <Text style={buttonStyles.primaryText}>Thêm vào giỏ</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[buttonStyles.primary, { marginBottom: 20 }]}
+        style={[
+          buttonStyles.primary,
+          { marginBottom: 20, marginHorizontal: 10 },
+        ]}
         onPress={() => navigation.navigate("StudentRegisteredCourses")}
       >
         <Text style={buttonStyles.primaryText}>Xem giỏ môn học</Text>

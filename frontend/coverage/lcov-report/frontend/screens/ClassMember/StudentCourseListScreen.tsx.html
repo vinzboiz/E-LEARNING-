@@ -445,7 +445,29 @@
 <a name='L380'></a><a href='#L380'>380</a>
 <a name='L381'></a><a href='#L381'>381</a>
 <a name='L382'></a><a href='#L382'>382</a>
-<a name='L383'></a><a href='#L383'>383</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L383'></a><a href='#L383'>383</a>
+<a name='L384'></a><a href='#L384'>384</a>
+<a name='L385'></a><a href='#L385'>385</a>
+<a name='L386'></a><a href='#L386'>386</a>
+<a name='L387'></a><a href='#L387'>387</a>
+<a name='L388'></a><a href='#L388'>388</a>
+<a name='L389'></a><a href='#L389'>389</a>
+<a name='L390'></a><a href='#L390'>390</a>
+<a name='L391'></a><a href='#L391'>391</a>
+<a name='L392'></a><a href='#L392'>392</a>
+<a name='L393'></a><a href='#L393'>393</a>
+<a name='L394'></a><a href='#L394'>394</a>
+<a name='L395'></a><a href='#L395'>395</a>
+<a name='L396'></a><a href='#L396'>396</a>
+<a name='L397'></a><a href='#L397'>397</a>
+<a name='L398'></a><a href='#L398'>398</a>
+<a name='L399'></a><a href='#L399'>399</a>
+<a name='L400'></a><a href='#L400'>400</a>
+<a name='L401'></a><a href='#L401'>401</a>
+<a name='L402'></a><a href='#L402'>402</a>
+<a name='L403'></a><a href='#L403'>403</a>
+<a name='L404'></a><a href='#L404'>404</a>
+<a name='L405'></a><a href='#L405'>405</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -469,6 +491,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -614,6 +637,16 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -723,9 +756,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -792,6 +830,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -832,6 +876,7 @@ import {
   View,
   Text,
   FlatList,
+  StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
@@ -1004,9 +1049,13 @@ export default function <span class="fstat-no" title="function not covered" >Stu
           style={imageStyles.banner}
           resizeMode="cover"
         /&gt;
-        &lt;View style={layoutStyles.bannerTextContainer}&gt;
-          &lt;Text style={textStyles.bannerTitle}&gt;Khóa học khả dụng&lt;/Text&gt;
-          &lt;Text style={textStyles.bannerSubtitle}&gt;
+        &lt;View style={[layoutStyles.bannerTextContainer, { right: 10 }]}&gt;
+          &lt;Text style={[textStyles.bannerTitle, { color: "#ffff" }]}&gt;
+            Đăng Ký khóa học
+          &lt;/Text&gt;
+          &lt;Text
+            style={[textStyles.bannerSubtitle, { color: "#ffff", left: 50 }]}
+          &gt;
             Chọn khóa học phù hợp để thêm vào giỏ
           &lt;/Text&gt;
         &lt;/View&gt;
@@ -1020,6 +1069,8 @@ export default function <span class="fstat-no" title="function not covered" >Stu
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         &gt;
           &lt;Text style={{ fontWeight: "bold" }}&gt;
@@ -1037,6 +1088,8 @@ export default function <span class="fstat-no" title="function not covered" >Stu
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         &gt;
           &lt;Text style={{ fontWeight: "bold" }}&gt;
@@ -1054,6 +1107,8 @@ export default function <span class="fstat-no" title="function not covered" >Stu
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         &gt;
           &lt;Text style={{ fontWeight: "bold" }}&gt;
@@ -1070,6 +1125,8 @@ export default function <span class="fstat-no" title="function not covered" >Stu
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         &gt;
           &lt;Text style={{ fontWeight: "bold" }}&gt;
@@ -1087,6 +1144,8 @@ export default function <span class="fstat-no" title="function not covered" >Stu
             padding: 10,
             borderRadius: 8,
             marginBottom: 10,
+            marginTop: 10,
+            marginHorizontal: 10,
           }}
         &gt;
           &lt;Text style={{ fontWeight: "bold" }}&gt;
@@ -1138,6 +1197,7 @@ export default function <span class="fstat-no" title="function not covered" >Stu
           padding: 8,
           borderRadius: 8,
           marginBottom: 10,
+          marginHorizontal: 10,
         }}
         placeholder="🔍 Tìm kiếm khóa học..."
         value={search}
@@ -1150,7 +1210,7 @@ export default function <span class="fstat-no" title="function not covered" >Stu
         data={filteredCourses}
         keyExtractor={<span class="fstat-no" title="function not covered" >(i</span>tem) =&gt; <span class="cstat-no" title="statement not covered" >item.course_id.toString()}</span>
         ListEmptyComponent={
-          &lt;View style={layoutStyles.center}&gt;
+          &lt;View style={[layoutStyles.center, { marginTop: 30 }]}&gt;
             &lt;Image
               source={Images.Common.nothing}
               style={imageStyles.emptyImage}
@@ -1194,14 +1254,20 @@ export default function <span class="fstat-no" title="function not covered" >Stu
 &nbsp;
       {/* Buttons */}
       &lt;TouchableOpacity
-        style={[buttonStyles.primary, { marginBottom: 10 }]}
+        style={[
+          buttonStyles.primary,
+          { marginBottom: 10, marginHorizontal: 10 },
+        ]}
         onPress={handleAddCourses}
       &gt;
         &lt;Text style={buttonStyles.primaryText}&gt;Thêm vào giỏ&lt;/Text&gt;
       &lt;/TouchableOpacity&gt;
 &nbsp;
       &lt;TouchableOpacity
-        style={[buttonStyles.primary, { marginBottom: 20 }]}
+        style={[
+          buttonStyles.primary,
+          { marginBottom: 20, marginHorizontal: 10 },
+        ]}
         onPress={<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >navigation.navigate("StudentRegisteredCourses")}</span>
       &gt;
         &lt;Text style={buttonStyles.primaryText}&gt;Xem giỏ môn học&lt;/Text&gt;
@@ -1216,7 +1282,7 @@ export default function <span class="fstat-no" title="function not covered" >Stu
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-02T18:44:58.311Z
+                at 2025-08-05T17:18:43.719Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

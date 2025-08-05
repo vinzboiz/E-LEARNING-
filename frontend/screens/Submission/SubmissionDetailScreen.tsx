@@ -22,6 +22,7 @@ import { cardStyles } from "../../constants/cardStyles";
 
 //assets
 import { Images } from "../../constants/images/images";
+import { colors } from "../../constants/colors";
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "SubmissionDetail"
@@ -57,44 +58,54 @@ export default function SubmissionDetailScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Chi tiết bài nộp</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 20 }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.textDark }]}>
+            Chi tiết bài nộp
+          </Text>
+          <Text style={[textStyles.bannerSubtitle, { color: colors.textDark }]}>
             Thông tin và nội dung bài làm
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <Text
+        style={[
+          textStyles.listTitle,
+          { marginTop: 10, marginLeft: 20, marginBottom: 0 },
+        ]}
+      >
+        Chi tiết bài nộp
+      </Text>
       {/* Nội dung bài nộp */}
       <View style={[cardStyles.card, { margin: 15 }]}>
-        <Text style={textStyles.subjectName}>
+        <Text style={[textStyles.subjectName, { fontSize: 18 }]}>
           Tên học sinh: {submission.student_name || "Không rõ"}
         </Text>
-        <Text style={textStyles.subjectDesc}>
+        <Text style={[textStyles.subjectDesc, { fontSize: 16 }]}>
           Nộp lúc: {formatDateTime(submission.submitted_at)}
         </Text>
-        <Text style={textStyles.subjectDesc}>
+        <Text style={[textStyles.subjectDesc, { fontSize: 16 }]}>
           Điểm: {submission.score != null ? submission.score : "Chưa chấm"}
         </Text>
-        <Text style={textStyles.subjectDesc}>
+        <Text style={[textStyles.subjectDesc, { fontSize: 16 }]}>
           Đánh giá: {submission.feedback || "Chưa nhận xét"}
         </Text>
 
-        <Text style={[textStyles.subjectDesc, { marginTop: 10 }]}>
+        <Text style={[textStyles.subjectDesc, { marginTop: 10, fontSize: 16 }]}>
           Nội dung bài làm:
         </Text>
-        <Text style={textStyles.modalDesc}>
+        <Text style={[textStyles.modalDesc, { fontSize: 16 }]}>
           {submission.content || "Không có nội dung"}
         </Text>
         {submission.drive_link && (
           <Text
-            style={[textStyles.linkText, { color: "blue" }]}
+            style={[textStyles.linkText, { color: "blue", fontSize: 16 }]}
             onPress={handleOpenDriveLink}
           >
             Link bài nộp (Google Drive)
@@ -103,12 +114,15 @@ export default function SubmissionDetailScreen() {
 
         {/* Nút chấm điểm */}
         <TouchableOpacity
+          accessibilityLabel={`goGradeSubmission`}
           style={[buttonStyles.primary, { marginTop: 15 }]}
           onPress={() =>
             navigation.navigate("GradeSubmissionScreen", { submission })
           }
         >
-          <Text style={buttonStyles.primaryText}>Chấm điểm</Text>
+          <Text style={[buttonStyles.primaryText, { fontSize: 16 }]}>
+            Chấm điểm
+          </Text>
         </TouchableOpacity>
       </View>
 

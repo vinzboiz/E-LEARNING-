@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">53.84% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/13</span>
+                <span class='fraction'>7/13</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">63.63% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/11</span>
+                <span class='fraction'>7/11</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line medium'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -83,40 +83,40 @@
 <a name='L18'></a><a href='#L18'>18</a>
 <a name='L19'></a><a href='#L19'>19</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import api from "./axiosInstance"; // thay vì import axios
 &nbsp;
-const API_URL = <span class="cstat-no" title="statement not covered" >"/api/auth";</span> // Không cần ghi full URL nữa, vì axiosInstance có baseURL
+const API_URL = "/api/auth"; // Không cần ghi full URL nữa, vì axiosInstance có baseURL
 &nbsp;
-export const registerAPI = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(n</span>ame: string, email: string, password: string) =&gt;</span>
+export const registerAPI = <span class="fstat-no" title="function not covered" >(n</span>ame: string, email: string, password: string) =&gt;
 <span class="cstat-no" title="statement not covered" >  api.post(`${API_URL}/register`, { name, email, password });</span>
 &nbsp;
-export const sendOTPAPI = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(n</span>ame: string, email: string, password: string) =&gt;</span>
+export const sendOTPAPI = <span class="fstat-no" title="function not covered" >(n</span>ame: string, email: string, password: string) =&gt;
 <span class="cstat-no" title="statement not covered" >  api.post(`${API_URL}/send-otp`, { name, email, password });</span>
 &nbsp;
-export const verifyOTPAPI = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(n</span>ame: string, email: string, password: string, otp: string) =&gt;</span>
+export const verifyOTPAPI = <span class="fstat-no" title="function not covered" >(n</span>ame: string, email: string, password: string, otp: string) =&gt;
 <span class="cstat-no" title="statement not covered" >  api.post(`${API_URL}/verify-otp`, { name, email, password, otp });</span>
 &nbsp;
-export const loginAPI = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(e</span>mail: string, password: string) =&gt;</span>
+export const loginAPI = <span class="fstat-no" title="function not covered" >(e</span>mail: string, password: string) =&gt;
 <span class="cstat-no" title="statement not covered" >  api.post(`${API_URL}/login`, { email, password });</span>
 &nbsp;
-export const getMeAPI = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >api.get(`${API_URL}/me`);</span></span> // không cần token thủ công
-export const logoutAPI = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >api.post(`${API_URL}/logout`);</span></span>
+export const getMeAPI = <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >api.get(`${API_URL}/me`);</span> // không cần token thủ công
+export const logoutAPI = <span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >api.post(`${API_URL}/logout`);</span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -124,7 +124,7 @@ export const logoutAPI = <span class="cstat-no" title="statement not covered" ><
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-02T18:44:58.311Z
+                at 2025-08-05T17:18:43.719Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

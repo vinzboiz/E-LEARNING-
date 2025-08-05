@@ -111,11 +111,16 @@ export default function TimetableScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={[textStyles.bannerTitle, { color: "#fcf958ff" }]}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 10 }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.lightYellow }]}>
             THỜI KHÓA BIỂU
           </Text>
-          <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
+          <Text
+            style={[
+              textStyles.bannerSubtitle,
+              { color: colors.primary, marginLeft: 10, marginTop: 40 },
+            ]}
+          >
             Quản lý thời khóa biểu
           </Text>
         </View>
@@ -129,6 +134,16 @@ export default function TimetableScreen() {
         )}
       </View>
 
+      <Text
+        style={[
+          textStyles.listTitle,
+          {
+            marginBottom: -10,
+          },
+        ]}
+      >
+        Thời Khóa Biểu
+      </Text>
       {/* Điều hướng tuần */}
       <View style={styles.weekNav}>
         <TouchableOpacity
@@ -176,7 +191,7 @@ export default function TimetableScreen() {
                         color={colors.primary}
                         style={{ marginRight: 5 }}
                       />
-                      <Text style={styles.subject}>{sch.subject_name}</Text>
+                      <Text testID={`subject-name-${sch.schedule_id ?? index}`} style={styles.subject}>{sch.subject_name}</Text>
                     </View>
                     <Text style={styles.info}>
                       🕒 {sch.start_time} - {sch.end_time} | 🏫 {sch.room}
@@ -220,12 +235,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   weekBtnText: { color: "#fff", fontWeight: "500", fontSize: 13 },
-  weekTitle: { fontWeight: "bold", fontSize: 15, color: colors.primary },
+  weekTitle: { fontWeight: "bold", fontSize: 15, color: colors.textDark },
   dayBlock: { marginBottom: 20 },
   dayTitle: {
     fontSize: 15,
     fontWeight: "bold",
-    color: colors.primary,
+    color: colors.textDark,
     marginBottom: 8,
   },
   scheduleCard: {

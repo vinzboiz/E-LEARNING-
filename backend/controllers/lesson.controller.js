@@ -4,7 +4,7 @@ const lessonModel = require("../models/lesson.model");
 exports.getAllLessons = async (req, res) => {
   try {
     const { role, id: userId } = req.user;
-    const courseId = req.query.course_id; // Yêu cầu truyền course_id qua query
+    const courseId = req.query.course_id;
 
     if (!courseId) {
       return res.status(400).json({ error: "Vui lòng cung cấp course_id." });
@@ -12,11 +12,10 @@ exports.getAllLessons = async (req, res) => {
 
     const lessons = await lessonModel.getAllLessons(userId, courseId, role);
     if (lessons?.message) {
-      // Không có quyền xem
       return res.status(403).json({ message: lessons.message });
     }
 
-    return res.json(lessons);
+    return res.json(lessons); // model đã format file_pdf
   } catch (err) {
     console.error("❌ Lỗi getAllLessons:", err);
     res.status(500).json({ error: "Lỗi khi lấy danh sách bài học." });
@@ -34,18 +33,13 @@ exports.getLessonById = async (req, res) => {
       lesson = await lessonModel.getLessonById(userId, lessonId, role);
     } else if (role === 2) {
       lesson = await lessonModel.getLessonByIdForStudent(userId, lessonId);
-    } else {
-      return res.status(403).json({ error: "Vai trò không hợp lệ." });
     }
 
     if (!lesson) {
       return res.status(404).json({ error: "Không tìm thấy bài học." });
     }
-    if (lesson?.message) {
-      return res.status(403).json({ message: lesson.message });
-    }
 
-    return res.json(lesson);
+    res.json(lesson); // model đã format file_pdf
   } catch (err) {
     console.error("❌ Lỗi getLessonById:", err);
     res.status(500).json({ error: "Lỗi khi lấy bài học." });
@@ -58,8 +52,9 @@ exports.getLessonsByStudent = async (req, res) => {
     if (req.user.role !== 2) {
       return res.status(403).json({ error: "Chỉ sinh viên mới dùng chức năng này." });
     }
+
     const lessons = await lessonModel.getLessonsByStudent(req.user.id);
-    res.json(lessons);
+    res.json(lessons); // model đã format file_pdf
   } catch (err) {
     console.error("❌ Lỗi getLessonsByStudent:", err);
     res.status(500).json({ error: "Lỗi khi lấy bài học cho sinh viên." });
@@ -77,12 +72,17 @@ exports.createLesson = async (req, res) => {
       return res.status(403).json({ error: "Bạn không có quyền tạo bài học." });
     }
 
-    const newLesson = await lessonModel.createLesson(userId, { title, content, file, course_id }, role);
+    const newLesson = await lessonModel.createLesson(
+      userId,
+      { title, content, file, course_id },
+      role
+    );
+
     if (newLesson?.message) {
       return res.status(403).json({ message: newLesson.message });
     }
 
-    res.status(201).json(newLesson);
+    res.status(201).json(newLesson); // model đã format file_pdf
   } catch (error) {
     console.error("Lỗi khi tạo bài học:", error);
     res.status(500).json({ error: error.message || "Lỗi khi tạo bài học." });
@@ -97,12 +97,18 @@ exports.updateLesson = async (req, res) => {
     const { role, id: userId } = req.user;
     const file = req.file ? req.file.filename : null;
 
-    const updated = await lessonModel.updateLesson(userId, lessonId, { title, content, file }, role);
+    const updated = await lessonModel.updateLesson(
+      userId,
+      lessonId,
+      { title, content, file },
+      role
+    );
+
     if (updated?.message) {
       return res.status(403).json({ message: updated.message });
     }
 
-    return res.json(updated);
+    return res.json(updated); // model đã format file_pdf
   } catch (err) {
     console.error("❌ Lỗi khi cập nhật bài học:", err);
     res.status(500).json({ error: err.message || "Lỗi khi cập nhật bài học." });
@@ -116,6 +122,7 @@ exports.deleteLesson = async (req, res) => {
     const { role, id: userId } = req.user;
 
     const result = await lessonModel.deleteLesson(userId, lessonId, role);
+
     if (result?.message === "Bạn không có quyền xoá bài học này.") {
       return res.status(403).json({ message: result.message });
     }

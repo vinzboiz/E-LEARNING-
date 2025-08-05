@@ -78,11 +78,21 @@ export default function AdminUserListScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={[textStyles.bannerTitle, { color: "#fcf958ff" }]}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 20 }]}>
+          <Text
+            style={[
+              textStyles.bannerTitle,
+              { color: colors.textDark, maxWidth: 200 },
+            ]}
+          >
             QUẢN LÝ THỜI KHÓA BIỂU
           </Text>
-          <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
+          <Text
+            style={[
+              textStyles.bannerSubtitle,
+              { color: colors.textDark, marginTop: 10 },
+            ]}
+          >
             Quản lý thời khóa biểu của người dùng trong hệ thống
           </Text>
         </View>

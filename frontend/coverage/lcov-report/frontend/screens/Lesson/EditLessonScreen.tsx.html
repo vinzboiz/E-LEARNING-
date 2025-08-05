@@ -262,7 +262,25 @@
 <a name='L197'></a><a href='#L197'>197</a>
 <a name='L198'></a><a href='#L198'>198</a>
 <a name='L199'></a><a href='#L199'>199</a>
-<a name='L200'></a><a href='#L200'>200</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L200'></a><a href='#L200'>200</a>
+<a name='L201'></a><a href='#L201'>201</a>
+<a name='L202'></a><a href='#L202'>202</a>
+<a name='L203'></a><a href='#L203'>203</a>
+<a name='L204'></a><a href='#L204'>204</a>
+<a name='L205'></a><a href='#L205'>205</a>
+<a name='L206'></a><a href='#L206'>206</a>
+<a name='L207'></a><a href='#L207'>207</a>
+<a name='L208'></a><a href='#L208'>208</a>
+<a name='L209'></a><a href='#L209'>209</a>
+<a name='L210'></a><a href='#L210'>210</a>
+<a name='L211'></a><a href='#L211'>211</a>
+<a name='L212'></a><a href='#L212'>212</a>
+<a name='L213'></a><a href='#L213'>213</a>
+<a name='L214'></a><a href='#L214'>214</a>
+<a name='L215'></a><a href='#L215'>215</a>
+<a name='L216'></a><a href='#L216'>216</a>
+<a name='L217'></a><a href='#L217'>217</a>
+<a name='L218'></a><a href='#L218'>218</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -397,7 +415,25 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -588,20 +624,33 @@ export default function <span class="fstat-no" title="function not covered" >Edi
           style={imageStyles.banner}
           resizeMode="cover"
         /&gt;
-        &lt;View style={layoutStyles.bannerTextContainer}&gt;
-          &lt;Text style={textStyles.bannerTitle}&gt;Chỉnh sửa bài học&lt;/Text&gt;
-          &lt;Text style={textStyles.bannerSubtitle}&gt;
+        &lt;View
+          style={[
+            layoutStyles.bannerTextContainer,
+            { right: 40, maxWidth: 150, top: 30 },
+          ]}
+        &gt;
+          &lt;Text style={[textStyles.bannerTitle, { color: colors.background }]}&gt;
+            Chỉnh sửa bài học
+          &lt;/Text&gt;
+          &lt;Text
+            style={[
+              textStyles.bannerSubtitle,
+              { color: colors.background, marginTop: 10 },
+            ]}
+          &gt;
             Cập nhật thông tin và tài liệu bài học
           &lt;/Text&gt;
         &lt;/View&gt;
         &lt;TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={<span class="fstat-no" title="function not covered" >()</span> =&gt; <span class="cstat-no" title="statement not covered" >navigation.goBack()}</span>
         &gt;
           &lt;Ionicons name="arrow-back" size={24} color="#fff" /&gt;
         &lt;/TouchableOpacity&gt;
       &lt;/View&gt;
-&nbsp;
+      &lt;Text style={textStyles.listTitle}&gt;Chỉnh sửa bài học &lt;/Text&gt;
       {/* Form chỉnh sửa */}
       &lt;View style={{ padding: 20 }}&gt;
         &lt;TextInput
@@ -626,7 +675,11 @@ export default function <span class="fstat-no" title="function not covered" >Edi
           {currentFile || "Chưa có file PDF"}
         &lt;/Text&gt;
 &nbsp;
-        &lt;TouchableOpacity style={buttonStyles.primary} onPress={pickPdfFile}&gt;
+        &lt;TouchableOpacity
+          accessibilityLabel={`pickPDFFile`}
+          style={buttonStyles.primary}
+          onPress={pickPdfFile}
+        &gt;
           &lt;Text style={buttonStyles.primaryText}&gt;Chọn file PDF mới&lt;/Text&gt;
         &lt;/TouchableOpacity&gt;
         {newPdfFile &amp;&amp; (
@@ -636,6 +689,7 @@ export default function <span class="fstat-no" title="function not covered" >Edi
         )}
 &nbsp;
         &lt;TouchableOpacity
+          accessibilityLabel={`updateLesson`}
           style={[buttonStyles.primary, { marginTop: 15 }]}
           onPress={handleUpdateLesson}
           disabled={saving}
@@ -667,7 +721,7 @@ export default function <span class="fstat-no" title="function not covered" >Edi
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-08-02T18:44:58.311Z
+                at 2025-08-05T17:18:43.719Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

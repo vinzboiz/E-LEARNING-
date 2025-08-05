@@ -3,11 +3,11 @@ import {
   View,
   Text,
   FlatList,
-  TouchableOpacity,
   ActivityIndicator,
   Alert,
   Linking,
   Image,
+  TouchableOpacity,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -17,15 +17,13 @@ import { AuthService } from "../../services/auth.service";
 import { SubmissionService } from "../../services/submission.service";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-// Import CSS chung
-import { layoutStyles } from "../../constants/layoutStyles";
+// Styles
+import { colors } from "../../constants/colors";
 import { textStyles } from "../../constants/textStyles";
-import { imageStyles } from "../../constants/imageStyles";
 import { buttonStyles } from "../../constants/buttonStyles";
 import { cardStyles } from "../../constants/cardStyles";
-import { colors } from "../../constants/colors";
-
-//assets
+import { imageStyles } from "../../constants/imageStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
 import { Images } from "../../constants/images/images";
 
 type NavigationProp = NativeStackNavigationProp<
@@ -53,11 +51,10 @@ export default function AssignmentDetailScreen() {
   const [assignmentDetail, setAssignmentDetail] = useState<any>(assignment);
 
   const fetchData = async () => {
-    if (!assignment || !assignment.assignment_id) {
+    if (!assignment?.assignment_id) {
       Alert.alert("Lỗi", "Không có thông tin bài tập.");
       return;
     }
-
     setLoading(true);
     try {
       const user = await AuthService.getMe();
@@ -75,7 +72,7 @@ export default function AssignmentDetailScreen() {
         setSubmissions(res);
       }
     } catch (error: any) {
-      if (error.message && !error.message.includes("quyền")) {
+      if (!error.message?.includes("quyền")) {
         Alert.alert("Lỗi", error.message || "Không thể tải chi tiết bài tập.");
       }
     } finally {
@@ -98,20 +95,29 @@ export default function AssignmentDetailScreen() {
 
   const renderSubmissionItem = ({ item }: { item: Submission }) => (
     <TouchableOpacity
-      style={[cardStyles.card, { marginHorizontal: 20, marginVertical: 5 }]}
+      accessibilityLabel={`goSubmissionDetail`}
+      style={[cardStyles.card, { flexDirection: "row" }]}
       onPress={() =>
         navigation.navigate("SubmissionDetail", { submission: item })
       }
     >
-      <Text style={textStyles.subjectName}>
-        {item.content || "Không có nội dung"}
-      </Text>
-      <Text style={textStyles.subjectDesc}>
-        Nộp lúc: {item.submitted_at || "Chưa có"}
-      </Text>
-      <Text style={textStyles.subjectDesc}>
-        Điểm: {item.score ?? "Chưa chấm"}
-      </Text>
+      <View style={{ flex: 1 }}>
+        <Text style={[textStyles.subjectName, { fontSize: 16 }]}>
+          {item.content || "Không có nội dung"}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          📅 Nộp lúc: {item.submitted_at || "Chưa có"}
+        </Text>
+        <Text style={textStyles.subjectDesc}>
+          🏆 Điểm: {item.score ?? "Chưa chấm"}
+        </Text>
+      </View>
+      <Ionicons
+        name="chevron-forward"
+        size={20}
+        color={colors.primary}
+        style={{ alignSelf: "center" }}
+      />
     </TouchableOpacity>
   );
 
@@ -130,51 +136,79 @@ export default function AssignmentDetailScreen() {
                 style={imageStyles.banner}
                 resizeMode="cover"
               />
-              <View style={layoutStyles.bannerTextContainer}>
-                <Text style={textStyles.bannerTitle}>Chi tiết bài tập</Text>
-                <Text style={textStyles.bannerSubtitle}>
-                  Thông tin và bài nộp của sinh viên
+              <View style={[layoutStyles.bannerTextContainer, { right: 20 }]}>
+                <Text
+                  style={[textStyles.bannerTitle, { color: colors.primary }]}
+                >
+                  Chi tiết bài tập
+                </Text>
+                <Text
+                  style={[textStyles.bannerSubtitle, { color: colors.primary }]}
+                >
+                  Thông tin & bài nộp
                 </Text>
               </View>
               <TouchableOpacity
+                accessibilityLabel={`back`}
                 style={buttonStyles.backButton}
                 onPress={() => navigation.goBack()}
               >
                 <Ionicons name="arrow-back" size={24} color="#fff" />
               </TouchableOpacity>
             </View>
-
+            <Text
+              style={[
+                textStyles.listTitle,
+                { marginTop: 10, marginLeft: 20, marginBottom: 0 },
+              ]}
+            >
+              Chi tiết bài tập
+            </Text>
             {/* Nội dung Assignment */}
             <View style={[cardStyles.card, { margin: 15 }]}>
-              <Text style={textStyles.subjectName}>
+              <Text
+                style={[
+                  textStyles.subjectName,
+                  {
+                    textTransform: "uppercase",
+                    fontSize: 18,
+                    textAlign: "center",
+                    width: "100%",
+                  },
+                ]}
+              >
                 {assignmentDetail?.title || "Không có tiêu đề"}
               </Text>
-              <Text style={textStyles.subjectDesc}>
-                {assignmentDetail?.description || "Không có mô tả"}
+              <Text style={[textStyles.subjectDesc, { fontSize: 15 }]}>
+                Mô tả: {assignmentDetail?.description || "Không có mô tả"}
               </Text>
-              <Text style={textStyles.subjectDesc}>
-                Thời gian: {assignmentDetail?.due_date_start} -{" "}
+              <Text style={[textStyles.subjectDesc, { fontSize: 15 }]}>
+                📅 Thời gian: {assignmentDetail?.due_date_start} -{" "}
                 {assignmentDetail?.due_date_end}
               </Text>
               {assignmentDetail?.link_drive ? (
                 <Text
-                  style={[textStyles.subjectDesc, { color: "blue" }]}
+                  style={[
+                    textStyles.subjectDesc,
+                    { color: "blue", fontSize: 15 },
+                  ]}
                   onPress={() => Linking.openURL(assignmentDetail.link_drive)}
                 >
-                  Link bài tập: {assignmentDetail.link_drive}
+                  🔗 Link bài tập: {assignmentDetail.link_drive}
                 </Text>
               ) : (
                 <Text style={textStyles.subjectDesc}>
-                  Link bài tập: Không có
+                  🔗 Link bài tập: Không có
                 </Text>
               )}
-              <Text style={textStyles.subjectDesc}>
-                Trạng thái: {assignmentDetail?.status || "Chưa xác định"}
+              <Text style={[textStyles.subjectDesc, { fontSize: 15 }]}>
+                📌 Trạng thái: {assignmentDetail?.status || "Chưa xác định"}
               </Text>
 
               {roleId === 2 && assignmentDetail?.status !== "đã hết hạn" && (
                 <TouchableOpacity
-                  style={[buttonStyles.primary, { marginTop: 10 }]}
+                  accessibilityLabel={`submitAssignment`}
+                  style={[buttonStyles.primary, { marginTop: 15 }]}
                   onPress={() =>
                     navigation.navigate("SubmitAssignmentScreen", {
                       assignment,
@@ -194,7 +228,7 @@ export default function AssignmentDetailScreen() {
                   { marginTop: 10, marginLeft: 20, marginBottom: 10 },
                 ]}
               >
-                Danh sách bài nộp:
+                Danh sách bài nộp
               </Text>
             )}
           </>
@@ -213,7 +247,7 @@ export default function AssignmentDetailScreen() {
         }
         ListEmptyComponent={
           roleId !== 2 ? (
-            <Text style={{ textAlign: "center", marginTop: 10 }}>
+            <Text style={{ textAlign: "center", marginTop: 10, fontSize: 15 }}>
               Chưa có bài nộp nào.
             </Text>
           ) : null

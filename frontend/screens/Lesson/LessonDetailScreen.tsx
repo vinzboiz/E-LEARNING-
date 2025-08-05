@@ -5,9 +5,9 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Linking,
   Image,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -15,15 +15,14 @@ import { RootStackParamList } from "../../navigation/AppNavigator";
 import { LessonService } from "../../services/lesson.service";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-// Import styles
 import { layoutStyles } from "../../constants/layoutStyles";
 import { textStyles } from "../../constants/textStyles";
 import { imageStyles } from "../../constants/imageStyles";
 import { buttonStyles } from "../../constants/buttonStyles";
 import { colors } from "../../constants/colors";
-
-//assets
 import { Images } from "../../constants/images/images";
+
+import { getPdfUrl } from "../../src/config"; // ✅ import hàm ghép IP
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -42,7 +41,15 @@ export default function LessonDetailScreen() {
     async function fetchLesson() {
       try {
         const data = await LessonService.getLessonById(lessonId);
-        setLesson(data);
+        console.log("📄 Lesson Data:", data);
+
+        const lessonWithFullPdf = {
+          ...data,
+          file_pdf: data?.file_pdf ? getPdfUrl(data.file_pdf) : null,
+        };
+
+        console.log("📄 PDF direct URL:", lessonWithFullPdf.file_pdf);
+        setLesson(lessonWithFullPdf);
       } catch (err: any) {
         Alert.alert("Lỗi", err.message || "Không thể tải chi tiết bài học.");
         navigation.goBack();
@@ -53,12 +60,17 @@ export default function LessonDetailScreen() {
     fetchLesson();
   }, [lessonId]);
 
-  const openPdf = async (fileUrl: string) => {
-    try {
-      await Linking.openURL(fileUrl);
-    } catch (error) {
-      Alert.alert("Lỗi", "Không thể mở file PDF.");
+  const openPdfInWPS = () => {
+    if (!lesson?.file_pdf) {
+      Alert.alert("Lỗi", "Không tìm thấy file PDF để mở.");
+      return;
     }
+    Linking.openURL(lesson.file_pdf).catch(() => {
+      Alert.alert(
+        "Lỗi",
+        "Không thể mở file PDF. Hãy đảm bảo đã cài WPS Office."
+      );
+    });
   };
 
   if (loading) {
@@ -87,37 +99,56 @@ export default function LessonDetailScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Chi Tiết Bài Học</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View
+          style={[
+            layoutStyles.bannerTextContainer,
+            { right: 40, maxWidth: 150, top: 30 },
+          ]}
+        >
+          <Text style={[textStyles.bannerTitle, { color: colors.background }]}>
+            Chi Tiết Bài Học
+          </Text>
+          <Text
+            style={[
+              textStyles.bannerSubtitle,
+              { color: colors.background, marginTop: 10 },
+            ]}
+          >
             Thông tin đầy đủ của bài học
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <Text style={[textStyles.listTitle, { marginBottom: -20 }]}>
+        Thông tin chi tiết bài học{" "}
+      </Text>
       {/* Nội dung bài học */}
       <View style={{ padding: 20 }}>
         <Text style={textStyles.listTitle}>{lesson.title}</Text>
-        <Text style={[{ marginBottom: 20, textAlign: "center" }]}>
+        <Text style={{ marginBottom: 20, textAlign: "center" }}>
           {lesson.content || "Chưa có nội dung cho bài học này."}
         </Text>
 
-        {lesson.file && (
+        {/* Nút mở PDF bằng WPS */}
+        {lesson.file_pdf && (
           <TouchableOpacity
+            accessibilityLabel={`openPDFFile`}
             style={buttonStyles.primary}
-            onPress={() => openPdf(lesson.file)}
+            onPress={openPdfInWPS}
           >
-            <Text style={buttonStyles.primaryText}>Mở file PDF</Text>
+            <Text style={buttonStyles.primaryText}>Mở file PDF bằng WPS</Text>
           </TouchableOpacity>
         )}
 
+        {/* Nút xem bài tập */}
         <TouchableOpacity
+          accessibilityLabel={`openAssignmentList`}
           style={[buttonStyles.primary, { marginTop: 10 }]}
           onPress={() =>
             navigation.navigate("AssignmentList", {

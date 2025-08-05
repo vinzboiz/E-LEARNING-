@@ -169,6 +169,7 @@ export default function ProfileScreen() {
         />
         <View style={layoutStyles.bannerTextContainer}></View>
         <TouchableOpacity
+          accessibilityLabel="back-button"
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >

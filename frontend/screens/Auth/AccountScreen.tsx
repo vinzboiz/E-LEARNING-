@@ -13,6 +13,18 @@ import { RootStackParamList } from "../../navigation/AppNavigator";
 import { useNavigation } from "@react-navigation/native";
 import { AuthService } from "../../services/auth.service";
 
+// Import styles
+import { colors } from "../../constants/colors";
+import { textStyles } from "../../constants/textStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { cardStyles } from "../../constants/cardStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { layoutStyles } from "../../constants/layoutStyles";
+import { searchStyles } from "../../constants/searchStyles";
+
+//assets
+import { Images } from "../../constants/images/images";
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function AccountScreen() {
@@ -62,8 +74,10 @@ export default function AccountScreen() {
         <View style={styles.overlay}>
           {user ? (
             <>
-              <Text style={styles.title}>Xin chào, {user.name}!</Text>
-              <Text style={styles.subtitle}>
+              <Text style={[textStyles.bannerTitle, styles.title]}>
+                Xin chào, {user.name}!
+              </Text>
+              <Text style={[textStyles.bannerSubtitle, styles.subtitle]}>
                 Chào mừng bạn đã quay trở lại. Truy cập hồ sơ của bạn để xem chi
                 tiết.
               </Text>
@@ -131,8 +145,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#535353ff",
     textAlign: "left",
-    marginBottom: 25,
-    width: "80%",
+    marginVertical: 20,
+    marginTop: 10,
+    maxWidth: "80%",
     lineHeight: 24,
     fontWeight: "500",
   },

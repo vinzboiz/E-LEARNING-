@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { AuthService } from "../../services/auth.service";
+import Ionicons from "react-native-vector-icons/Ionicons"; // ✅ icon mắt
 
 //assets
 import { Images } from "../../constants/images/images";
@@ -27,6 +28,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [focusedInput, setFocusedInput] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false); // ✅ trạng thái xem mật khẩu
 
   const navigation = useNavigation<NavigationProp>();
 
@@ -40,8 +42,6 @@ export default function RegisterScreen() {
       setLoading(true);
       const res = await AuthService.sendOTP(name, email, password);
       Alert.alert("Thông báo", res.message || "OTP đã được gửi tới email");
-
-      // Chuyển sang màn hình OTP để xác thực
       navigation.navigate("OTP", { name, email, password });
     } catch (error: any) {
       console.log(
@@ -58,11 +58,13 @@ export default function RegisterScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       {/* Nút Back */}
       <TouchableOpacity
+        accessibilityLabel="back-button"
         style={styles.backButton}
         onPress={() => navigation.navigate<any>("Main", { screen: "Account" })}
       >
         <Image source={Images.Common.back} style={styles.backIcon} />
       </TouchableOpacity>
+
       <ImageBackground
         source={require("../../assets/Auth/purple-bg.png")}
         style={styles.backgroundImage}
@@ -103,18 +105,31 @@ export default function RegisterScreen() {
 
           {/* Password */}
           <Text style={styles.label}>Password</Text>
-          <TextInput
-            placeholder="Enter your password"
-            style={[
-              styles.input,
-              focusedInput === "password" && styles.inputFocused,
-            ]}
-            value={password}
-            secureTextEntry
-            onChangeText={setPassword}
-            onFocus={() => setFocusedInput("password")}
-            onBlur={() => setFocusedInput("")}
-          />
+          <View style={{ position: "relative" }}>
+            <TextInput
+              placeholder="Enter your password"
+              style={[
+                styles.input,
+                focusedInput === "password" && styles.inputFocused,
+              ]}
+              value={password}
+              secureTextEntry={!showPassword} // ✅ ẩn/hiện mật khẩu
+              onChangeText={setPassword}
+              onFocus={() => setFocusedInput("password")}
+              onBlur={() => setFocusedInput("")}
+            />
+            <TouchableOpacity
+              accessibilityLabel="toggle-password"
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={22}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
 
           {/* Register Button */}
           <TouchableOpacity
@@ -187,6 +202,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     marginBottom: 20,
+    backgroundColor: "#fff",
   },
   inputFocused: { borderColor: "#6C63FF", borderWidth: 2 },
   button: {
@@ -201,4 +217,9 @@ const styles = StyleSheet.create({
   buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
   footerText: { textAlign: "center", marginTop: 20, color: "#666" },
   signInText: { color: "#6C63FF", fontWeight: "bold" },
+  eyeIcon: {
+    position: "absolute",
+    right: 10,
+    top: 12,
+  },
 });

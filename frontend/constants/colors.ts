@@ -10,4 +10,6 @@ export const colors = {
   border: "#ddd",
   shadow: "#000",
   gray: "#999",
+  lightblue:"#4da3ff",
+  lightYellow:"FFEB3B"
 };

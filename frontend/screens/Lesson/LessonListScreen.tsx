@@ -125,23 +125,39 @@ export default function LessonListScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Danh Sách Bài Học</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View
+          style={[
+            layoutStyles.bannerTextContainer,
+            { right: 40, maxWidth: 150, top: 30 },
+          ]}
+        >
+          <Text style={[textStyles.bannerTitle, { color: colors.background }]}>
+            Danh Sách Bài Học
+          </Text>
+          <Text
+            style={[
+              textStyles.bannerSubtitle,
+              { color: colors.background, marginTop: 10 },
+            ]}
+          >
             Quản lý bài học của khóa học (ID: {courseId})
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+      {/* Tiêu đề */}
+      <Text style={textStyles.listTitle}>Danh sách bài học </Text>
 
       {/* Nút FAB Thêm bài học */}
-      {roleId !== 2 && (
+      {roleId !== 2 && roleId !== 1 && (
         <TouchableOpacity
+          accessibilityLabel={`addLesson`}
           style={buttonStyles.fab}
           onPress={() => navigation.navigate("AddLesson", { courseId })}
         >
@@ -166,6 +182,7 @@ export default function LessonListScreen() {
           renderItem={({ item }) => (
             <View style={cardStyles.card}>
               <TouchableOpacity
+                accessibilityLabel={`goLessonDetail`}
                 style={{ flex: 1 }}
                 onPress={() =>
                   navigation.navigate("LessonDetail", {
@@ -173,9 +190,19 @@ export default function LessonListScreen() {
                   })
                 }
               >
-                <Text style={textStyles.subjectName}>{item.title}</Text>
                 <Text
-                  style={textStyles.subjectDesc}
+                  style={[
+                    textStyles.subjectName,
+                    { fontSize: 18, textTransform: "uppercase" },
+                  ]}
+                >
+                  {item.title}
+                </Text>
+                <Text
+                  style={[
+                    textStyles.subjectDesc,
+                    { fontSize: 16, marginBottom: 5 },
+                  ]}
                   numberOfLines={2}
                   ellipsizeMode="tail"
                 >
@@ -187,6 +214,7 @@ export default function LessonListScreen() {
               {roleId !== 2 && (
                 <View style={cardStyles.cardActions}>
                   <TouchableOpacity
+                    accessibilityLabel={`editLesson`}
                     style={[
                       buttonStyles.iconBtn,
                       { backgroundColor: colors.primary },
@@ -201,6 +229,7 @@ export default function LessonListScreen() {
                     <Ionicons name="create-outline" size={18} color="#fff" />
                   </TouchableOpacity>
                   <TouchableOpacity
+                    accessibilityLabel={`deleteLesson`}
                     style={[
                       buttonStyles.iconBtn,
                       { backgroundColor: colors.danger },
@@ -208,16 +237,6 @@ export default function LessonListScreen() {
                     onPress={() => handleDelete(item.lesson_id)}
                   >
                     <Ionicons name="trash-outline" size={18} color="#fff" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[buttonStyles.iconBtn, { backgroundColor: "green" }]}
-                    onPress={() =>
-                      navigation.navigate("AssignmentList", {
-                        lessonId: item.lesson_id,
-                      })
-                    }
-                  >
-                    <Ionicons name="book-outline" size={18} color="#fff" />
                   </TouchableOpacity>
                 </View>
               )}

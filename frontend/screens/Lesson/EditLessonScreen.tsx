@@ -125,20 +125,33 @@ export default function EditLessonScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Chỉnh sửa bài học</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View
+          style={[
+            layoutStyles.bannerTextContainer,
+            { right: 40, maxWidth: 150, top: 30 },
+          ]}
+        >
+          <Text style={[textStyles.bannerTitle, { color: colors.background }]}>
+            Chỉnh sửa bài học
+          </Text>
+          <Text
+            style={[
+              textStyles.bannerSubtitle,
+              { color: colors.background, marginTop: 10 },
+            ]}
+          >
             Cập nhật thông tin và tài liệu bài học
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <Text style={textStyles.listTitle}>Chỉnh sửa bài học </Text>
       {/* Form chỉnh sửa */}
       <View style={{ padding: 20 }}>
         <TextInput
@@ -163,7 +176,11 @@ export default function EditLessonScreen() {
           {currentFile || "Chưa có file PDF"}
         </Text>
 
-        <TouchableOpacity style={buttonStyles.primary} onPress={pickPdfFile}>
+        <TouchableOpacity
+          accessibilityLabel={`pickPDFFile`}
+          style={buttonStyles.primary}
+          onPress={pickPdfFile}
+        >
           <Text style={buttonStyles.primaryText}>Chọn file PDF mới</Text>
         </TouchableOpacity>
         {newPdfFile && (
@@ -173,6 +190,7 @@ export default function EditLessonScreen() {
         )}
 
         <TouchableOpacity
+          accessibilityLabel={`updateLesson`}
           style={[buttonStyles.primary, { marginTop: 15 }]}
           onPress={handleUpdateLesson}
           disabled={saving}

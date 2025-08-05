@@ -72,13 +72,16 @@ export default function GradeSubmissionScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Chấm điểm</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 20 }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.textDark }]}>
+            Chấm điểm
+          </Text>
+          <Text style={[textStyles.bannerSubtitle, { color: colors.textDark }]}>
             Nhập điểm và nhận xét cho học sinh
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -88,9 +91,7 @@ export default function GradeSubmissionScreen() {
 
       {/* Nội dung */}
       <View style={{ padding: 20 }}>
-        <Text style={textStyles.listTitle}>
-          Chấm điểm - {submission.studentName}
-        </Text>
+        <Text style={textStyles.listTitle}>Chấm điểm</Text>
 
         <TextInput
           placeholder="Nhập điểm (0 - 10)"
@@ -111,6 +112,7 @@ export default function GradeSubmissionScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         ) : (
           <TouchableOpacity
+            accessibilityLabel={`saveGrade`}
             style={[buttonStyles.primary, { marginTop: 10 }]}
             onPress={handleGrade}
           >

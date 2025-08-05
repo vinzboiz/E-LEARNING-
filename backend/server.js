@@ -1,9 +1,23 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const path = require("path");
 
 // Middlewares
 app.use(express.json());
+
+// Public thư mục uploads (kèm Content-Type cho PDF)
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith(".pdf")) {
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Access-Control-Allow-Origin", "*");
+      }
+    },
+  })
+);
 
 const assignmentModel = require("./models/assignment.model");
 // Gọi 1 lần khi server khởi động

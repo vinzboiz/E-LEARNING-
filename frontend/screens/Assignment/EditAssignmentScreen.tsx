@@ -13,6 +13,7 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { AssignmentService } from "../../services/assignment.service";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 // Import styles chung
 import { layoutStyles } from "../../constants/layoutStyles";
@@ -117,14 +118,28 @@ export default function EditAssignmentScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Chỉnh sửa bài tập</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View style={[layoutStyles.bannerTextContainer, { right: 5 }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
+            Chỉnh sửa bài tập
+          </Text>
+          <Text
+            style={[
+              textStyles.bannerSubtitle,
+              { color: colors.primary, marginLeft: 20 },
+            ]}
+          >
             Cập nhật thông tin bài tập
           </Text>
         </View>
+        <TouchableOpacity
+          accessibilityLabel={`back`}
+          style={buttonStyles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
-
+      <Text style={textStyles.listTitle}>Chỉnh sửa bài tập </Text>
       {/* Form nhập liệu */}
       <View style={{ padding: 20 }}>
         <TextInput
@@ -186,7 +201,11 @@ export default function EditAssignmentScreen() {
           onChangeText={setLink}
         />
 
-        <TouchableOpacity style={buttonStyles.primary} onPress={handleSave}>
+        <TouchableOpacity
+          accessibilityLabel={`saveEditAssignment`}
+          style={buttonStyles.primary}
+          onPress={handleSave}
+        >
           <Text style={buttonStyles.primaryText}>Lưu thay đổi</Text>
         </TouchableOpacity>
       </View>

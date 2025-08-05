@@ -59,6 +59,7 @@ export default function OTPScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       {/* Nút Back */}
       <TouchableOpacity
+        accessibilityLabel="back-button"
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >

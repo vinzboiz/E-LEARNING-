@@ -14,7 +14,14 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { CourseService } from "../../services/course.service";
 //assets
+import { layoutStyles } from "../../constants/layoutStyles";
+import { textStyles } from "../../constants/textStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { colors } from "../../constants/colors";
 import { Images } from "../../constants/images/images";
+
+import { getPdfUrl } from "../../src/config"; // ✅ import hàm ghép IP
 
 export default function EditCourseScreen() {
   const route = useRoute<any>();
@@ -97,8 +104,17 @@ export default function EditCourseScreen() {
           style={styles.banner}
           resizeMode="cover"
         />
+        <View style={[layoutStyles.bannerTextContainer, { right: 20 }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
+            Sửa Khóa Học
+          </Text>
+          <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
+            Chỉnh sửa thông tin khóa học của bạn
+          </Text>
+        </View>
         {/* Nút quay lại */}
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -157,6 +173,7 @@ export default function EditCourseScreen() {
 
         {/* Nút Lưu */}
         <TouchableOpacity
+          accessibilityLabel={`saveCourse`}
           style={styles.saveBtn}
           onPress={handleEdit}
           disabled={saving}

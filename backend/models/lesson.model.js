@@ -1,13 +1,19 @@
 const db = require("../config/db");
+require("dotenv").config();
 
-// LESSON FUNCTIONS
+// Format dữ liệu trả về (đường dẫn tương đối)
+function formatLessonFile(lesson) {
+  if (lesson?.file) {
+    lesson.file_pdf = `/uploads/lessons/${lesson.file}`;
+  }
+  return lesson;
+}
 
-// Thêm bài học (admin hoặc giảng viên)
+// ================== CRUD ==================
 async function createLesson(userId, data, role) {
   const { title, content, file, course_id } = data;
 
   if (role !== 1) {
-    // Giảng viên mới cần check quyền
     const isOwner = await isCourseOwnerByCourse(userId, course_id);
     if (!isOwner) {
       return { message: "Bạn không có quyền thêm bài học cho khoá học này." };
@@ -19,10 +25,10 @@ async function createLesson(userId, data, role) {
      VALUES ($1, $2, $3, $4) RETURNING *`,
     [title, content, file, course_id]
   );
-  return result.rows[0];
+
+  return formatLessonFile(result.rows[0]);
 }
 
-// Cập nhật bài học (admin hoặc giảng viên)
 async function updateLesson(userId, id, data, role) {
   if (role !== 1) {
     const isOwner = await isCourseOwner(userId, id);
@@ -35,19 +41,18 @@ async function updateLesson(userId, id, data, role) {
   let result;
   if (file) {
     result = await db.query(
-      `UPDATE lesson SET title = $1, content = $2, file = $3 WHERE lesson_id = $4 RETURNING *`,
+      `UPDATE lesson SET title=$1, content=$2, file=$3 WHERE lesson_id=$4 RETURNING *`,
       [title, content, file, id]
     );
   } else {
     result = await db.query(
-      `UPDATE lesson SET title = $1, content = $2 WHERE lesson_id = $3 RETURNING *`,
+      `UPDATE lesson SET title=$1, content=$2 WHERE lesson_id=$3 RETURNING *`,
       [title, content, id]
     );
   }
-  return result.rows[0];
+  return formatLessonFile(result.rows[0]);
 }
 
-// Xóa bài học (admin hoặc giảng viên)
 async function deleteLesson(userId, id, role) {
   if (role !== 1) {
     const isOwner = await isCourseOwner(userId, id);
@@ -56,11 +61,11 @@ async function deleteLesson(userId, id, role) {
     }
   }
 
-  await db.query(`DELETE FROM lesson WHERE lesson_id = $1`, [id]);
+  await db.query(`DELETE FROM lesson WHERE lesson_id=$1`, [id]);
   return { message: "Xoá bài học thành công" };
 }
 
-// Lấy tất cả bài học
+// ================== GET ==================
 async function getAllLessons(userId, courseId, role) {
   if (role !== 1) {
     const isOwner = await isCourseOwnerByCourse(userId, courseId);
@@ -70,13 +75,12 @@ async function getAllLessons(userId, courseId, role) {
   }
 
   const result = await db.query(
-    `SELECT * FROM lesson WHERE course_id = $1 ORDER BY lesson_id ASC`,
+    `SELECT * FROM lesson WHERE course_id=$1 ORDER BY lesson_id ASC`,
     [courseId]
   );
-  return result.rows;
+  return result.rows.map(row => formatLessonFile(row));
 }
 
-// Lấy bài học theo ID
 async function getLessonById(userId, id, role) {
   if (role !== 1) {
     const isOwner = await isCourseOwner(userId, id);
@@ -86,13 +90,13 @@ async function getLessonById(userId, id, role) {
   }
 
   const result = await db.query(
-    `SELECT * FROM lesson WHERE lesson_id = $1`,
+    `SELECT * FROM lesson WHERE lesson_id=$1`,
     [id]
   );
-  return result.rows[0];
+
+  return formatLessonFile(result.rows[0]);
 }
 
-// STUDENT LESSONS
 async function getLessonsByStudent(user_id) {
   const result = await db.query(
     `SELECT l.* FROM lesson l
@@ -102,23 +106,22 @@ async function getLessonsByStudent(user_id) {
      WHERE rc.user_id = $1`,
     [user_id]
   );
-  return result.rows;
+  return result.rows.map(row => formatLessonFile(row));
 }
 
 async function getLessonByIdForStudent(userId, lessonId) {
   const result = await db.query(
-    `SELECT l.*
-     FROM lesson l
-     INNER JOIN course c ON l.course_id = c.course_id
-     INNER JOIN classmember cm ON cm.course_id = c.course_id
-     INNER JOIN registercourse rc ON rc.register_id = cm.register_id
+    `SELECT l.* FROM lesson l
+     JOIN course c ON l.course_id = c.course_id
+     JOIN classmember cm ON cm.course_id = c.course_id
+     JOIN registercourse rc ON rc.register_id = cm.register_id
      WHERE l.lesson_id = $1 AND rc.user_id = $2 AND rc.status = 'đã thanh toán'`,
     [lessonId, userId]
   );
-  return result.rows[0];
+  return formatLessonFile(result.rows[0]);
 }
 
-// PERMISSIONS
+// ================== PERMISSIONS ==================
 async function isCourseOwner(userId, lessonId) {
   const result = await db.query(
     `SELECT 1 FROM lesson l
@@ -139,8 +142,7 @@ async function isCourseOwnerByCourse(userId, courseId) {
 
 async function canUserViewLesson(userId, lessonId) {
   const result = await db.query(
-    `SELECT 1
-     FROM lesson l
+    `SELECT 1 FROM lesson l
      JOIN course c ON l.course_id = c.course_id
      LEFT JOIN classmember cm ON c.course_id = cm.course_id
      LEFT JOIN registercourse rc ON cm.register_id = rc.register_id
@@ -153,8 +155,7 @@ async function canUserViewLesson(userId, lessonId) {
 
 async function isCourseOwnerByLesson(userId, lessonId) {
   const result = await db.query(
-    `SELECT 1
-     FROM lesson l
+    `SELECT 1 FROM lesson l
      JOIN course c ON l.course_id = c.course_id
      WHERE l.lesson_id = $1 AND c.user_id = $2`,
     [lessonId, userId]
@@ -173,5 +174,5 @@ module.exports = {
   isCourseOwner,
   isCourseOwnerByCourse,
   canUserViewLesson,
-  isCourseOwnerByLesson,
+  isCourseOwnerByLesson
 };

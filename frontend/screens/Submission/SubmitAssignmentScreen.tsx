@@ -71,13 +71,14 @@ export default function SubmitAssignmentScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 20 }]}>
           <Text style={textStyles.bannerTitle}>Nộp bài tập</Text>
           <Text style={textStyles.bannerSubtitle}>
             Điền nội dung và link bài làm để nộp
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -108,6 +109,7 @@ export default function SubmitAssignmentScreen() {
           <ActivityIndicator size="large" color={colors.primary} />
         ) : (
           <TouchableOpacity
+            accessibilityLabel={`submissionAssignment`}
             style={[buttonStyles.primary, { marginTop: 10 }]}
             onPress={handleSubmit}
           >

@@ -51,6 +51,7 @@ export default function SubmittedAssignmentDetailScreen() {
           Không có thông tin bài nộp.
         </Text>
         <TouchableOpacity
+          accessibilityLabel={`backNothing`}
           style={[buttonStyles.primary, { marginTop: 15 }]}
           onPress={() => navigation.goBack()}
         >
@@ -85,20 +86,28 @@ export default function SubmittedAssignmentDetailScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 20 }]}>
           <Text style={textStyles.bannerTitle}>Chi tiết bài nộp</Text>
           <Text style={textStyles.bannerSubtitle}>
             Xem thông tin đầy đủ về bài nộp
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <Text
+        style={[
+          textStyles.listTitle,
+          { marginTop: 10, marginLeft: 20, marginBottom: 0 },
+        ]}
+      >
+        Chi tiết bài nộp
+      </Text>
       {/* Nội dung chi tiết */}
       <View style={[cardStyles.card, { margin: 15 }]}>
         <Text style={textStyles.subjectName}>

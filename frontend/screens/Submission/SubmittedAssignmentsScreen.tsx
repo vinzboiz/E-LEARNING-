@@ -84,20 +84,28 @@ export default function SubmittedAssignmentsScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 20 }]}>
           <Text style={textStyles.bannerTitle}>Bài tập đã nộp</Text>
           <Text style={textStyles.bannerSubtitle}>
             Xem tất cả bài tập bạn đã nộp
           </Text>
         </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={buttonStyles.backButton}
           onPress={() => navigation.goBack()}
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <Text
+        style={[
+          textStyles.listTitle,
+          { marginTop: 10, marginLeft: 20, marginBottom: 0 },
+        ]}
+      >
+        Danh sách bài nộp
+      </Text>
       {/* Danh sách */}
       {submissions.length === 0 ? (
         <View style={layoutStyles.center}>
@@ -114,6 +122,7 @@ export default function SubmittedAssignmentsScreen() {
           keyExtractor={(item) => item.submission_id.toString()}
           renderItem={({ item }) => (
             <TouchableOpacity
+              accessibilityLabel={`goSubmittedAssignmentDetail`}
               style={cardStyles.card}
               onPress={() =>
                 navigation.navigate("SubmittedAssignmentDetail", {

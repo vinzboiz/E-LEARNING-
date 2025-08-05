@@ -30,14 +30,12 @@ export default function StudentRegisteredCoursesScreen() {
   const [hasScannedQR, setHasScannedQR] = useState(false);
   const [allPaid, setAllPaid] = useState(false);
 
-  // Lấy danh sách môn học
   const fetchMyCourses = async () => {
     try {
       setLoading(true);
       const res = await ClassMemberService.getMyClassMembers();
       const data = res.data || [];
 
-      // Kiểm tra đã thanh toán hết chưa
       const isAllPaid =
         data.length > 0 &&
         data.every((c: any) => c.status?.toLowerCase() === "đã thanh toán");
@@ -46,18 +44,16 @@ export default function StudentRegisteredCoursesScreen() {
         setAllPaid(true);
         setCourses([]);
         setTotalPrice(0);
-        return;
+      } else {
+        setAllPaid(false);
+        setCourses(data);
+
+        const total = data.reduce((sum: number, course: any) => {
+          const priceNum = parseFloat(course.price) || 0;
+          return sum + priceNum;
+        }, 0);
+        setTotalPrice(total);
       }
-
-      setAllPaid(false);
-      setCourses(data);
-
-      // Tính tổng tiền
-      const total = data.reduce((sum: number, course: any) => {
-        const priceNum = parseFloat(course.price) || 0;
-        return sum + priceNum;
-      }, 0);
-      setTotalPrice(total);
     } catch (err: any) {
       Alert.alert("Lỗi", err.message || "Không thể tải giỏ môn học.");
     } finally {
@@ -69,7 +65,6 @@ export default function StudentRegisteredCoursesScreen() {
     fetchMyCourses();
   }, []);
 
-  // Lưu giỏ
   const handleSave = async () => {
     try {
       const res = await ClassMemberService.saveRegisterCourses();
@@ -80,7 +75,6 @@ export default function StudentRegisteredCoursesScreen() {
     }
   };
 
-  // Thanh toán
   const handlePay = async () => {
     if (!hasScannedQR) {
       Alert.alert("Thông báo", "Vui lòng quét mã QR trước khi đóng học phí.");
@@ -91,13 +85,12 @@ export default function StudentRegisteredCoursesScreen() {
       const res = await ClassMemberService.payTuition();
       Alert.alert("Thông báo", res.message || "Đóng học phí thành công.");
       setHasScannedQR(false);
-      fetchMyCourses(); // Sau khi đóng học phí -> load lại
+      fetchMyCourses();
     } catch (error: any) {
       Alert.alert("Lỗi", error.message);
     }
   };
 
-  // Xóa môn học
   const handleRemoveCourse = async (course_id: number) => {
     Alert.alert("Xác nhận", "Bạn có chắc chắn muốn xóa môn học này khỏi giỏ?", [
       { text: "Hủy", style: "cancel" },
@@ -126,21 +119,8 @@ export default function StudentRegisteredCoursesScreen() {
     );
   }
 
-  // Nếu đã đóng học phí hết
-  if (allPaid) {
-    return (
-      <View style={layoutStyles.center}>
-        <Ionicons name="checkmark-circle" size={50} color="green" />
-        <Text style={{ fontSize: 16, fontWeight: "bold", marginTop: 10 }}>
-          🎉 Bạn đã hoàn tất đóng học phí!
-        </Text>
-        <Text style={{ marginTop: 5 }}>Không còn môn học nào trong giỏ.</Text>
-      </View>
-    );
-  }
-
   return (
-    <View style={layoutStyles.container}>
+    <View style={{ flex: 1 }}>
       {/* Banner */}
       <View style={layoutStyles.bannerWrapper}>
         <Image
@@ -148,9 +128,13 @@ export default function StudentRegisteredCoursesScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Giỏ môn học</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View style={[layoutStyles.bannerTextContainer, { right: 10 }]}>
+          <Text style={[textStyles.bannerTitle, { color: "#ffff" }]}>
+            Giỏ môn học
+          </Text>
+          <Text
+            style={[textStyles.bannerSubtitle, { color: "#ffff", left: 50 }]}
+          >
             Quản lý các môn học bạn đã chọn
           </Text>
         </View>
@@ -162,120 +146,149 @@ export default function StudentRegisteredCoursesScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Tổng tiền */}
-      {courses.length > 0 && (
-        <View
-          style={{
-            backgroundColor: "#fff8d6",
-            padding: 10,
-            borderRadius: 8,
-            marginVertical: 10,
-            borderWidth: 1,
-            borderColor: "#ffb300",
-          }}
-        >
-          <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-            💰 Tổng học phí:{" "}
-            <Text style={{ color: "#d32f2f" }}>
-              {totalPrice.toLocaleString()} VNĐ
-            </Text>
-          </Text>
-        </View>
-      )}
-
-      {/* Danh sách khóa học */}
+      {/* Nội dung cuộn */}
       <FlatList
-        data={courses}
-        keyExtractor={(item) => item.course_id.toString()}
-        renderItem={({ item }) => (
-          <View
-            style={[
-              cardStyles.card,
-              { flexDirection: "row", justifyContent: "space-between" },
-            ]}
-          >
-            <View>
-              <Text style={textStyles.subjectName}>
-                {item.subject_name || "Môn học"}
-              </Text>
-              <Text style={textStyles.subjectDesc}>
-                Học phí: {item.price?.toLocaleString()} VNĐ
-              </Text>
-            </View>
-
-            <TouchableOpacity
-              onPress={() => handleRemoveCourse(item.course_id)}
-              style={{
-                padding: 5,
-                backgroundColor: "#f44336",
-                borderRadius: 5,
-                alignSelf: "center",
-              }}
+        data={allPaid ? [] : courses}
+        keyExtractor={(item) => (item.course_id || "").toString()}
+        ListHeaderComponent={
+          <>
+            {/* Nếu đã thanh toán */}
+            {allPaid ? (
+              <View style={{ alignItems: "center", paddingVertical: 30 }}>
+                <Ionicons name="checkmark-circle" size={50} color="green" />
+                <Text
+                  style={{ fontSize: 16, fontWeight: "bold", marginTop: 10 }}
+                >
+                  🎉 Bạn đã hoàn tất đóng học phí!
+                </Text>
+              </View>
+            ) : (
+              <>
+                {/* Tổng tiền */}
+                {courses.length > 0 && (
+                  <View
+                    style={{
+                      backgroundColor: "#fff8d6",
+                      padding: 10,
+                      borderRadius: 8,
+                      marginVertical: 10,
+                      borderWidth: 1,
+                      borderColor: "#ffb300",
+                    }}
+                  >
+                    <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                      💰 Tổng học phí:{" "}
+                      <Text style={{ color: "#d32f2f" }}>
+                        {totalPrice.toLocaleString()} VNĐ
+                      </Text>
+                    </Text>
+                  </View>
+                )}
+              </>
+            )}
+          </>
+        }
+        renderItem={({ item }) => {
+          if (allPaid) return null; // Không render gì nếu đã thanh toán
+          return (
+            <View
+              style={[
+                cardStyles.card,
+                { flexDirection: "row", justifyContent: "space-between" },
+              ]}
             >
-              <Ionicons name="close" size={20} color="#fff" />
-            </TouchableOpacity>
+              <View>
+                <Text style={textStyles.subjectName}>
+                  {item.subject_name || "Môn học"}
+                </Text>
+                <Text style={textStyles.subjectDesc}>
+                  Học phí: {item.price?.toLocaleString()} VNĐ
+                </Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => handleRemoveCourse(item.course_id)}
+                style={{
+                  padding: 5,
+                  backgroundColor: "#f44336",
+                  borderRadius: 5,
+                  alignSelf: "center",
+                }}
+              >
+                <Ionicons name="close" size={20} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          );
+        }}
+        ListFooterComponent={
+          <View style={{ alignItems: "center", marginVertical: 20 }}>
+            <Image
+              source={Images.More.img10}
+              style={imageStyles.footerImage}
+              resizeMode="contain"
+            />
+            <Text style={textStyles.footerText}>
+              {allPaid
+                ? "Bạn đã thanh toán học phí, chúc bạn học tập hiệu quả!"
+                : "Hãy hoàn tất đăng ký và thanh toán để bắt đầu học ngay!"}
+            </Text>
           </View>
-        )}
+        }
+        contentContainerStyle={{ paddingBottom: 90 }}
       />
 
-      {/* Footer */}
-      <View style={{ alignItems: "center", marginVertical: 20 }}>
-        <Image
-          source={Images.More.img10}
-          style={imageStyles.footerImage}
-          resizeMode="contain"
-        />
-        <Text style={textStyles.footerText}>
-          Hãy hoàn tất đăng ký và thanh toán để bắt đầu học ngay!
-        </Text>
-      </View>
-
-      {/* Nút hành động */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          marginBottom: 20,
-        }}
-      >
-        {/* Lưu */}
-        <TouchableOpacity
-          style={[buttonStyles.primary, { flex: 1, marginRight: 5 }]}
-          onPress={handleSave}
-        >
-          <Text style={buttonStyles.primaryText}>Lưu giỏ</Text>
-        </TouchableOpacity>
-
-        {/* QR */}
-        <TouchableOpacity
-          style={[
-            buttonStyles.primary,
-            { flex: 1, marginHorizontal: 5, backgroundColor: "#ff9800" },
-          ]}
-          onPress={() => {
-            setShowQR(true);
-            setHasScannedQR(true);
+      {/* Nút sticky dưới cùng */}
+      {!allPaid && (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            padding: 10,
+            backgroundColor: "#fff",
+            borderTopWidth: 1,
+            borderTopColor: "#ddd",
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
           }}
         >
-          <Text style={buttonStyles.primaryText}>Quét mã QR</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[buttonStyles.primary, { flex: 1, marginRight: 5 }]}
+            onPress={handleSave}
+          >
+            <Text style={buttonStyles.primaryText}>Lưu giỏ</Text>
+          </TouchableOpacity>
 
-        {/* Thanh toán */}
-        <TouchableOpacity
-          style={[
-            buttonStyles.primary,
-            {
-              flex: 1,
-              marginLeft: 5,
-              backgroundColor: hasScannedQR ? colors.primary : "#ccc",
-            },
-          ]}
-          onPress={handlePay}
-          disabled={!hasScannedQR}
-        >
-          <Text style={buttonStyles.primaryText}>Đóng học phí</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={[
+              buttonStyles.primary,
+              { flex: 1, marginHorizontal: 5, backgroundColor: "#ff9800" },
+            ]}
+            onPress={() => {
+              setShowQR(true);
+              setHasScannedQR(true);
+            }}
+          >
+            <Text style={buttonStyles.primaryText}>Quét mã QR</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              buttonStyles.primary,
+              {
+                flex: 1,
+                marginLeft: 5,
+                backgroundColor: hasScannedQR ? colors.primary : "#ccc",
+              },
+            ]}
+            onPress={handlePay}
+            disabled={!hasScannedQR}
+          >
+            <Text style={buttonStyles.primaryText}>Đóng học phí</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Modal QR */}
       <Modal visible={showQR} transparent animationType="fade">

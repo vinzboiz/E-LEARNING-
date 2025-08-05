@@ -15,6 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../navigation/AppNavigator";
 import { AuthService } from "../../services/auth.service";
+import Ionicons from "react-native-vector-icons/Ionicons"; // ✅ thêm icon
 
 //assets
 import { Images } from "../../constants/images/images";
@@ -26,6 +27,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [focusedInput, setFocusedInput] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false); // ✅ trạng thái xem mật khẩu
 
   const navigation = useNavigation<NavigationProp>();
 
@@ -55,6 +57,7 @@ export default function LoginScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       {/* Nút Back */}
       <TouchableOpacity
+        accessibilityLabel="back-button"
         style={styles.backButton}
         onPress={() => navigation.navigate<any>("Main", { screen: "Account" })}
       >
@@ -87,18 +90,31 @@ export default function LoginScreen() {
 
           {/* Password */}
           <Text style={styles.label}>Password</Text>
-          <TextInput
-            placeholder="Enter your password"
-            style={[
-              styles.input,
-              focusedInput === "password" && styles.inputFocused,
-            ]}
-            value={password}
-            secureTextEntry
-            onChangeText={setPassword}
-            onFocus={() => setFocusedInput("password")}
-            onBlur={() => setFocusedInput("")}
-          />
+          <View style={{ position: "relative" }}>
+            <TextInput
+              placeholder="Enter your password"
+              style={[
+                styles.input,
+                focusedInput === "password" && styles.inputFocused,
+              ]}
+              value={password}
+              secureTextEntry={!showPassword} // ✅ ẩn/hiện mật khẩu
+              onChangeText={setPassword}
+              onFocus={() => setFocusedInput("password")}
+              onBlur={() => setFocusedInput("")}
+            />
+            <TouchableOpacity
+              accessibilityLabel="toggle-password"
+              style={styles.eyeIcon}
+              onPress={() => setShowPassword(!showPassword)}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={22}
+                color="#666"
+              />
+            </TouchableOpacity>
+          </View>
 
           {/* Nút Login */}
           <TouchableOpacity
@@ -154,7 +170,6 @@ const styles = StyleSheet.create({
     height: 32,
     transform: [{ rotate: "180deg" }],
   },
-
   overlay: {
     backgroundColor: "transparent",
     paddingHorizontal: 20,
@@ -179,6 +194,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 8,
     marginBottom: 20,
+    backgroundColor: "#fff",
   },
   inputFocused: {
     borderColor: "#6C63FF",
@@ -206,5 +222,10 @@ const styles = StyleSheet.create({
   signUpText: {
     color: "#6C63FF",
     fontWeight: "bold",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 10,
+    top: 12,
   },
 });

@@ -19,8 +19,14 @@ import { RootStackParamList } from "../../navigation/AppNavigator";
 import { UserService } from "../../services/user.service";
 import { CourseService } from "../../services/course.service";
 import { SubjectService } from "../../services/subject.service";
-//assets
+import { layoutStyles } from "../../constants/layoutStyles";
+import { textStyles } from "../../constants/textStyles";
+import { imageStyles } from "../../constants/imageStyles";
+import { buttonStyles } from "../../constants/buttonStyles";
+import { colors } from "../../constants/colors";
 import { Images } from "../../constants/images/images";
+
+import { getPdfUrl } from "../../src/config"; // ✅ import hàm ghép IP
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -191,7 +197,16 @@ export default function AddCourseScreen() {
           style={styles.banner}
           resizeMode="cover"
         />
+        <View style={[layoutStyles.bannerTextContainer, { right: 20 }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
+            Thêm Khóa Học
+          </Text>
+          <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
+            Thêm khóa học khóa học mới
+          </Text>
+        </View>
         <TouchableOpacity
+          accessibilityLabel={`back`}
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
@@ -206,6 +221,7 @@ export default function AddCourseScreen() {
         <Text style={styles.label}>Môn Học</Text>
         <View style={styles.pickerWrapper}>
           <Picker
+            testID="subjectPicker"
             selectedValue={selectedSubject}
             onValueChange={(value) => setSelectedSubject(value)}
           >
@@ -263,6 +279,7 @@ export default function AddCourseScreen() {
         <Text style={styles.label}>Giảng Viên</Text>
         <View style={styles.pickerWrapper}>
           <Picker
+            testID="teacherPicker"
             selectedValue={selectedTeacher}
             onValueChange={(value) => setSelectedTeacher(value)}
           >
@@ -387,6 +404,7 @@ export default function AddCourseScreen() {
         ))}
 
         <TouchableOpacity
+          accessibilityLabel={`addScheduleTable`}
           style={styles.addScheduleBtn}
           onPress={handleAddSchedule}
         >
@@ -394,7 +412,11 @@ export default function AddCourseScreen() {
           <Text style={styles.addScheduleText}>Thêm Lịch Học</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.submitBtn} onPress={handleAdd}>
+        <TouchableOpacity
+          accessibilityLabel={`addCourse`}
+          style={styles.submitBtn}
+          onPress={handleAdd}
+        >
           <Text style={styles.submitText}>Tạo Khóa Học</Text>
         </TouchableOpacity>
       </View>
