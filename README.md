@@ -1,6 +1,6 @@
 # 📚 E-Learning
 
-> Hệ thống E-Learning full-stack: ứng dụng di động (React Native / Expo) và API backend (Node.js). Quản lý học phần, khóa học, bài học, bài tập, đăng ký môn, nộp bài và phân quyền Admin / Giảng viên / Sinh viên.
+> A full-stack E-Learning system with a mobile app (React Native / Expo) and a backend API (Node.js). It manages subjects, courses, lessons, assignments, course registration, submissions, and role-based access for Admins, Teachers, and Students.
 
 [![Node](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js)](https://nodejs.org/)
 [![Expo](https://img.shields.io/badge/Expo-53+-000020?logo=expo)](https://expo.dev/)
@@ -8,202 +8,202 @@
 
 ---
 
-## 📋 Mục lục
+## 📋 Table of Contents
 
-- [Bắt đầu nhanh](#-bắt-đầu-nhanh)
-- [Tính năng](#-tính-năng)
-- [Công nghệ](#-công-nghệ)
-- [Cài đặt chi tiết](#-cài-đặt-chi-tiết)
-- [Biến môi trường](#-biến-môi-trường)
-- [Cấu trúc dự án](#-cấu-trúc-dự-án)
-- [Phân quyền](#-phân-quyền)
-- [API tham khảo](#-api-tham-khảo)
+- [Quick Start](#-quick-start)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Detailed Setup](#-detailed-setup)
+- [Environment Variables](#-environment-variables)
+- [Project Structure](#-project-structure)
+- [Roles and Permissions](#-roles-and-permissions)
+- [API Reference](#-api-reference)
 - [Scripts](#-scripts)
-- [Xử lý lỗi thường gặp](#-xử-lý-lỗi-thường-gặp)
-- [Đóng góp](#-đóng-góp)
-- [Giấy phép & Liên hệ](#-giấy-phép--liên-hệ)
+- [Common Issues](#-common-issues)
+- [Contributing](#-contributing)
+- [License and Contact](#-license-and-contact)
 
 ---
 
-## 🚀 Bắt đầu nhanh
+## 🚀 Quick Start
 
-Cần **Node.js 18+**, **PostgreSQL 14+** và **Expo**. Sau khi tạo database và file `.env` trong `backend/` và `frontend/`:
+You need **Node.js 18+**, **PostgreSQL 14+**, and **Expo**. After creating the database and `.env` files in `backend/` and `frontend/`:
 
 ```bash
-# 1. Tạo database và chạy schema
+# 1. Create the database and run the schema
 psql -U postgres -c "CREATE DATABASE elearning;"
 cd backend && psql -U postgres -d elearning -f database/schema.sql
 
 # 2. Backend
 cd backend && npm install
-cp .env.example .env   # chỉnh .env theo mục Biến môi trường
+cp .env.example .env   # update .env based on the Environment Variables section
 npm run dev
-# → http://localhost:3000
+# -> http://localhost:3000
 
-# 3. Frontend (terminal mới)
+# 3. Frontend (new terminal)
 cd frontend && npm install
-cp .env.example .env   # đặt EXPO_PUBLIC_API_URL trỏ tới backend
+cp .env.example .env   # set EXPO_PUBLIC_API_URL to your backend
 npx expo start
 ```
 
-Mở app bằng **Expo Go** (quét QR) hoặc nhấn `a` / `i` trong terminal để chạy giả lập.
+Open the app with **Expo Go** by scanning the QR code, or press `a` / `i` in the terminal to launch an emulator.
 
 **Repository:** [github.com/vinzboiz/E-LEARNING-](https://github.com/vinzboiz/E-LEARNING-)
 
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-## ✨ Tính năng
+## ✨ Features
 
-| Khu vực | Mô tả |
-|--------|--------|
-| **Xác thực** | Đăng ký, đăng nhập, xác thực OTP qua email. |
-| **Quản trị (Admin)** | Quản lý người dùng, môn học, khóa học, lịch học, đợt đăng ký học phần. |
-| **Giảng viên** | Quản lý bài học, bài tập; chấm điểm và nhận xét bài nộp. |
-| **Sinh viên** | Đăng ký môn học, xem lịch, học phần; nộp bài tập, xem điểm và nhận xét. |
-| **Phân quyền** | Ba vai trò: Admin, Giảng viên, Sinh viên với quyền hạn tương ứng. |
+| Area | Description |
+|------|-------------|
+| **Authentication** | Registration, login, and email OTP verification. |
+| **Administration (Admin)** | Manage users, subjects, courses, schedules, and course registration periods. |
+| **Teachers** | Manage lessons and assignments; grade and comment on submissions. |
+| **Students** | Register for courses, view schedules and course content; submit assignments, view grades, and feedback. |
+| **Authorization** | Three roles: Admin, Teacher, and Student with separate permissions. |
 
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-## 🛠 Công nghệ
+## 🛠 Tech Stack
 
-| Phần | Công nghệ |
-|------|-----------|
+| Part | Technology |
+|------|------------|
 | **Frontend** | React Native, Expo 53, TypeScript, React Navigation, Axios |
 | **Backend** | Node.js, Express 5 |
 | **Database** | PostgreSQL |
-| **Xác thực** | JWT, bcrypt |
-| **Gửi email** | Nodemailer (Gmail) — OTP đăng ký |
+| **Authentication** | JWT, bcrypt |
+| **Email** | Nodemailer (Gmail) for registration OTP |
 
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-## 📦 Cài đặt chi tiết
+## 📦 Detailed Setup
 
-### 1. Clone và vào thư mục
+### 1. Clone the repository and enter the project folder
 
 ```bash
-git clone <url-repository-của-bạn>
-cd E_LEARNING   # hoặc tên thư mục dự án
+git clone <your-repository-url>
+cd E_LEARNING   # or your project folder name
 ```
 
-### 2. Tạo database PostgreSQL
+### 2. Create the PostgreSQL database
 
-Tạo database (ví dụ tên `elearning`). Dùng `psql`, pgAdmin hoặc DBeaver:
+Create a database, for example `elearning`, using `psql`, pgAdmin, or DBeaver:
 
 ```sql
 CREATE DATABASE elearning;
 ```
 
-### 3. Chạy schema (tạo bảng + dữ liệu mặc định)
+### 3. Run the schema (create tables and seed default data)
 
 ```bash
 cd backend
 psql -U postgres -d elearning -f database/schema.sql
 ```
 
-*Hoặc:* mở file `backend/database/schema.sql` trong pgAdmin/DBeaver và thực thi toàn bộ.
+*Or:* open `backend/database/schema.sql` in pgAdmin or DBeaver and execute the entire file.
 
-### 4. Cấu hình backend
+### 4. Configure the backend
 
-Trong thư mục `backend`, tạo file `.env` (xem [Biến môi trường](#-biến-môi-trường) bên dưới). Ví dụ:
+Inside `backend`, create a `.env` file (see [Environment Variables](#-environment-variables) below). Example:
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/elearning
 PORT=3000
-JWT_SECRET=chuoi-bi-mat-dai-ngau-nhien
+JWT_SECRET=your-long-random-secret
 GMAIL_USER=your-email@gmail.com
-GMAIL_PASS=app-password-gmail
+GMAIL_PASS=your-gmail-app-password
 NODE_ENV=development
 ```
 
-### 5. Cài đặt backend
+### 5. Install backend dependencies
 
 ```bash
 cd backend
 npm install
 ```
 
-### 6. Cấu hình frontend
+### 6. Configure the frontend
 
-Trong thư mục `frontend`, tạo file `.env`:
+Inside `frontend`, create a `.env` file:
 
 ```env
-# Thiết bị thật / cùng mạng: http://<IP-máy-backend>:3000
+# Physical device / same network: http://<BACKEND_IP>:3000
 # Android Emulator: http://10.0.2.2:3000
 # iOS Simulator: http://localhost:3000
 EXPO_PUBLIC_API_URL=http://192.168.1.9:3000
 ```
 
-### 7. Cài đặt frontend
+### 7. Install frontend dependencies
 
 ```bash
 cd ../frontend
 npm install
 ```
 
-### 8. Chạy ứng dụng
+### 8. Run the application
 
-- **Terminal 1:** `cd backend && npm run dev` → API: `http://localhost:3000`
-- **Terminal 2:** `cd frontend && npx expo start` → mở app bằng Expo Go hoặc emulator
+- **Terminal 1:** `cd backend && npm run dev` -> API: `http://localhost:3000`
+- **Terminal 2:** `cd frontend && npx expo start` -> open the app with Expo Go or an emulator
 
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-## 🔐 Biến môi trường
+## 🔐 Environment Variables
 
-Tạo file `backend/.env` và `frontend/.env` với các biến sau.
+Create `backend/.env` and `frontend/.env` with the following variables.
 
 **Backend (`backend/.env`):**
 
-| Biến | Bắt buộc | Mô tả |
-|------|----------|--------|
-| `DATABASE_URL` | Có | Chuỗi kết nối PostgreSQL, ví dụ: `postgresql://user:password@localhost:5432/elearning` |
-| `PORT` | Không (mặc định 3000) | Cổng chạy server backend |
-| `JWT_SECRET` | Có (production) | Chuỗi bí mật để ký JWT; nên dùng chuỗi dài, ngẫu nhiên |
-| `GMAIL_USER` | Có (nếu dùng OTP) | Địa chỉ Gmail gửi OTP |
-| `GMAIL_PASS` | Có (nếu dùng OTP) | [Mật khẩu ứng dụng Gmail](https://support.google.com/accounts/answer/185833), không dùng mật khẩu đăng nhập thường |
-| `NODE_ENV` | Không | `development` hoặc `production` |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | Yes | PostgreSQL connection string, for example: `postgresql://user:password@localhost:5432/elearning` |
+| `PORT` | No (default: 3000) | Port used by the backend server |
+| `JWT_SECRET` | Yes (production) | Secret used to sign JWTs; use a long random value |
+| `GMAIL_USER` | Yes (if using OTP) | Gmail address used to send OTP emails |
+| `GMAIL_PASS` | Yes (if using OTP) | [Gmail App Password](https://support.google.com/accounts/answer/185833), not your normal login password |
+| `NODE_ENV` | No | `development` or `production` |
 
 **Frontend (`frontend/.env`):**
 
-| Biến | Bắt buộc | Mô tả |
-|------|----------|--------|
-| `EXPO_PUBLIC_API_URL` | Có | URL gốc API backend (thiết bị thật: `http://<IP>:3000`, Android emulator: `http://10.0.2.2:3000`, iOS: `http://localhost:3000`) |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `EXPO_PUBLIC_API_URL` | Yes | Base URL of the backend API (`http://<IP>:3000` for physical devices, `http://10.0.2.2:3000` for Android emulator, `http://localhost:3000` for iOS simulator) |
 
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-## 📁 Cấu trúc dự án
+## 📁 Project Structure
 
 ```
 E_LEARNING/
-├── backend/                    # API Node.js + Express
-│   ├── config/                 # Kết nối DB
+├── backend/                    # Node.js + Express API
+│   ├── config/                 # Database connection
 │   ├── controllers/            # Logic: auth, user, course, lesson, assignment, ...
 │   ├── database/
-│   │   └── schema.sql          # Tạo bảng + seed vai trò
-│   ├── middlewares/            # Auth, phân quyền, upload
-│   ├── models/                 # Truy vấn PostgreSQL
-│   ├── routes/                 # Định nghĩa API routes
-│   ├── uploads/                # File tải lên (bài học, PDF)
-│   ├── utils/                  # Gửi email, ...
+│   │   └── schema.sql          # Table creation + role seed data
+│   ├── middlewares/            # Auth, authorization, upload
+│   ├── models/                 # PostgreSQL queries
+│   ├── routes/                 # API route definitions
+│   ├── uploads/                # Uploaded files (lessons, PDFs)
+│   ├── utils/                  # Email sending, ...
 │   ├── .env.example
 │   ├── server.js
 │   └── package.json
 │
-├── frontend/                    # Ứng dụng React Native (Expo)
-│   ├── api/                    # Axios, gọi API theo module
-│   ├── constants/              # Màu, style, hình ảnh
-│   ├── navigation/             # Stack, Bottom Tab
-│   ├── screens/                 # Các màn hình
-│   ├── services/                # Layer gọi API
+├── frontend/                   # React Native app (Expo)
+│   ├── api/                    # Axios setup and API modules
+│   ├── constants/              # Colors, styles, images
+│   ├── navigation/             # Stack and Bottom Tab navigation
+│   ├── screens/                # App screens
+│   ├── services/               # API service layer
 │   ├── utils/
 │   ├── .env.example
 │   ├── App.tsx
@@ -212,45 +212,45 @@ E_LEARNING/
 └── README.md
 ```
 
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-## 👥 Phân quyền
+## 👥 Roles and Permissions
 
-Ba vai trò mặc định (tạo khi chạy `schema.sql`):
+There are three default roles created when `schema.sql` is executed:
 
-| Mã | Vai trò | Mô tả |
-|----|---------|--------|
-| 1 | Admin | Quản lý người dùng, môn học, khóa học, lịch học, đợt đăng ký học phần; toàn quyền. |
-| 2 | Sinh viên | Đăng ký môn, xem lịch, bài học, nộp bài tập, xem điểm và nhận xét. |
-| 3 | Giảng viên | Quản lý bài học, bài tập; chấm điểm và nhận xét bài nộp. |
+| ID | Role | Description |
+|----|------|-------------|
+| 1 | Admin | Manages users, subjects, courses, schedules, and course registration periods; has full access. |
+| 2 | Student | Registers for courses, views schedules and lessons, submits assignments, and checks grades and feedback. |
+| 3 | Teacher | Manages lessons and assignments; grades and comments on submissions. |
 
-Sau khi chạy schema, cần tạo ít nhất một tài khoản Admin (đăng ký qua app + xác thực OTP, hoặc chèn trực tiếp vào bảng `users` với `role_id = 1`).
+After running the schema, you should create at least one Admin account, either by registering through the app and verifying OTP, or by inserting directly into the `users` table with `role_id = 1`.
 
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-## 📡 API tham khảo
+## 📡 API Reference
 
-| Nhóm | Endpoint ví dụ | Mô tả |
-|------|----------------|--------|
-| **Auth** | `POST /api/auth/register`, `POST /api/auth/send-otp`, `POST /api/auth/verify-otp`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout` | Đăng ký, gửi/verify OTP, đăng nhập, thông tin user, đăng xuất |
-| **Users** | `GET /api/users`, `GET /api/users/teachers`, `GET /api/users/:id`, `POST /api/users`, `PUT /api/users/:id`, `DELETE /api/users/:id` | CRUD người dùng (Admin) |
-| **Roles** | `GET /api/roles`, `GET /api/roles/:id`, `POST /api/roles`, `PUT /api/roles/:id`, `DELETE /api/roles/:id`, `GET /api/roles/user/:userId` | CRUD vai trò |
-| **Subjects** | `GET /api/subjects`, `GET /api/subjects/:id`, `POST /api/subjects`, `PUT /api/subjects/:id`, `DELETE /api/subjects/:id` | CRUD môn học |
-| **Course** | `GET /api/course/admin/all`, `GET /api/course/student/all`, `GET /api/course/teacher/my-courses`, `GET /api/course/student/:id`, `POST /api/course`, `PUT /api/course/:id`, `DELETE /api/course/:id` | Khóa học (Admin / Student / Teacher) |
-| **Course schedule** | `GET /api/courseschedules`, `GET /api/courseschedules/:id`, `GET /api/courseschedules/teacher/my-schedules`, `GET /api/courseschedules/courseschedules/student`, `PUT /api/courseschedules/:id`, `DELETE /api/courseschedules/:id` | Lịch học |
-| **Register course** | `GET /api/registercourse`, `GET /api/registercourse/me`, `GET /api/registercourse/:id`, `POST /api/registercourse`, `PUT /api/registercourse/update-time` | Đợt đăng ký học phần |
-| **Class member** | `GET /api/classmember`, `POST /api/classmember`, `DELETE /api/classmember`, `POST /api/classmember/pay`, `GET /api/classmember/paid`, ... | Giỏ môn học, thanh toán |
-| **Lesson** | `GET /api/lesson`, `GET /api/lesson/student`, `GET /api/lesson/:id`, `POST /api/lesson`, `PUT /api/lesson/:id`, `DELETE /api/lesson/:id` | Bài học |
-| **Assignment** | `GET /api/assignment/lesson/:lessonId`, `GET /api/assignment/:id`, `POST /api/assignment`, `PUT /api/assignment/:id`, `DELETE /api/assignment/:id` | Bài tập |
-| **Submission** | `GET /api/submission/assignment/:assignmentId`, `GET /api/submission/my`, `GET /api/submission/:id`, `POST /api/submission`, `PUT /api/submission/:id`, `PUT /api/submission/:id/grade`, `DELETE /api/submission/:id` | Nộp bài, chấm điểm |
+| Group | Example endpoints | Description |
+|------|-------------------|-------------|
+| **Auth** | `POST /api/auth/register`, `POST /api/auth/send-otp`, `POST /api/auth/verify-otp`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout` | Register, send/verify OTP, login, get user info, logout |
+| **Users** | `GET /api/users`, `GET /api/users/teachers`, `GET /api/users/:id`, `POST /api/users`, `PUT /api/users/:id`, `DELETE /api/users/:id` | User CRUD (Admin) |
+| **Roles** | `GET /api/roles`, `GET /api/roles/:id`, `POST /api/roles`, `PUT /api/roles/:id`, `DELETE /api/roles/:id`, `GET /api/roles/user/:userId` | Role CRUD |
+| **Subjects** | `GET /api/subjects`, `GET /api/subjects/:id`, `POST /api/subjects`, `PUT /api/subjects/:id`, `DELETE /api/subjects/:id` | Subject CRUD |
+| **Course** | `GET /api/course/admin/all`, `GET /api/course/student/all`, `GET /api/course/teacher/my-courses`, `GET /api/course/student/:id`, `POST /api/course`, `PUT /api/course/:id`, `DELETE /api/course/:id` | Courses (Admin / Student / Teacher) |
+| **Course schedule** | `GET /api/courseschedules`, `GET /api/courseschedules/:id`, `GET /api/courseschedules/teacher/my-schedules`, `GET /api/courseschedules/courseschedules/student`, `PUT /api/courseschedules/:id`, `DELETE /api/courseschedules/:id` | Class schedules |
+| **Register course** | `GET /api/registercourse`, `GET /api/registercourse/me`, `GET /api/registercourse/:id`, `POST /api/registercourse`, `PUT /api/registercourse/update-time` | Course registration periods |
+| **Class member** | `GET /api/classmember`, `POST /api/classmember`, `DELETE /api/classmember`, `POST /api/classmember/pay`, `GET /api/classmember/paid`, ... | Course cart and payment |
+| **Lesson** | `GET /api/lesson`, `GET /api/lesson/student`, `GET /api/lesson/:id`, `POST /api/lesson`, `PUT /api/lesson/:id`, `DELETE /api/lesson/:id` | Lessons |
+| **Assignment** | `GET /api/assignment/lesson/:lessonId`, `GET /api/assignment/:id`, `POST /api/assignment`, `PUT /api/assignment/:id`, `DELETE /api/assignment/:id` | Assignments |
+| **Submission** | `GET /api/submission/assignment/:assignmentId`, `GET /api/submission/my`, `GET /api/submission/:id`, `POST /api/submission`, `PUT /api/submission/:id`, `PUT /api/submission/:id/grade`, `DELETE /api/submission/:id` | Submission and grading |
 
-Chi tiết từng route nằm trong `backend/routes/`.
+Detailed route definitions are available in `backend/routes/`.
 
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
@@ -258,60 +258,60 @@ Chi tiết từng route nằm trong `backend/routes/`.
 
 **Backend (`backend/`)**
 
-| Lệnh | Mô tả |
-|------|--------|
-| `npm run dev` | Chạy server với nodemon (tự reload khi đổi code) |
-| `npm start` | Chạy server với node |
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Run the server with nodemon (auto-reloads on code changes) |
+| `npm start` | Run the server with Node.js |
 
 **Frontend (`frontend/`)**
 
-| Lệnh | Mô tả |
-|------|--------|
-| `npx expo start` | Chạy Expo dev server |
-| `npm run android` | Mở trên Android emulator |
-| `npm run ios` | Mở trên iOS simulator |
-| `npm run web` | Chạy bản web |
-| `npm test` | Chạy Jest |
+| Command | Description |
+|---------|-------------|
+| `npx expo start` | Start the Expo development server |
+| `npm run android` | Open on Android emulator |
+| `npm run ios` | Open on iOS simulator |
+| `npm run web` | Run the web version |
+| `npm test` | Run Jest |
 
-**[↑ Về mục lục](#-mục-lục)**
-
----
-
-## 🔧 Xử lý lỗi thường gặp
-
-| Triệu chứng | Gợi ý xử lý |
-|-------------|-------------|
-| **Không kết nối được PostgreSQL** | Kiểm tra `DATABASE_URL` trong `backend/.env`, PostgreSQL đã chạy và user có quyền truy cập database. |
-| **Frontend không gọi được API** | Kiểm tra backend chạy đúng cổng và `EXPO_PUBLIC_API_URL` trong `frontend/.env` trỏ đúng (thiết bị thật: IP máy backend; Android emulator: `http://10.0.2.2:3000`; iOS: `http://localhost:3000`). |
-| **CORS lỗi** | Backend đã bật `cors()`. Nếu vẫn lỗi, kiểm tra origin (Expo Go / emulator) có bị chặn không. |
-| **Gửi OTP thất bại** | Dùng [Mật khẩu ứng dụng Gmail](https://support.google.com/accounts/answer/185833) cho `GMAIL_PASS`, không dùng mật khẩu đăng nhập thông thường. |
-| **Schema đã chạy nhưng thiếu bảng** | Chạy lại `psql -U postgres -d elearning -f backend/database/schema.sql` hoặc thực thi toàn bộ file trong pgAdmin/DBeaver. |
-
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-## 🤝 Đóng góp
+## 🔧 Common Issues
 
-1. **Fork** repository và clone về máy.
-2. Tạo **nhánh mới** cho tính năng hoặc sửa lỗi: `git checkout -b feature/ten-tinh-nang`.
-3. Cài đặt và chạy theo [Cài đặt chi tiết](#-cài-đặt-chi-tiết), đảm bảo không phá tính năng hiện có.
-4. **Commit** với message rõ ràng, rồi **push** lên nhánh của bạn.
-5. Mở **Pull Request** vào nhánh chính, mô tả thay đổi và lý do. Maintainer sẽ xem xét.
+| Symptom | Suggested fix |
+|---------|---------------|
+| **Cannot connect to PostgreSQL** | Check `DATABASE_URL` in `backend/.env`, make sure PostgreSQL is running, and confirm the user has database access. |
+| **Frontend cannot call the API** | Make sure the backend is running on the correct port and `EXPO_PUBLIC_API_URL` in `frontend/.env` points to the right address (physical device: backend machine IP; Android emulator: `http://10.0.2.2:3000`; iOS: `http://localhost:3000`). |
+| **CORS error** | The backend already enables `cors()`. If the error remains, check whether the origin used by Expo Go or the emulator is being blocked. |
+| **OTP email sending failed** | Use a [Gmail App Password](https://support.google.com/accounts/answer/185833) for `GMAIL_PASS`, not your normal Gmail password. |
+| **Schema ran but some tables are missing** | Re-run `psql -U postgres -d elearning -f backend/database/schema.sql` or execute the full file in pgAdmin/DBeaver. |
 
-Thắc mắc hoặc báo lỗi có thể gửi qua **Issues** của repository.
-
-**[↑ Về mục lục](#-mục-lục)**
-
----
-
-## 📄 Giấy phép & Liên hệ
-
-- **Giấy phép:** Dự án sử dụng giấy phép ISC. Xem file `license` trong từng package (nếu có).
-- **Liên hệ / Báo lỗi / Đề xuất:** Mở **Issue** trên repository.
-
-**[↑ Về mục lục](#-mục-lục)**
+**[↑ Back to table of contents](#-table-of-contents)**
 
 ---
 
-*E-Learning — xây dựng với React Native (Expo), Express và PostgreSQL.*
+## 🤝 Contributing
+
+1. **Fork** the repository and clone it locally.
+2. Create a **new branch** for your feature or bug fix: `git checkout -b feature/your-feature-name`.
+3. Install and run the project following [Detailed Setup](#-detailed-setup), and make sure existing features are not broken.
+4. **Commit** with a clear message, then **push** your branch.
+5. Open a **Pull Request** to the main branch, describing the change and the reason for it. A maintainer will review it.
+
+For questions or bug reports, please open an **Issue** in the repository.
+
+**[↑ Back to table of contents](#-table-of-contents)**
+
+---
+
+## 📄 License and Contact
+
+- **License:** This project uses the ISC license. See the `license` file in each package if available.
+- **Contact / Bug Reports / Suggestions:** Open an **Issue** in the repository.
+
+**[↑ Back to table of contents](#-table-of-contents)**
+
+---
+
+*E-Learning — built with React Native (Expo), Express, and PostgreSQL.*
