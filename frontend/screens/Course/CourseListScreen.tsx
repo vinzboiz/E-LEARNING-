@@ -63,7 +63,10 @@ export default function CourseListScreen() {
       const user = await AuthService.getMe();
       setRoleId(user.role_id);
     } catch (error: any) {
-      Alert.alert("Lỗi", error.message || "Không lấy được thông tin người dùng.");
+      Alert.alert(
+        "Lỗi",
+        error.message || "Không lấy được thông tin người dùng."
+      );
     }
   };
 
@@ -160,7 +163,7 @@ export default function CourseListScreen() {
         <View
           style={[
             layoutStyles.bannerTextContainer,
-            { alignItems: "flex-end", right: 25 },
+            { alignItems: "flex-end", right: 30 },
           ]}
         >
           <Text
@@ -177,7 +180,7 @@ export default function CourseListScreen() {
               { color: colors.primary, textAlign: "right", marginTop: 25 },
             ]}
           >
-            Khám phá và quản lý danh sách các khóa học của bạn
+            Khám phá và quản lý danh sách khóa học của bạn
           </Text>
         </View>
       </View>
@@ -226,8 +229,7 @@ export default function CourseListScreen() {
             >
               <Text
                 style={{
-                  color:
-                    selectedFilter === btn.key ? "#fff" : colors.textDark,
+                  color: selectedFilter === btn.key ? "#fff" : colors.textDark,
                 }}
               >
                 {btn.label}
@@ -241,7 +243,7 @@ export default function CourseListScreen() {
       {filteredCourses.length === 0 ? (
         <View style={layoutStyles.center}>
           <Image
-            source={Images.TopBanner.course}
+            source={Images.Common.nothing}
             style={imageStyles.emptyImage}
             resizeMode="contain"
           />
@@ -301,7 +303,9 @@ export default function CourseListScreen() {
             </TouchableOpacity>
           )}
           ListFooterComponent={
-            <View style={{ marginTop: 20, alignItems: "center", marginBottom: 30 }}>
+            <View
+              style={{ marginTop: 20, alignItems: "center", marginBottom: 30 }}
+            >
               <Image
                 source={Images.More.img11}
                 style={imageStyles.footerImage}

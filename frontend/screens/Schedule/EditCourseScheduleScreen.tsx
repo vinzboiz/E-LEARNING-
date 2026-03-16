@@ -132,7 +132,7 @@ export default function EditCourseScheduleScreen() {
           resizeMode="cover"
         />
         <View style={layoutStyles.bannerTextContainer}>
-          <Text style={[textStyles.bannerTitle, { color: "#fcf958ff" }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
             Lịch học
           </Text>
           <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>

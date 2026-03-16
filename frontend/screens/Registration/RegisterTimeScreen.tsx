@@ -33,13 +33,13 @@ import { Images } from "../../constants/images/images";
 
 interface RegisterTime {
   begin_register: string; // ngày gốc từ DB (timestamp)
-  end_register: string;   // ngày gốc từ DB (timestamp)
+  end_register: string; // ngày gốc từ DB (timestamp)
   due_date_start: string;
   due_date_end: string;
   year: number;
   semester: number;
   begin_display?: string; // ngày hiển thị
-  end_display?: string;   // ngày hiển thị
+  end_display?: string; // ngày hiển thị
 }
 
 export default function RegisterTimeScreen() {
@@ -61,9 +61,9 @@ export default function RegisterTimeScreen() {
   const [selectedTime, setSelectedTime] = useState<RegisterTime | null>(null);
 
   const formatDate = (date: Date | string) => {
-  const d = new Date(date);
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-};
+    const d = new Date(date);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
 
   const isExpired = (date: string) => new Date(date) < new Date();
 
@@ -152,24 +152,24 @@ export default function RegisterTimeScreen() {
         Alert.alert("Thành công", "Cập nhật thời gian thành công");
       } else {
         const res = await RegisterCourseService.createForAll({
-  begin_register: formatDate(begin),
-  end_register: formatDate(end),
-  year: Number(year),
-  semester: Number(semester),
-});
+          begin_register: formatDate(begin),
+          end_register: formatDate(end),
+          year: Number(year),
+          semester: Number(semester),
+        });
 
-if (res?.message) {
-  // Nếu BE trả về message thì hiển thị message đó
-  if (res.message.includes("tồn tại")) {
-    Alert.alert("Thông báo", res.message);
-    setModalVisible(false);
-    return; // Không cần fetch lại vì không có thay đổi
-  } else {
-    Alert.alert("Thành công", res.message);
-  }
-} else {
-  Alert.alert("Thành công", "Thêm thời gian đăng ký thành công");
-}
+        if (res?.message) {
+          // Nếu BE trả về message thì hiển thị message đó
+          if (res.message.includes("tồn tại")) {
+            Alert.alert("Thông báo", res.message);
+            setModalVisible(false);
+            return; // Không cần fetch lại vì không có thay đổi
+          } else {
+            Alert.alert("Thành công", res.message);
+          }
+        } else {
+          Alert.alert("Thành công", "Thêm thời gian đăng ký thành công");
+        }
       }
       setModalVisible(false);
       fetchRegisterTimes();
@@ -189,9 +189,7 @@ if (res?.message) {
         <Text style={textStyles.subjectDesc}>
           Bắt đầu: {item.begin_display}
         </Text>
-        <Text style={textStyles.subjectDesc}>
-          Kết thúc: {item.end_display}
-        </Text>
+        <Text style={textStyles.subjectDesc}>Kết thúc: {item.end_display}</Text>
         <Text style={textStyles.subjectDesc}>
           Đóng học phí: {item.due_date_start} - {item.due_date_end}
         </Text>
@@ -216,9 +214,11 @@ if (res?.message) {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
-          <Text style={textStyles.bannerTitle}>Thời gian đăng ký</Text>
-          <Text style={textStyles.bannerSubtitle}>
+        <View style={[layoutStyles.bannerTextContainer, { left: "50%" }]}>
+          <Text style={[textStyles.bannerTitle, { maxWidth: 150 }]}>
+            Thời gian đăng ký
+          </Text>
+          <Text style={[textStyles.bannerSubtitle, { marginTop: 10 }]}>
             Quản lý và xem danh sách thời gian đăng ký
           </Text>
         </View>
@@ -269,9 +269,11 @@ if (res?.message) {
 
       {/* Nút Tạo Thời Gian Đăng Ký - chỉ Admin */}
       {role === 1 && (
-        <TouchableOpacity 
+        <TouchableOpacity
           accessibilityLabel="add-register-time-button"
-          style={buttonStyles.fab} onPress={() => openModal()}>
+          style={buttonStyles.fab}
+          onPress={() => openModal()}
+        >
           <Ionicons name="add" size={30} color="#fff" />
         </TouchableOpacity>
       )}

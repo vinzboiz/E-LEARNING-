@@ -121,7 +121,7 @@ export default function AddLessonScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={[layoutStyles.bannerTextContainer, { right: 20 }]}>
+        <View style={[layoutStyles.bannerTextContainer, { left: "50%" }]}>
           <Text style={[textStyles.bannerTitle, { color: colors.background }]}>
             Thêm Bài Học
           </Text>

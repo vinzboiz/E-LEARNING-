@@ -1,10 +1,13 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+const baseURL =
+  typeof process !== "undefined" && process.env?.EXPO_PUBLIC_API_URL
+    ? process.env.EXPO_PUBLIC_API_URL
+    : "http://192.168.1.9:3000";
+
 const api = axios.create({
-  // baseURL: "http://10.0.2.2:3000", // Android Emulator
-  baseURL: "http://192.168.1.6:3000",
-  // baseURL: "http://10.12.78.226:3000"
+  baseURL,
 });
 
 // Tự động chèn token

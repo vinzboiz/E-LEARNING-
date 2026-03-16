@@ -1,9 +1,11 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const app = express();
 const path = require("path");
 
 // Middlewares
+app.use(cors());
 app.use(express.json());
 
 // Public thư mục uploads (kèm Content-Type cho PDF)

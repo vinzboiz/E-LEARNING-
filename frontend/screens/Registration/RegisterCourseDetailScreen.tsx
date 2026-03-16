@@ -19,7 +19,7 @@ import { imageStyles } from "../../constants/imageStyles";
 import { buttonStyles } from "../../constants/buttonStyles";
 import { inputStyles } from "../../constants/inputStyles";
 import { textStyles } from "../../constants/textStyles";
-import { layoutStyles } from "../../constants/layoutStyles";
+import { colors } from "../../constants/colors";
 
 //assets
 import { Images } from "../../constants/images/images";
@@ -96,9 +96,16 @@ export default function RegisterCourseDetailScreen() {
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <View style={styles.bannerTextContainer}>
-          <Text style={styles.bannerTitle}>CHI TIẾT ĐĂNG KÝ</Text>
-          <Text style={styles.bannerSubtitle}>
+        <View style={[styles.bannerTextContainer, { left: "40%", top: "35%" }]}>
+          <Text style={[styles.bannerTitle, { color: colors.primary }]}>
+            CHI TIẾT ĐĂNG KÝ
+          </Text>
+          <Text
+            style={[
+              styles.bannerSubtitle,
+              { color: colors.primary, marginTop: 20 },
+            ]}
+          >
             Thông tin chi tiết về đăng ký khóa học
           </Text>
         </View>
@@ -144,21 +151,21 @@ export default function RegisterCourseDetailScreen() {
       </View>
 
       {/* Danh sách khóa học đã đăng ký */}
-{registerCourse.courses && registerCourse.courses.length > 0 && (
-  <View style={styles.card}>
-    <Text style={[styles.label, { marginBottom: 8 }]}>
-      Danh sách môn học đã đăng ký:
-    </Text>
-    {registerCourse.courses.map((course: any, idx: number) => (
-      <View key={idx} style={styles.courseItem}>
-        <Text style={styles.courseName}>{course.subject_name}</Text>
-        <Text style={styles.coursePrice}>
-          {course.price?.toLocaleString("vi-VN")} VNĐ
-        </Text>
-      </View>
-    ))}
-  </View>
-)}
+      {registerCourse.courses && registerCourse.courses.length > 0 && (
+        <View style={styles.card}>
+          <Text style={[styles.label, { marginBottom: 8 }]}>
+            Danh sách môn học đã đăng ký:
+          </Text>
+          {registerCourse.courses.map((course: any, idx: number) => (
+            <View key={idx} style={styles.courseItem}>
+              <Text style={styles.courseName}>{course.subject_name}</Text>
+              <Text style={styles.coursePrice}>
+                {course.price?.toLocaleString("vi-VN")} VNĐ
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Ảnh minh họa dưới */}
       <View style={styles.bottomImageContainer}>
@@ -221,13 +228,12 @@ const styles = StyleSheet.create({
   footerText: { marginTop: 10, color: "#777", fontSize: 14 },
 
   courseItem: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  paddingVertical: 6,
-  borderBottomWidth: 1,
-  borderBottomColor: "#eee",
-},
-courseName: { fontSize: 15, color: "#333" },
-coursePrice: { fontSize: 14, color: "red" },
-
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  courseName: { fontSize: 15, color: "#333" },
+  coursePrice: { fontSize: 14, color: "red" },
 });

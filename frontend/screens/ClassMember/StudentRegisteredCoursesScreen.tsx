@@ -128,13 +128,11 @@ export default function StudentRegisteredCoursesScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={[layoutStyles.bannerTextContainer, { right: 10 }]}>
+        <View style={[layoutStyles.bannerTextContainer, { left: "50%" }]}>
           <Text style={[textStyles.bannerTitle, { color: "#ffff" }]}>
             Giỏ môn học
           </Text>
-          <Text
-            style={[textStyles.bannerSubtitle, { color: "#ffff", left: 50 }]}
-          >
+          <Text style={[textStyles.bannerSubtitle, { color: "#ffff" }]}>
             Quản lý các môn học bạn đã chọn
           </Text>
         </View>

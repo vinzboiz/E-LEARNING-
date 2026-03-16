@@ -197,7 +197,7 @@ export default function AddCourseScreen() {
           style={styles.banner}
           resizeMode="cover"
         />
-        <View style={[layoutStyles.bannerTextContainer, { right: 20 }]}>
+        <View style={[layoutStyles.bannerTextContainer, { left: "50%" }]}>
           <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
             Thêm Khóa Học
           </Text>

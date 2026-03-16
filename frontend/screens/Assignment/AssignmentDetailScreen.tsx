@@ -136,14 +136,22 @@ export default function AssignmentDetailScreen() {
                 style={imageStyles.banner}
                 resizeMode="cover"
               />
-              <View style={[layoutStyles.bannerTextContainer, { right: 20 }]}>
+              <View
+                style={[
+                  layoutStyles.bannerTextContainer,
+                  { left: "50%", maxWidth: 150 },
+                ]}
+              >
                 <Text
                   style={[textStyles.bannerTitle, { color: colors.primary }]}
                 >
                   Chi tiết bài tập
                 </Text>
                 <Text
-                  style={[textStyles.bannerSubtitle, { color: colors.primary }]}
+                  style={[
+                    textStyles.bannerSubtitle,
+                    { color: colors.primary, marginTop: 10 },
+                  ]}
                 >
                   Thông tin & bài nộp
                 </Text>

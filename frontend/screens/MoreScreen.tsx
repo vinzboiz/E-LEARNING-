@@ -45,7 +45,7 @@ export default function MoreScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
+        <View style={[layoutStyles.bannerTextContainer, { left: 10 }]}>
           <Text style={textStyles.bannerTitle}>Dịch Vụ Quản Trị</Text>
           <Text style={textStyles.bannerSubtitle}>
             Quản lý toàn bộ chức năng dành cho Admin

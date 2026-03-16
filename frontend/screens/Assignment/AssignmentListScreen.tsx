@@ -139,7 +139,7 @@ export default function AssignmentListScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={[layoutStyles.bannerTextContainer, { right: 50 }]}>
+        <View style={[layoutStyles.bannerTextContainer, { left: "50%" }]}>
           <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
             Bài Tập
           </Text>
@@ -236,7 +236,7 @@ export default function AssignmentListScreen() {
                 </Text>
               </TouchableOpacity>
 
-              {(roleId === 1 || roleId === 3) && (
+              {roleId === 3 && (
                 <View style={{ justifyContent: "center" }}>
                   <TouchableOpacity
                     accessibilityLabel={`editAssignment`}
@@ -270,7 +270,7 @@ export default function AssignmentListScreen() {
       )}
 
       {/* Nút thêm bài tập */}
-      {(roleId === 1 || roleId === 3) && (
+      {roleId === 3 && (
         <TouchableOpacity
           accessibilityLabel={`addAssignment`}
           style={buttonStyles.fab}

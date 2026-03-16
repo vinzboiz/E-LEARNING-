@@ -129,7 +129,7 @@ export default function ScheduleListScreen() {
           resizeMode="cover"
         />
         <View style={layoutStyles.bannerTextContainer}>
-          <Text style={[textStyles.bannerTitle, { color: "#fcf958ff" }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
             Lịch học
           </Text>
           <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
@@ -145,7 +145,9 @@ export default function ScheduleListScreen() {
       </View>
 
       {/* Tiêu đề */}
-      <Text style={styles.title}>Danh Sách Lịch Học</Text>
+      <Text style={[styles.title, { textAlign: "center" }]}>
+        Danh Sách Lịch Học
+      </Text>
       <Text style={styles.totalText}>Tổng số: {schedules.length} lịch học</Text>
 
       {/* Danh sách */}

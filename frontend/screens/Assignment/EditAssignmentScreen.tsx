@@ -118,14 +118,19 @@ export default function EditAssignmentScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={[layoutStyles.bannerTextContainer, { right: 5 }]}>
+        <View
+          style={[
+            layoutStyles.bannerTextContainer,
+            { left: "50%", maxWidth: 150 },
+          ]}
+        >
           <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>
             Chỉnh sửa bài tập
           </Text>
           <Text
             style={[
               textStyles.bannerSubtitle,
-              { color: colors.primary, marginLeft: 20 },
+              { color: colors.primary, marginTop: 10 },
             ]}
           >
             Cập nhật thông tin bài tập

@@ -125,7 +125,7 @@ export default function CourseDetailScreen() {
         <View
           style={[
             layoutStyles.bannerTextContainer,
-            { right: 40, maxWidth: 150, top: 30 },
+            { left: "50%", maxWidth: 150, top: 30 },
           ]}
         >
           <Text style={[textStyles.bannerTitle, { color: colors.primary }]}>

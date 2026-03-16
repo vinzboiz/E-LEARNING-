@@ -90,10 +90,15 @@ export default function TeacherStudentListScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={layoutStyles.bannerTextContainer}>
+        <View
+          style={[
+            layoutStyles.bannerTextContainer,
+            { left: 40, maxWidth: 160 },
+          ]}
+        >
           <Text style={textStyles.bannerTitle}>Danh sách sinh viên</Text>
-          <Text style={textStyles.bannerSubtitle}>
-            Quản lý và xem danh sách sinh viên trong khóa học
+          <Text style={[textStyles.bannerSubtitle, { marginTop: 10 }]}>
+            Quản lý danh sách sinh viên trong khóa học
           </Text>
         </View>
         <TouchableOpacity

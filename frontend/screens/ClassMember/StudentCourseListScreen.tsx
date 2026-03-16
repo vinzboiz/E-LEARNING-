@@ -176,12 +176,20 @@ export default function StudentCourseListScreen() {
           style={imageStyles.banner}
           resizeMode="cover"
         />
-        <View style={[layoutStyles.bannerTextContainer, { right: 10 }]}>
+        <View
+          style={[
+            layoutStyles.bannerTextContainer,
+            { left: "50%", maxWidth: 150 },
+          ]}
+        >
           <Text style={[textStyles.bannerTitle, { color: "#ffff" }]}>
             Đăng Ký khóa học
           </Text>
           <Text
-            style={[textStyles.bannerSubtitle, { color: "#ffff", left: 50 }]}
+            style={[
+              textStyles.bannerSubtitle,
+              { color: "#ffff", marginTop: 10 },
+            ]}
           >
             Chọn khóa học phù hợp để thêm vào giỏ
           </Text>

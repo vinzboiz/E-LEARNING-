@@ -114,7 +114,7 @@ export default function SubjectListScreen() {
           resizeMode="cover"
         />
         <View style={layoutStyles.bannerTextContainer}>
-          <Text style={[textStyles.bannerTitle, { color: "#fcf958ff" }]}>
+          <Text style={[textStyles.bannerTitle, { color: colors.lightYellow }]}>
             Môn học
           </Text>
           <Text style={[textStyles.bannerSubtitle, { color: colors.primary }]}>
